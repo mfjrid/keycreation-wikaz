@@ -28,6 +28,7 @@
             direction: 'vertical',
             loop: slides.length > 1,
             speed: 1000, // Smoother transition
+            grabCursor: false,
 
             // Autoplay
             autoplay: settings.autoplay ? {
@@ -75,6 +76,27 @@
                     const activeSlide = this.slides[this.activeIndex];
                     if (activeSlide) {
                         resetAnimations(activeSlide);
+                    }
+                },
+                touchStart: function (s, e) {
+                    this.startX = e.pageX || e.touches[0].pageX;
+                    this.startY = e.pageY || e.touches[0].pageY;
+                },
+                touchEnd: function (s, e) {
+                    const endX = e.pageX || e.changedTouches[0].pageX;
+                    const endY = e.pageY || e.changedTouches[0].pageY;
+
+                    const diffX = endX - this.startX;
+                    const diffY = endY - this.startY;
+                    const threshold = 50;
+
+                    // Detect horizontal swipe even in vertical mode
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > threshold) {
+                        if (diffX > 0) {
+                            this.slidePrev();
+                        } else {
+                            this.slideNext();
+                        }
                     }
                 }
             }
