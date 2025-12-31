@@ -8,6 +8,7 @@ if (!defined('ABSPATH')) {
 }
 
 $categories = get_terms('product_cat', array('hide_empty' => false));
+$tags = get_terms('product_tag', array('hide_empty' => false));
 ?>
 
 <div class="wrap wikaz-admin-wrap product-manager">
@@ -100,20 +101,62 @@ $categories = get_terms('product_cat', array('hide_empty' => false));
                     </div>
                 </div>
 
-                <!-- Image Section -->
-                <div class="wikaz-form-group">
-                    <label><?php _e('Product Image', 'keycreation-wikaz'); ?></label>
-                    <div class="pm-image-uploader" id="pm-image-uploader">
-                        <input type="hidden" id="pm-product-image-id">
-                        <div class="pm-image-preview" id="pm-image-preview">
-                            <div class="placeholder">
-                                <span class="dashicons dashicons-admin-media"></span>
-                                <p><?php _e('Click or Drag Image Here', 'keycreation-wikaz'); ?></p>
+                <div class="wikaz-form-row">
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Short Description', 'keycreation-wikaz'); ?></label>
+                        <textarea id="pm-product-short-description" rows="2"
+                            placeholder="<?php _e('Write a brief summary...', 'keycreation-wikaz'); ?>"></textarea>
+                    </div>
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Product Tags', 'keycreation-wikaz'); ?></label>
+                        <select id="pm-product-tags" multiple class="pm-select2">
+                            <?php foreach ($tags as $tag): ?>
+                                <option value="<?php echo $tag->term_id; ?>"><?php echo $tag->name; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="wikaz-form-row">
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Full Description', 'keycreation-wikaz'); ?></label>
+                        <textarea id="pm-product-description" rows="4"
+                            placeholder="<?php _e('Write a detailed description...', 'keycreation-wikaz'); ?>"></textarea>
+                    </div>
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Video URL', 'keycreation-wikaz'); ?></label>
+                        <input type="url" id="pm-product-video-url" placeholder="https://youtube.com/watch?v=...">
+                        <p class="description">
+                            <?php _e('YouTube or Vimeo link for video thumbnail', 'keycreation-wikaz'); ?></p>
+                    </div>
+                </div>
+
+                <!-- Image & Gallery Section -->
+                <div class="wikaz-form-row">
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Main Image', 'keycreation-wikaz'); ?> <span class="required">*</span></label>
+                        <div class="pm-image-uploader main-uploader" id="pm-image-uploader">
+                            <input type="hidden" id="pm-product-image-id">
+                            <div class="pm-image-preview" id="pm-image-preview">
+                                <div class="placeholder">
+                                    <span class="dashicons dashicons-admin-media"></span>
+                                    <p><?php _e('Set Main Image', 'keycreation-wikaz'); ?></p>
+                                </div>
+                                <img src="" style="display:none;">
                             </div>
-                            <img src="" style="display:none;">
                         </div>
-                        <button type="button" class="button remove-image"
-                            style="display:none;"><?php _e('Remove Image', 'keycreation-wikaz'); ?></button>
+                    </div>
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Product Gallery', 'keycreation-wikaz'); ?></label>
+                        <div class="pm-gallery-uploader" id="pm-gallery-uploader">
+                            <input type="hidden" id="pm-product-gallery-ids">
+                            <div class="pm-gallery-container" id="pm-gallery-container">
+                                <!-- Gallery items added here -->
+                                <div class="pm-gallery-add" id="pm-add-gallery-item">
+                                    <span class="dashicons dashicons-plus"></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

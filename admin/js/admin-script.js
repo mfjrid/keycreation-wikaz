@@ -106,11 +106,21 @@
         $pmModal.find('.wikaz-modal-close, .wikaz-modal-cancel').on('click', closePMModal);
         $pmForm.on('submit', savePMProduct);
         $('#pm-image-preview').on('click', selectPMImage);
+        $('#pm-add-gallery-item').on('click', selectPMGalleryImages);
+        $(document).on('click', '.pm-gallery-remove', function () { $(this).parent().remove(); updateGalleryIDs(); });
 
         // Initial Load
         if ($pmProductList.length) {
             loadPMProducts();
             loadPMAttributes();
+        }
+
+        // Initialize Select2
+        if ($.fn.select2) {
+            $('.pm-select2').select2({
+                width: '100%',
+                dropdownParent: $pmModal
+            });
         }
     }
 
@@ -680,6 +690,8 @@
             $('#wikaz-pm-modal-title').text('Edit Product');
             $('#pm-product-id').val(productId);
 
+            $('.pm-gallery-item').remove(); // Ensure clean start
+
             // Show loading state
             $pmForm.addClass('wikaz-loading');
 
@@ -697,7 +709,11 @@
                         $('#pm-product-name').val(p.name);
                         $('#pm-product-sku').val(p.sku);
                         $('#pm-product-price').val(p.price);
-                        $('#pm-product-category').val(p.categories);
+                        $('#pm-product-short-description').val(p.short_description || '');
+                        $('#pm-product-description').val(p.description || '');
+                        $('#pm-product-category').val(p.categories ? p.categories.map(String) : []).trigger('change');
+                        $('#pm-product-tags').val(p.tags ? p.tags.map(String) : []).trigger('change');
+                        $('#pm-product-video-url').val(p.video_url || '');
 
                         if (p.image_url) {
                             $('#pm-product-image-id').val(p.image_id);
@@ -705,14 +721,19 @@
                             $('#pm-image-preview .placeholder').hide();
                         }
 
+                        // Populate Gallery
+                        if (p.gallery_images) {
+                            p.gallery_images.forEach(img => addGalleryThumbnail(img.id, img.url));
+                            updateGalleryIDs();
+                        }
+
                         // Populate Attributes
                         if (p.attributes) {
-                            Object.keys(p.attributes).forEach(slug => {
-                                const attr = p.attributes[slug];
-                                const taxonomy = slug.replace('pa_', '');
-                                if (attr.data && attr.data.options) {
-                                    attr.data.options.forEach(optSlug => {
-                                        $(`.pm-attribute-row[data-slug="${taxonomy}"] input[value="${optSlug}"]`).prop('checked', true);
+                            Object.keys(p.attributes).forEach(cleanSlug => {
+                                const options = p.attributes[cleanSlug];
+                                if (Array.isArray(options)) {
+                                    options.forEach(optSlug => {
+                                        $(`.pm-attribute-row[data-slug="${cleanSlug}"] input[value="${optSlug}"]`).prop('checked', true);
                                     });
                                 }
                             });
@@ -721,17 +742,26 @@
                         // Generate Matrix
                         generateVariationMatrix();
 
-                        // Overwrite Matrix with actual variation data if exists
+                        // Match variations by attributes
                         if (p.variations && p.variations.length > 0) {
-                            p.variations.forEach((v, idx) => {
-                                // This is tricky as matrix indices might shift if attributes changed.
-                                // For now, we rely on the generated order.
-                                const $row = $('#pm-variation-matrix-body tr').eq(idx);
-                                if ($row.length) {
-                                    $row.find('.pm-var-sku').val(v.sku);
-                                    $row.find('.pm-var-price').val(v.price);
-                                    $row.find('.pm-var-stock').val(v.stock);
-                                }
+                            p.variations.forEach(v => {
+                                // WooCommerce variation attributes can have various prefixes
+                                const cleanVarAttrs = {};
+                                Object.keys(v.attributes).forEach(k => {
+                                    const ck = k.replace('attribute_pa_', '').replace('attribute_', '').replace('pa_', '');
+                                    cleanVarAttrs[ck] = v.attributes[k];
+                                });
+
+                                $('#pm-variation-matrix-body tr').each(function () {
+                                    const $row = $(this);
+                                    const rowCombo = $row.data('combo');
+                                    // Row combo is slug -> slug
+                                    if (rowCombo && isMatch(rowCombo, cleanVarAttrs)) {
+                                        $row.find('.pm-var-sku').val(v.sku);
+                                        $row.find('.pm-var-price').val(v.price);
+                                        $row.find('.pm-var-stock').val(v.stock);
+                                    }
+                                });
                             });
                         }
                     }
@@ -750,8 +780,11 @@
         $pmForm[0].reset();
         $('#pm-product-id').val(0);
         $('#pm-product-image-id').val('');
+        $('#pm-product-gallery-ids').val('');
+        $('#pm-product-category, #pm-product-tags').val([]).trigger('change');
         $('#pm-image-preview img').hide().attr('src', '');
         $('#pm-image-preview .placeholder').show();
+        $('.pm-gallery-item').remove();
         $('#pm-variation-matrix-wrap').hide();
         $('#pm-variation-matrix-body').empty();
         $('.pm-term-item input').prop('checked', false);
@@ -767,6 +800,39 @@
             $('#pm-image-preview .placeholder').hide();
         });
         wp.media.frames.pm_frame.open();
+    }
+
+    function selectPMGalleryImages() {
+        const frame = wp.media({
+            title: 'Select Gallery Images',
+            button: { text: 'Add to Gallery' },
+            multiple: 'add'
+        });
+        frame.on('select', function () {
+            const selection = frame.state().get('selection');
+            selection.map(attachment => {
+                const img = attachment.toJSON();
+                addGalleryThumbnail(img.id, img.url);
+            });
+            updateGalleryIDs();
+        });
+        frame.open();
+    }
+
+    function addGalleryThumbnail(id, url) {
+        if ($(`.pm-gallery-item[data-id="${id}"]`).length) return;
+        const html = `
+            <div class="pm-gallery-item" data-id="${id}">
+                <img src="${url}">
+                <button type="button" class="pm-gallery-remove">&times;</button>
+            </div>
+        `;
+        $('#pm-add-gallery-item').before(html);
+    }
+
+    function updateGalleryIDs() {
+        const ids = $('.pm-gallery-item').map(function () { return $(this).data('id'); }).get();
+        $('#pm-product-gallery-ids').val(ids.join(','));
     }
 
     /**
@@ -800,8 +866,12 @@
             const labels = Object.values(combo).map(v => v.name).join(' / ');
             const skuSuffix = Object.values(combo).map(v => v.slug.toUpperCase()).join('-');
 
+            // Create a clean combo object for matching (slug -> slug)
+            const cleanCombo = {};
+            Object.keys(combo).forEach(k => cleanCombo[k] = combo[k].slug);
+
             const html = `
-                <tr>
+                <tr data-combo='${JSON.stringify(cleanCombo)}'>
                     <td><strong>${labels}</strong></td>
                     <td><input type="text" class="pm-var-sku" data-idx="${idx}" value="${baseSku}-${skuSuffix}"></td>
                     <td><input type="number" class="pm-var-price" data-idx="${idx}" value="${$('#pm-product-price').val() || ''}"></td>
@@ -812,6 +882,13 @@
         });
 
         $('#pm-variation-matrix-wrap').show();
+    }
+
+    function isMatch(obj1, obj2) {
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+        if (keys1.length !== keys2.length) return false;
+        return keys1.every(key => obj1[key] === obj2[key]);
     }
 
     function savePMProduct(e) {
@@ -868,9 +945,13 @@
             name: $('#pm-product-name').val(),
             sku: baseSku,
             price: $('#pm-product-price').val(),
-            description: '', // Simplified for now
+            short_description: $('#pm-product-short-description').val(),
+            description: $('#pm-product-description').val(),
             categories: $('#pm-product-category').val(),
+            tags: $('#pm-product-tags').val(),
+            video_url: $('#pm-product-video-url').val(),
             image_id: $('#pm-product-image-id').val(),
+            gallery_ids: $('#pm-product-gallery-ids').val(),
             attributes: attributes,
             variations: variations
         };

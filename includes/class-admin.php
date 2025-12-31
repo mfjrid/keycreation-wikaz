@@ -84,12 +84,18 @@ class Wikaz_Admin
      */
     public function enqueue_admin_assets($hook)
     {
-        if (strpos($hook, 'wikaz-design') === false && strpos($hook, 'wikaz-marquee') === false) {
+        if (
+            strpos($hook, 'wikaz-design') === false &&
+            strpos($hook, 'wikaz-marquee') === false &&
+            strpos($hook, 'wikaz-product-manager') === false
+        ) {
             return;
         }
 
         wp_enqueue_media();
         wp_enqueue_script('jquery-ui-sortable');
+        wp_enqueue_style('select2');
+        wp_enqueue_script('select2');
 
         wp_enqueue_style(
             'wikaz-admin-style',
@@ -480,22 +486,48 @@ class Wikaz_Admin
         $data = array(
             'id' => $product->get_id(),
             'name' => $product->get_name(),
-            'description' => $product->get_description(),
+            'description' => $product->get_description('edit'),
+            'short_description' => $product->get_short_description('edit'),
             'price' => $product->get_regular_price(),
             'sale_price' => $product->get_sale_price(),
             'sku' => $product->get_sku(),
             'type' => $product->get_type(),
             'image_id' => $product->get_image_id(),
             'image_url' => wp_get_attachment_image_url($product->get_image_id(), 'large'),
+            'gallery_images' => array_map(function ($id) {
+                return array('id' => $id, 'url' => wp_get_attachment_image_url($id, 'thumbnail'));
+            }, $product->get_gallery_image_ids()),
             'categories' => $product->get_category_ids(),
+            'tags' => $product->get_tag_ids(),
+            'video_url' => get_post_meta($product->get_id(), '_video_url', true),
             'attributes' => array(),
             'variations' => array()
         );
 
         if ($product->is_type('variable')) {
-            $data['attributes'] = $product->get_attributes();
+            $product_attributes = $product->get_attributes();
+            foreach ($product_attributes as $slug => $attr) {
+                // Remove pa_ prefix for JS matching
+                $clean_slug = str_replace('pa_', '', $slug);
+                $options = $attr->get_options();
+                if ($attr->is_taxonomy()) {
+                    $slug_options = array();
+                    foreach ($options as $id) {
+                        $term = get_term($id);
+                        if ($term)
+                            $slug_options[] = $term->slug;
+                    }
+                    $data['attributes'][$clean_slug] = $slug_options;
+                } else {
+                    $data['attributes'][$clean_slug] = $options;
+                }
+            }
+
             foreach ($product->get_children() as $var_id) {
                 $var = wc_get_product($var_id);
+                if (!$var)
+                    continue;
+
                 $data['variations'][] = array(
                     'id' => $var_id,
                     'sku' => $var->get_sku(),
@@ -591,10 +623,21 @@ class Wikaz_Admin
         $product->set_status('publish');
         $product->set_sku(sanitize_text_field($_POST['sku']));
         $product->set_description(wp_kses_post($_POST['description']));
+        $product->set_short_description(wp_kses_post($_POST['short_description']));
         $product->set_category_ids(isset($_POST['categories']) ? array_map('intval', $_POST['categories']) : array());
+        $product->set_tag_ids(isset($_POST['tags']) ? array_map('intval', $_POST['tags']) : array());
+
+        if (isset($_POST['video_url'])) {
+            $product->update_meta_data('_video_url', esc_url_raw($_POST['video_url']));
+        }
 
         if (!empty($_POST['image_id'])) {
             $product->set_image_id(intval($_POST['image_id']));
+        }
+
+        if (!empty($_POST['gallery_ids'])) {
+            $gallery_ids = array_map('intval', explode(',', $_POST['gallery_ids']));
+            $product->set_gallery_image_ids($gallery_ids);
         }
 
         if ($type === 'simple') {
@@ -626,32 +669,50 @@ class Wikaz_Admin
         // 5. Handle Variations
         if ($type === 'variable' && $product_id) {
             $existing_variations = $product->get_children();
+            $processed_variation_ids = array();
 
             foreach ($variations_data as $v_data) {
-                // Check if variation already exists (by attributes combination)
-                $variation_id = 0;
-                // For simplicity in this wizard, we'll create new variations or update existing ones if we manage IDs
-                // But since it's a "Quick Creator", we'll create fresh ones or update by index if complex.
-                // Let's create new ones for now and clean up? No, that's messy.
-                // Better: Create variation object, set attributes, and save.
-
-                $variation = new WC_Product_Variation();
-                $variation->set_parent_id($product_id);
-
                 $v_attributes = array();
                 foreach ($v_data['attributes'] as $slug => $val) {
                     $v_attributes[wc_attribute_taxonomy_name($slug)] = $val;
                 }
 
-                $variation->set_attributes($v_attributes);
+                // Check if variation with these attributes already exists
+                $variation_id = $this->find_matching_variation($product_id, $v_attributes);
+
+                if ($variation_id) {
+                    $variation = new WC_Product_Variation($variation_id);
+                } else {
+                    $variation = new WC_Product_Variation();
+                    $variation->set_parent_id($product_id);
+                    $variation->set_attributes($v_attributes);
+                }
+
                 $variation->set_regular_price(sanitize_text_field($v_data['price']));
                 $variation->set_sku(sanitize_text_field($v_data['sku']));
                 $variation->set_manage_stock(true);
                 $variation->set_stock_quantity(intval($v_data['stock']));
+                $variation->set_status('publish');
                 $variation->save();
             }
+
+            // Optional: Remove variations that are no longer in the matrix?
+            // For now, let's just keep them to avoid accidental data loss.
         }
 
         wp_send_json_success(array('id' => $product_id));
+    }
+
+    /**
+     * Find a variation ID matching specific attributes
+     */
+    private function find_matching_variation($product_id, $attributes)
+    {
+        $product = wc_get_product($product_id);
+        if (!$product || $product->get_type() !== 'variable')
+            return 0;
+
+        $data_store = $product->get_data_store();
+        return $data_store->find_matching_product_variation($product, $attributes);
     }
 }
