@@ -1,0 +1,482 @@
+/**
+ * Wikaz Carousel Styles
+ */
+
+/* CSS Variables */
+:root {
+    --wikaz-carousel-height: 100vh;
+    --wikaz-carousel-height-mobile: 100vh;
+    --wikaz-carousel-min-height: 500px;
+    --wikaz-text-primary: #f1f1f1;
+    --wikaz-text-secondary: #fafafa;
+    --wikaz-accent: #e7c490;
+    --wikaz-accent-hover: #e7c490;
+    --wikaz-overlay-start: rgba(0, 0, 0, 0.6);
+    --wikaz-overlay-end: rgba(0, 0, 0, 0.2);
+    --wikaz-split-bg: #0e0e0e;
+}
+
+/* Carousel Wrapper */
+.wikaz-carousel-wrapper {
+    position: relative;
+    width: 100%;
+    height: var(--wikaz-carousel-height);
+    /* margin-top: -100px; */
+    overflow: hidden;
+}
+
+.wikaz-carousel {
+    width: 100%;
+    height: 100%;
+}
+
+/* Slide */
+.wikaz-slide {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+}
+
+/* Layout Specifics */
+.wikaz-carousel .wikaz-slide.layout-full-bg {
+    flex-direction: column !important;
+    display: flex !important;
+}
+
+.wikaz-carousel .wikaz-slide.layout-split-left {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+}
+
+.wikaz-carousel .wikaz-slide.layout-split-right {
+    display: flex !important;
+    flex-direction: row-reverse !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+}
+
+/* Image Side */
+.wikaz-slide-image {
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.layout-full-bg .wikaz-slide-image {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.wikaz-carousel .wikaz-slide.layout-split-left .wikaz-slide-image,
+.wikaz-carousel .wikaz-slide.layout-split-right .wikaz-slide-image {
+    width: 50% !important;
+    min-width: 50% !important;
+    max-width: 50% !important;
+    flex: 0 0 50% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 40px !important;
+    /* Elegant padding around image */
+    z-index: 2;
+    background-color: var(--wikaz-split-bg) !important;
+    /* Match text side background */
+    box-sizing: border-box !important;
+}
+
+/* Background */
+.wikaz-slide-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1);
+    transition: transform 8s ease-out;
+}
+
+/* Better fit for portrait images in split mode */
+.layout-split-left .wikaz-slide-bg,
+.layout-split-right .wikaz-slide-bg {
+    inset: 40px !important;
+    top: 120px !important;
+    background-size: cover;
+    background-position: center top;
+    background-color: transparent;
+    border-radius: 30px;
+}
+
+.swiper-slide-active .wikaz-slide-bg {
+    transform: scale(1.05);
+}
+
+/* Overlay */
+.wikaz-slide-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            var(--wikaz-overlay-start) 0%,
+            var(--wikaz-overlay-end) 100%);
+}
+
+.layout-split-left .wikaz-slide-overlay,
+.layout-split-right .wikaz-slide-overlay {
+    display: none;
+}
+
+/* Content Side */
+.wikaz-slide-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    padding: 60px;
+    box-sizing: border-box;
+}
+
+.layout-full-bg .wikaz-slide-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: flex-start;
+}
+
+.wikaz-carousel .wikaz-slide.layout-split-left .wikaz-slide-content,
+.wikaz-carousel .wikaz-slide.layout-split-right .wikaz-slide-content {
+    width: 50% !important;
+    min-width: 50% !important;
+    max-width: 50% !important;
+    flex: 0 0 50% !important;
+    background: var(--wikaz-split-bg);
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+
+.wikaz-carousel .wikaz-slide.layout-split-left .wikaz-slide-content {
+    text-align: left !important;
+}
+
+.wikaz-carousel .wikaz-slide.layout-split-right .wikaz-slide-content {
+    text-align: right !important;
+}
+
+.wikaz-content-inner {
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Typography & Elements */
+.wikaz-slide-subtitle {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--wikaz-accent);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 8px 20px;
+    border-radius: 50px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 0.6s ease forwards;
+    animation-delay: 0.2s;
+}
+
+.swiper-slide-active .wikaz-slide-subtitle {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wikaz-slide-title {
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--wikaz-text-primary);
+    margin: 0 0 20px 0;
+    max-width: 700px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 0.6s ease forwards;
+    animation-delay: 0.4s;
+}
+
+.swiper-slide-active .wikaz-slide-title {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wikaz-slide-price {
+    font-size: 24px;
+    color: var(--wikaz-text-secondary);
+    margin-bottom: 30px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 0.6s ease forwards;
+    animation-delay: 0.5s;
+}
+
+.swiper-slide-active .wikaz-slide-price {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wikaz-slide-price del {
+    opacity: 0.6;
+    font-size: 0.8em;
+}
+
+.wikaz-slide-price ins {
+    text-decoration: none;
+    font-weight: 700;
+    color: #fbbf24;
+}
+
+.wikaz-slide-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: var(--wikaz-accent);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(241, 208, 99, 0.322);
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 0.6s ease forwards;
+    animation-delay: 0.6s;
+}
+
+.swiper-slide-active .wikaz-slide-button {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wikaz-slide-button:hover {
+    background: var(--wikaz-accent-hover);
+    transform: translateX(5px);
+    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
+    color: white;
+}
+
+.wikaz-slide-button svg {
+    transition: transform 0.3s ease;
+}
+
+.wikaz-slide-button:hover svg {
+    transform: translateX(5px);
+}
+
+/* Navigation & Pagination */
+.wikaz-carousel-nav {
+    position: absolute;
+    bottom: 30px;
+    right: 60px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.wikaz-nav-prev,
+.wikaz-nav-next {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.wikaz-nav-prev:hover,
+.wikaz-nav-next:hover {
+    background: var(--wikaz-accent);
+    border-color: var(--wikaz-accent);
+    transform: scale(1.1);
+}
+
+.wikaz-carousel-pagination {
+    position: absolute;
+    bottom: 30px;
+    left: 60px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.wikaz-carousel-pagination .swiper-pagination-bullet {
+    width: 40px;
+    height: 4px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 1;
+    transition: all 0.3s ease;
+}
+
+.wikaz-carousel-pagination .swiper-pagination-bullet-active {
+    background: var(--wikaz-accent);
+    width: 60px;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .wikaz-slide-content {
+        padding: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .wikaz-slide {
+        flex-direction: column !important;
+        /* Always vertical on mobile */
+    }
+
+    .layout-split-left .wikaz-slide-image,
+    .layout-split-right .wikaz-slide-image {
+        width: 100% !important;
+        min-width: 100% !important;
+        height: 50% !important;
+        padding: 20px !important;
+        /* Smaller padding on mobile */
+    }
+
+    .layout-split-left .wikaz-slide-bg,
+    .layout-split-right .wikaz-slide-bg {
+        inset: 20px !important;
+        /* Match mobile padding */
+        border-radius: 20px !important;
+        /* Slightly smaller radius on mobile */
+    }
+
+    .layout-split-left .wikaz-slide-content,
+    .layout-split-right .wikaz-slide-content {
+        width: 100%;
+        height: 50%;
+        padding: 30px;
+    }
+
+    .wikaz-slide-content {
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    .wikaz-carousel-nav {
+        display: none;
+    }
+
+    .wikaz-carousel-pagination {
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 20px;
+    }
+}
+
+body.wikaz-header-transparent .wikaz-carousel-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+/* Force Topbar and Header to Overlay */
+body.wikaz-header-transparent .tf-topbar,
+body.wikaz-header-transparent #header,
+body.wikaz-header-transparent .header-default,
+#header.header-default {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 1000 !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Offset Header below Topbar */
+body.wikaz-header-transparent #header {
+    top: 45px !important;
+    /* height of .tf-topbar marquee */
+}
+
+/* Make inner containers transparent */
+body.wikaz-header-transparent .tf-topbar .container,
+body.wikaz-header-transparent #header .container,
+body.wikaz-header-transparent .wrapper-header {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* Hide the default Page Title section on homepage when hero is active */
+body.wikaz-header-transparent .tf-page-title {
+    display: none !important;
+}
+
+/* Push Carousel Content down so it's not obscured by the menu */
+body.wikaz-header-transparent .wikaz-slide-content {
+    padding-top: 180px !important;
+}
+
+@media (max-width: 768px) {
+    body.wikaz-header-transparent .wikaz-carousel-wrapper {
+        margin-top: 0 !important;
+    }
+
+    body.wikaz-header-transparent .wikaz-slide-content {
+        padding-top: 140px !important;
+    }
+}
+
+.tf-topbar.bg-dark-5.topbar-bg {
+    position: absolute !important;
+    z-index: 999;
+    background-color: #0e0e0e !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+
+@media (min-width: 1200px) {
+    .tf-topbar {
+        display: flex;
+        height: auto !important;
+    }
+}
+
+.tf-topbar .overflow-hidden::before,
+.tf-topbar .overflow-hidden::after {
+    display: none !important;
+}
+
+.tf-topbar.bg-dark-5.topbar-bg .container {
+    max-width: 100% !important;
+}

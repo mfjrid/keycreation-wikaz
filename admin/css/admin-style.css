@@ -1,0 +1,748 @@
+/**
+ * Wikaz Admin Styles
+ */
+
+/* Variables */
+:root {
+    --wikaz-primary: #6366f1;
+    --wikaz-primary-hover: #4f46e5;
+    --wikaz-success: #10b981;
+    --wikaz-danger: #ef4444;
+    --wikaz-warning: #f59e0b;
+    --wikaz-dark: #1e293b;
+    --wikaz-gray: #64748b;
+    --wikaz-light: #f1f5f9;
+    --wikaz-white: #ffffff;
+    --wikaz-border: #e2e8f0;
+    --wikaz-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --wikaz-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --wikaz-radius: 12px;
+    --wikaz-radius-sm: 8px;
+}
+
+/* General Styles */
+.wikaz-admin-wrap {
+    max-width: 1400px;
+    margin: 20px 20px 20px 0;
+}
+
+.wikaz-admin-wrap h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--wikaz-dark);
+}
+
+.wikaz-admin-wrap h1 .dashicons {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: var(--wikaz-primary);
+}
+
+.wikaz-admin-wrap .page-title-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    background: var(--wikaz-primary);
+    color: white;
+    border: none;
+    border-radius: var(--wikaz-radius-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wikaz-admin-wrap .page-title-action:hover {
+    background: var(--wikaz-primary-hover);
+    color: white;
+}
+
+.wikaz-admin-wrap .page-title-action .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Container */
+.wikaz-admin-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 24px;
+    margin-top: 20px;
+}
+
+/* Slides Section */
+.wikaz-slides-section {
+    background: var(--wikaz-white);
+    border-radius: var(--wikaz-radius);
+    box-shadow: var(--wikaz-shadow);
+    padding: 24px;
+}
+
+.wikaz-slides-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.wikaz-no-slides {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--wikaz-gray);
+}
+
+.wikaz-no-slides .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
+    margin-bottom: 15px;
+}
+
+/* Slide Item */
+.wikaz-slide-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--wikaz-light);
+    border-radius: var(--wikaz-radius-sm);
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.wikaz-slide-item:hover {
+    border-color: var(--wikaz-primary);
+    box-shadow: var(--wikaz-shadow);
+}
+
+.wikaz-slide-item.inactive {
+    opacity: 0.6;
+}
+
+.wikaz-slide-item.ui-sortable-helper {
+    box-shadow: var(--wikaz-shadow-lg);
+    background: var(--wikaz-white);
+}
+
+.wikaz-slide-handle {
+    cursor: grab;
+    color: var(--wikaz-gray);
+    padding: 10px 5px;
+}
+
+.wikaz-slide-handle:active {
+    cursor: grabbing;
+}
+
+.wikaz-slide-preview {
+    width: 120px;
+    height: 70px;
+    border-radius: var(--wikaz-radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--wikaz-border);
+}
+
+.wikaz-slide-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wikaz-slide-no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--wikaz-gray);
+}
+
+.wikaz-slide-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.wikaz-slide-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--wikaz-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wikaz-slide-info p {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: var(--wikaz-gray);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wikaz-slide-product {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--wikaz-primary);
+    background: rgba(99, 102, 241, 0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.wikaz-slide-product .dashicons {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+}
+
+/* Slide Actions */
+.wikaz-slide-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wikaz-slide-actions .button {
+    padding: 6px;
+    min-height: auto;
+    border-radius: 6px;
+}
+
+.wikaz-slide-actions .button .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.wikaz-delete-slide:hover {
+    background: var(--wikaz-danger) !important;
+    border-color: var(--wikaz-danger) !important;
+    color: white !important;
+}
+
+/* Toggle Switch */
+.wikaz-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.wikaz-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.wikaz-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--wikaz-border);
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.wikaz-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.wikaz-toggle input:checked+.wikaz-toggle-slider {
+    background-color: var(--wikaz-success);
+}
+
+.wikaz-toggle input:checked+.wikaz-toggle-slider:before {
+    transform: translateX(20px);
+}
+
+/* Settings Panel */
+.wikaz-settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.wikaz-settings-panel,
+.wikaz-help-panel {
+    background: var(--wikaz-white);
+    border-radius: var(--wikaz-radius);
+    box-shadow: var(--wikaz-shadow);
+    padding: 24px;
+}
+
+.wikaz-settings-panel h3,
+.wikaz-help-panel h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--wikaz-dark);
+}
+
+.wikaz-settings-panel h3 .dashicons,
+.wikaz-help-panel h3 .dashicons {
+    color: var(--wikaz-primary);
+}
+
+.wikaz-form-group {
+    margin-bottom: 16px;
+}
+
+.wikaz-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--wikaz-dark);
+}
+
+.wikaz-form-group input[type="text"],
+.wikaz-form-group input[type="number"],
+.wikaz-form-group input[type="url"],
+.wikaz-form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--wikaz-border);
+    border-radius: var(--wikaz-radius-sm);
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.wikaz-form-group input:focus,
+.wikaz-form-group select:focus {
+    outline: none;
+    border-color: var(--wikaz-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.wikaz-form-group .description {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--wikaz-gray);
+}
+
+.wikaz-settings-panel .button-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--wikaz-primary);
+    border-color: var(--wikaz-primary);
+}
+
+.wikaz-settings-panel .button-primary:hover {
+    background: var(--wikaz-primary-hover);
+    border-color: var(--wikaz-primary-hover);
+}
+
+.wikaz-help-panel ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.wikaz-help-panel li {
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+    color: var(--wikaz-gray);
+    font-size: 13px;
+}
+
+.wikaz-help-panel li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--wikaz-primary);
+}
+
+/* Modal */
+.wikaz-modal {
+    display: none;
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+.wikaz-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.wikaz-modal-content {
+    background: var(--wikaz-white);
+    border-radius: var(--wikaz-radius);
+    width: 100%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: var(--wikaz-shadow-lg);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wikaz-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--wikaz-border);
+}
+
+.wikaz-modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--wikaz-dark);
+}
+
+.wikaz-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: var(--wikaz-gray);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.wikaz-modal-close:hover {
+    color: var(--wikaz-danger);
+}
+
+.wikaz-modal-body {
+    padding: 24px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.wikaz-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--wikaz-border);
+    background: var(--wikaz-light);
+}
+
+.wikaz-modal-footer .button-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--wikaz-primary);
+    border-color: var(--wikaz-primary);
+}
+
+/* Form Row */
+.wikaz-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* Image Upload */
+.wikaz-image-upload .wikaz-image-preview {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed var(--wikaz-border);
+    border-radius: var(--wikaz-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    overflow: hidden;
+    background: var(--wikaz-light);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.wikaz-image-upload .wikaz-image-preview:hover {
+    border-color: var(--wikaz-primary);
+}
+
+.wikaz-image-upload .wikaz-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wikaz-image-placeholder {
+    text-align: center;
+    color: var(--wikaz-gray);
+}
+
+.wikaz-image-placeholder .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
+}
+
+.wikaz-image-placeholder p {
+    margin: 10px 0 0 0;
+}
+
+/* Product Search */
+.wikaz-product-search-wrap {
+    position: relative;
+}
+
+.wikaz-product-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--wikaz-white);
+    border: 1px solid var(--wikaz-border);
+    border-radius: var(--wikaz-radius-sm);
+    box-shadow: var(--wikaz-shadow-lg);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+}
+
+.wikaz-product-results.active {
+    display: block;
+}
+
+.wikaz-product-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--wikaz-border);
+    transition: background 0.2s ease;
+}
+
+.wikaz-product-item:last-child {
+    border-bottom: none;
+}
+
+.wikaz-product-item:hover {
+    background: var(--wikaz-light);
+}
+
+.wikaz-product-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.wikaz-product-item-info {
+    flex: 1;
+}
+
+.wikaz-product-item-info strong {
+    display: block;
+    font-size: 13px;
+    color: var(--wikaz-dark);
+}
+
+.wikaz-product-item-info span {
+    font-size: 12px;
+    color: var(--wikaz-gray);
+}
+
+.wikaz-selected-product {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: var(--wikaz-light);
+    border-radius: var(--wikaz-radius-sm);
+    margin-top: 8px;
+}
+
+.wikaz-selected-product img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.wikaz-selected-product .product-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--wikaz-dark);
+}
+
+.wikaz-selected-product .remove-product {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--wikaz-gray);
+    cursor: pointer;
+    padding: 0;
+}
+
+.wikaz-selected-product .remove-product:hover {
+    color: var(--wikaz-danger);
+}
+
+/* Layout Selector */
+.wikaz-layout-selector {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.wikaz-layout-option {
+    cursor: pointer;
+    flex: 1;
+}
+
+.wikaz-layout-option input {
+    display: none;
+}
+
+.wikaz-layout-option .layout-preview {
+    border: 2px solid var(--wikaz-border);
+    border-radius: var(--wikaz-radius-sm);
+    padding: 10px;
+    height: 60px;
+    display: flex;
+    gap: 5px;
+    transition: all 0.2s ease;
+    background: var(--wikaz-light);
+}
+
+.wikaz-layout-option input:checked+.layout-preview {
+    border-color: var(--wikaz-primary);
+    background: var(--wikaz-white);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.layout-preview .preview-box,
+.layout-preview .preview-text {
+    border-radius: 3px;
+}
+
+.layout-preview .preview-box {
+    background: var(--wikaz-gray);
+    opacity: 0.3;
+}
+
+.layout-preview .preview-text {
+    background: var(--wikaz-border);
+    opacity: 0.5;
+}
+
+.layout-full-bg .preview-box {
+    flex: 1;
+}
+
+.layout-split-left .preview-box {
+    width: 40%;
+}
+
+.layout-split-left .preview-text {
+    flex: 1;
+}
+
+.layout-split-right .preview-box {
+    width: 40%;
+}
+
+.layout-split-right .preview-text {
+    flex: 1;
+}
+
+/* Loading State */
+.wikaz-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .wikaz-admin-container {
+        grid-template-columns: 1fr;
+    }
+
+    .wikaz-settings-section {
+        flex-direction: row;
+    }
+
+    .wikaz-settings-panel,
+    .wikaz-help-panel {
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .wikaz-settings-section {
+        flex-direction: column;
+    }
+
+    .wikaz-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Spin animation for loading */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
