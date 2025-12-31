@@ -22,14 +22,12 @@
         };
 
         // Initialize Swiper
+        const slides = carouselEl.querySelectorAll('.swiper-slide');
         const swiper = new Swiper('.wikaz-carousel', {
             // Core
-            loop: true,
-            speed: 800,
-            effect: 'fade',
-            fadeEffect: {
-                crossFade: true
-            },
+            direction: 'vertical',
+            loop: slides.length > 1,
+            speed: 1000, // Smoother transition
 
             // Autoplay
             autoplay: settings.autoplay ? {
@@ -38,10 +36,12 @@
                 pauseOnMouseEnter: true
             } : false,
 
-            // Navigation
-            navigation: {
-                nextEl: '.wikaz-nav-next',
-                prevEl: '.wikaz-nav-prev',
+            // Mousewheel
+            mousewheel: {
+                invert: false,
+                sensitivity: 1,
+                releaseOnEdges: false,
+                forceToAxis: true,
             },
 
             // Pagination
