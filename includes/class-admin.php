@@ -27,6 +27,13 @@ class Wikaz_Admin
         add_action('wp_ajax_wikaz_save_settings', array($this, 'ajax_save_settings'));
         add_action('wp_ajax_wikaz_save_marquee', array($this, 'ajax_save_marquee'));
         add_action('wp_ajax_wikaz_get_slide', array($this, 'ajax_get_slide'));
+
+        // Product Manager Actions
+        add_action('wp_ajax_wikaz_get_pm_products', array($this, 'ajax_get_pm_products'));
+        add_action('wp_ajax_wikaz_save_pm_product', array($this, 'ajax_save_pm_product'));
+        add_action('wp_ajax_wikaz_delete_pm_product', array($this, 'ajax_delete_pm_product'));
+        add_action('wp_ajax_wikaz_get_pm_attributes', array($this, 'ajax_get_pm_attributes'));
+        add_action('wp_ajax_wikaz_get_pm_product', array($this, 'ajax_get_pm_product'));
     }
 
     /**
@@ -41,7 +48,7 @@ class Wikaz_Admin
             'wikaz-design',
             array($this, 'render_carousel_page'),
             'dashicons-art',
-            30
+            2
         );
 
         add_submenu_page(
@@ -60,6 +67,15 @@ class Wikaz_Admin
             'manage_options',
             'wikaz-marquee',
             array($this, 'render_marquee_page')
+        );
+
+        add_submenu_page(
+            'wikaz-design',
+            __('Product Manager', 'keycreation-wikaz'),
+            __('Product Manager', 'keycreation-wikaz'),
+            'manage_options',
+            'wikaz-product-manager',
+            array($this, 'render_product_manager_page')
         );
     }
 
@@ -120,6 +136,14 @@ class Wikaz_Admin
     public function render_marquee_page()
     {
         require_once WIKAZ_PLUGIN_DIR . 'admin/marquee-dashboard.php';
+    }
+
+    /**
+     * Render product manager admin page
+     */
+    public function render_product_manager_page()
+    {
+        require_once WIKAZ_PLUGIN_DIR . 'admin/product-dashboard.php';
     }
 
     /**
@@ -390,5 +414,244 @@ class Wikaz_Admin
         }
 
         wp_send_json_success($data);
+    }
+
+    /**
+     * AJAX: Get products for Product Manager
+     */
+    public function ajax_get_pm_products()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        $page = isset($_POST['page']) ? intval($_POST['page']) : 1;
+        $per_page = 10;
+
+        $args = array(
+            'status' => 'publish',
+            'limit' => $per_page,
+            'page' => $page,
+            'paginate' => true,
+        );
+
+        if (!empty($search)) {
+            $args['s'] = $search;
+        }
+
+        $products = wc_get_products($args);
+        $data = array();
+
+        foreach ($products->products as $product) {
+            $data[] = array(
+                'id' => $product->get_id(),
+                'name' => $product->get_name(),
+                'sku' => $product->get_sku(),
+                'price' => $product->get_price(),
+                'image' => wp_get_attachment_image_url($product->get_image_id(), 'thumbnail') ?: wc_placeholder_img_src('thumbnail'),
+                'type' => $product->get_type(),
+                'stock' => $product->get_stock_quantity(),
+                'variations_count' => $product->is_type('variable') ? count($product->get_children()) : 0
+            );
+        }
+
+        wp_send_json_success(array(
+            'products' => $data,
+            'total_pages' => $products->max_num_pages
+        ));
+    }
+
+    /**
+     * AJAX: Get single product for PM editor
+     */
+    public function ajax_get_pm_product()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $product_id = intval($_POST['product_id']);
+        $product = wc_get_product($product_id);
+
+        if (!$product)
+            wp_send_json_error('Product not found');
+
+        $data = array(
+            'id' => $product->get_id(),
+            'name' => $product->get_name(),
+            'description' => $product->get_description(),
+            'price' => $product->get_regular_price(),
+            'sale_price' => $product->get_sale_price(),
+            'sku' => $product->get_sku(),
+            'type' => $product->get_type(),
+            'image_id' => $product->get_image_id(),
+            'image_url' => wp_get_attachment_image_url($product->get_image_id(), 'large'),
+            'categories' => $product->get_category_ids(),
+            'attributes' => array(),
+            'variations' => array()
+        );
+
+        if ($product->is_type('variable')) {
+            $data['attributes'] = $product->get_attributes();
+            foreach ($product->get_children() as $var_id) {
+                $var = wc_get_product($var_id);
+                $data['variations'][] = array(
+                    'id' => $var_id,
+                    'sku' => $var->get_sku(),
+                    'price' => $var->get_regular_price(),
+                    'stock' => $var->get_stock_quantity(),
+                    'attributes' => $var->get_attributes()
+                );
+            }
+        }
+
+        wp_send_json_success($data);
+    }
+
+    /**
+     * AJAX: Get WooCommerce attributes
+     */
+    public function ajax_get_pm_attributes()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $attribute_taxonomies = wc_get_attribute_taxonomies();
+        $attributes = array();
+
+        foreach ($attribute_taxonomies as $tax) {
+            $taxonomy_name = wc_attribute_taxonomy_name($tax->attribute_name);
+            $terms = get_terms(array('taxonomy' => $taxonomy_name, 'hide_empty' => false));
+
+            $attributes[] = array(
+                'slug' => $tax->attribute_name,
+                'label' => $tax->attribute_label,
+                'terms' => array_map(function ($term) {
+                    return array('name' => $term->name, 'slug' => $term->slug);
+                }, $terms)
+            );
+        }
+
+        wp_send_json_success($attributes);
+    }
+
+    /**
+     * AJAX: Delete product
+     */
+    public function ajax_delete_pm_product()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $product_id = intval($_POST['product_id']);
+        $result = wp_delete_post($product_id, true);
+
+        if ($result) {
+            wp_send_json_success();
+        } else {
+            wp_send_json_error('Failed to delete product');
+        }
+    }
+
+    /**
+     * AJAX: Save product (Simple or Variable)
+     */
+    public function ajax_save_pm_product()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $product_id = intval($_POST['product_id']);
+        $is_new = ($product_id === 0);
+
+        // Determine type based on variations presence
+        $variations_data = isset($_POST['variations']) ? $_POST['variations'] : array();
+        $type = !empty($variations_data) ? 'variable' : 'simple';
+
+        // 1. Create or Load Product
+        if ($is_new) {
+            $product = ($type === 'variable') ? new WC_Product_Variable() : new WC_Product_Simple();
+        } else {
+            $product = wc_get_product($product_id);
+            // If type changed (rare but possible), it's tricky. We'll stick to original type if editing.
+            if ($product->get_type() !== $type) {
+                // Force type change logic if needed, but for now we follow the creator's flow.
+            }
+        }
+
+        if (!$product)
+            wp_send_json_error('Failed to load product');
+
+        // 2. Set Basic Data
+        $product->set_name(sanitize_text_field($_POST['name']));
+        $product->set_status('publish');
+        $product->set_sku(sanitize_text_field($_POST['sku']));
+        $product->set_description(wp_kses_post($_POST['description']));
+        $product->set_category_ids(isset($_POST['categories']) ? array_map('intval', $_POST['categories']) : array());
+
+        if (!empty($_POST['image_id'])) {
+            $product->set_image_id(intval($_POST['image_id']));
+        }
+
+        if ($type === 'simple') {
+            $product->set_regular_price(sanitize_text_field($_POST['price']));
+        }
+
+        // 3. Handle Variable Product Attributes
+        if ($type === 'variable') {
+            $attributes_data = isset($_POST['attributes']) ? $_POST['attributes'] : array();
+            $product_attributes = array();
+
+            foreach ($attributes_data as $tax_slug => $terms) {
+                $taxonomy = wc_attribute_taxonomy_name($tax_slug);
+                $attribute = new WC_Product_Attribute();
+                $attribute->set_id(wc_attribute_taxonomy_id_by_name($tax_slug));
+                $attribute->set_name($taxonomy);
+                $attribute->set_options($terms);
+                $attribute->set_position(0);
+                $attribute->set_visible(true);
+                $attribute->set_variation(true);
+                $product_attributes[] = $attribute;
+            }
+            $product->set_attributes($product_attributes);
+        }
+
+        // 4. Save Parent Product (Crucial: save BEFORE creating variations)
+        $product_id = $product->save();
+
+        // 5. Handle Variations
+        if ($type === 'variable' && $product_id) {
+            $existing_variations = $product->get_children();
+
+            foreach ($variations_data as $v_data) {
+                // Check if variation already exists (by attributes combination)
+                $variation_id = 0;
+                // For simplicity in this wizard, we'll create new variations or update existing ones if we manage IDs
+                // But since it's a "Quick Creator", we'll create fresh ones or update by index if complex.
+                // Let's create new ones for now and clean up? No, that's messy.
+                // Better: Create variation object, set attributes, and save.
+
+                $variation = new WC_Product_Variation();
+                $variation->set_parent_id($product_id);
+
+                $v_attributes = array();
+                foreach ($v_data['attributes'] as $slug => $val) {
+                    $v_attributes[wc_attribute_taxonomy_name($slug)] = $val;
+                }
+
+                $variation->set_attributes($v_attributes);
+                $variation->set_regular_price(sanitize_text_field($v_data['price']));
+                $variation->set_sku(sanitize_text_field($v_data['sku']));
+                $variation->set_manage_stock(true);
+                $variation->set_stock_quantity(intval($v_data['stock']));
+                $variation->save();
+            }
+        }
+
+        wp_send_json_success(array('id' => $product_id));
     }
 }

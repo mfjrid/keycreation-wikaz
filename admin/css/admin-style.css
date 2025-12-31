@@ -746,3 +746,148 @@
         transform: rotate(360deg);
     }
 }
+
+/* Product Manager Module Styles */
+.product-manager .wikaz-admin-container.full-width {
+    grid-template-columns: 1fr;
+    max-width: 1200px;
+}
+
+.wikaz-pm-tools {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.wikaz-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+.column-thumb {
+    width: 60px;
+}
+
+.column-thumb img {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--wikaz-border);
+}
+
+.pm-variations-section {
+    background: #fcfcfd;
+    border: 1px solid #edf2f7;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 25px;
+}
+
+.pm-attributes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.pm-attribute-row {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 15px;
+}
+
+.pm-attribute-row:last-child {
+    border-bottom: none;
+}
+
+.pm-terms-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.pm-term-item input {
+    display: none;
+}
+
+.pm-term-item span {
+    display: inline-block;
+    padding: 6px 16px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #4a5568;
+}
+
+.pm-term-item input:checked+span {
+    background: var(--wikaz-primary);
+    color: white;
+    border-color: var(--wikaz-primary);
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
+}
+
+.pm-variation-table {
+    width: 100%;
+    border-spacing: 0;
+    margin-top: 20px;
+}
+
+.pm-variation-table th {
+    text-align: left;
+    background: #f8fafc;
+    padding: 12px;
+    font-size: 12px;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.pm-variation-table td {
+    padding: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.pm-variation-table input {
+    padding: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+}
+
+.pm-image-preview {
+    width: 150px;
+    height: 150px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.pm-image-preview:hover {
+    border-color: var(--wikaz-primary);
+    background: #f1f5f9;
+}
+
+.pm-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pm-image-uploader .remove-image {
+    margin-top: 10px;
+    color: var(--wikaz-danger);
+}
+
+.pm-select2 {
+    height: 100px !important;
+}
