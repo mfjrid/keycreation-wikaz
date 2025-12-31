@@ -25,6 +25,7 @@ class Wikaz_Admin
         add_action('wp_ajax_wikaz_search_products', array($this, 'ajax_search_products'));
         add_action('wp_ajax_wikaz_toggle_slide', array($this, 'ajax_toggle_slide'));
         add_action('wp_ajax_wikaz_save_settings', array($this, 'ajax_save_settings'));
+        add_action('wp_ajax_wikaz_save_marquee', array($this, 'ajax_save_marquee'));
         add_action('wp_ajax_wikaz_get_slide', array($this, 'ajax_get_slide'));
     }
 
@@ -51,6 +52,15 @@ class Wikaz_Admin
             'wikaz-design',
             array($this, 'render_carousel_page')
         );
+
+        add_submenu_page(
+            'wikaz-design',
+            __('Marquee Settings', 'keycreation-wikaz'),
+            __('Marquee', 'keycreation-wikaz'),
+            'manage_options',
+            'wikaz-marquee',
+            array($this, 'render_marquee_page')
+        );
     }
 
     /**
@@ -58,7 +68,7 @@ class Wikaz_Admin
      */
     public function enqueue_admin_assets($hook)
     {
-        if (strpos($hook, 'wikaz-design') === false) {
+        if (strpos($hook, 'wikaz-design') === false && strpos($hook, 'wikaz-marquee') === false) {
             return;
         }
 
@@ -102,6 +112,14 @@ class Wikaz_Admin
         // Ensure table exists (fallback for activation hook)
         $this->maybe_create_table();
         require_once WIKAZ_PLUGIN_DIR . 'admin/dashboard.php';
+    }
+
+    /**
+     * Render marquee admin page
+     */
+    public function render_marquee_page()
+    {
+        require_once WIKAZ_PLUGIN_DIR . 'admin/marquee-dashboard.php';
     }
 
     /**
@@ -301,6 +319,37 @@ class Wikaz_Admin
         update_option('wikaz_header_transparent', isset($_POST['header_transparent']) ? '1' : '0');
 
         wp_send_json_success();
+    }
+
+    /**
+     * AJAX: Save marquee settings
+     */
+    public function ajax_save_marquee()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Permission denied', 'keycreation-wikaz'));
+        }
+
+        $marquee_items = isset($_POST['marquee_items']) ? $_POST['marquee_items'] : array();
+        $sanitized_items = array();
+
+        if (is_array($marquee_items)) {
+            foreach ($marquee_items as $item) {
+                if (empty($item['text']))
+                    continue;
+                $sanitized_items[] = array(
+                    'text' => sanitize_text_field($item['text']),
+                    'link' => esc_url_raw($item['link'])
+                );
+            }
+        }
+
+        $json_value = wp_json_encode($sanitized_items);
+        set_theme_mod('topbar_marquee_arr', $json_value);
+
+        wp_send_json_success(__('Marquee settings saved', 'keycreation-wikaz'));
     }
 
     /**

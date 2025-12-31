@@ -81,6 +81,11 @@
         $('#wikaz-product-results').on('click', '.wikaz-product-item', selectProduct);
         $('#wikaz-selected-product .remove-product').on('click', removeProduct);
 
+        // Marquee events
+        $('#add-marquee-item').on('click', addMarqueeItem);
+        $(document).on('click', '.remove-marquee-item', removeMarqueeItem);
+        $('#wikaz-marquee-form').on('submit', saveMarquee);
+
         // Close product results on click outside
         $(document).on('click', function (e) {
             if (!$(e.target).closest('.wikaz-product-search-wrap').length) {
@@ -442,6 +447,100 @@
             error: function () {
                 alert(wikazAdmin.strings.error);
                 $btn.html(originalText).prop('disabled', false);
+            }
+        });
+    }
+
+    /**
+     * Add new marquee item row
+     */
+    function addMarqueeItem() {
+        const $container = $('#marquee-items-container');
+        const index = $container.find('.marquee-item-row').length;
+
+        const html = `
+            <div class="marquee-item-row" data-index="${index}">
+                <div class="wikaz-form-group">
+                    <label>Text</label>
+                    <input type="text" name="marquee_items[${index}][text]" value="" class="widefat" placeholder="Scrolling text...">
+                </div>
+                <div class="wikaz-form-group">
+                    <label>Link</label>
+                    <input type="text" name="marquee_items[${index}][link]" value="" class="widefat" placeholder="https://...">
+                </div>
+                <button type="button" class="button remove-marquee-item" title="Remove">
+                    <span class="dashicons dashicons-no-alt"></span>
+                </button>
+            </div>
+        `;
+
+        $container.append(html);
+    }
+
+    /**
+     * Remove marquee item row
+     */
+    function removeMarqueeItem() {
+        $(this).closest('.marquee-item-row').remove();
+
+        // Re-index remaining rows
+        $('#marquee-items-container .marquee-item-row').each(function (i) {
+            $(this).attr('data-index', i);
+            $(this).find('input').each(function () {
+                const name = $(this).attr('name');
+                $(this).attr('name', name.replace(/\[\d+\]/, `[${i}]`));
+            });
+        });
+    }
+
+    /**
+     * Save marquee settings
+     */
+    function saveMarquee(e) {
+        e.preventDefault();
+
+        const $form = $(this);
+        const $btn = $('#save-marquee');
+        const originalText = $btn.html();
+        const $spinner = $form.find('.spinner');
+
+        $btn.prop('disabled', true);
+        $spinner.addClass('is-active');
+
+        const formData = {
+            action: 'wikaz_save_marquee',
+            nonce: wikazAdmin.nonce,
+            marquee_items: []
+        };
+
+        $form.find('.marquee-item-row').each(function () {
+            formData.marquee_items.push({
+                text: $(this).find('input[name*="[text]"]').val(),
+                link: $(this).find('input[name*="[link]"]').val()
+            });
+        });
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    $btn.html('<span class="dashicons dashicons-yes"></span> ' + wikazAdmin.strings.saved);
+                    setTimeout(function () {
+                        $btn.html(originalText).prop('disabled', false);
+                    }, 2000);
+                } else {
+                    alert(wikazAdmin.strings.error);
+                    $btn.html(originalText).prop('disabled', false);
+                }
+            },
+            error: function () {
+                alert(wikazAdmin.strings.error);
+                $btn.html(originalText).prop('disabled', false);
+            },
+            complete: function () {
+                $spinner.removeClass('is-active');
             }
         });
     }

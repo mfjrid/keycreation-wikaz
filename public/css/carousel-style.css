@@ -486,3 +486,12 @@ body.wikaz-header-transparent .wikaz-carousel-wrapper {
 .tf-topbar.bg-dark-5.topbar-bg .container {
     max-width: 100% !important;
 }
+
+#mainnav a,
+a.nav-icon-item {
+    color: #f1f1f1 !important;
+}
+
+li.menu-item.menu-item-type-post_type.menu-item-object-page {
+    padding: 0 !important;
+}
