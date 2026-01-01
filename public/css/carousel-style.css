@@ -52,25 +52,36 @@
     justify-content: center;
     min-width: 42px;
     height: 42px;
-    padding: 0 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 21px;
-    /* Pill/Circle shape */
+    padding: 0 16px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    /* Default to rounded rect for text */
     cursor: pointer;
     font-size: 13px;
-    font-weight: 500;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+    transition: all 0.2s ease;
     background: #fff;
     list-style: none;
     margin: 0 !important;
+    color: #333;
+}
+
+/* Color swatches should remain circular */
+.variations_form .variations .value .swatch-color,
+.variations_form .variations .value li[class*="color"],
+.variations_form .variations .value li[data-value*="#"] {
+    border-radius: 50%;
+    padding: 0;
+    width: 42px;
 }
 
 .variations_form .variations .value .selected,
 .variations_form .variations .value .active,
 .variations_form .variations .value li.selected {
-    border-color: #000 !important;
-    background: #fdfdfd;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 2px solid #000 !important;
+    /* Thicker black border for active */
+    background: #fff;
+    color: #000;
 }
 
 .variations_form .variations .label {

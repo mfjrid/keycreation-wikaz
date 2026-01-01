@@ -655,6 +655,7 @@ class Wikaz_Admin
         if ($type === 'variable') {
             $attributes_data = isset($_POST['attributes']) ? $_POST['attributes'] : array();
             $product_attributes = array();
+            $index = 2;
 
             foreach ($attributes_data as $tax_slug => $terms) {
                 $taxonomy = wc_attribute_taxonomy_name($tax_slug);
@@ -662,7 +663,19 @@ class Wikaz_Admin
                 $attribute->set_id(wc_attribute_taxonomy_id_by_name($tax_slug));
                 $attribute->set_name($taxonomy);
                 $attribute->set_options($terms);
-                $attribute->set_position(0);
+
+                // Set position based on importance
+                $pos = 99;
+                $slug_lower = strtolower($tax_slug);
+                if (strpos($slug_lower, 'size') !== false || strpos($slug_lower, 'ukuran') !== false) {
+                    $pos = 0;
+                } elseif (strpos($slug_lower, 'color') !== false || strpos($slug_lower, 'warna') !== false) {
+                    $pos = 1;
+                } else {
+                    $pos = $index++;
+                }
+
+                $attribute->set_position($pos);
                 $attribute->set_visible(true);
                 $attribute->set_variation(true);
                 $product_attributes[] = $attribute;
