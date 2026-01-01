@@ -1162,3 +1162,99 @@
 .column-actions button span.dashicons {
     pointer-events: none;
 }
+
+/* General Dashboard */
+.wikaz-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.wikaz-dashboard-card {
+    background: var(--wikaz-white);
+    border-radius: var(--wikaz-radius-lg);
+    padding: 30px;
+    box-shadow: var(--wikaz-shadow);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.wikaz-dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--wikaz-shadow-lg);
+    border-color: var(--wikaz-primary);
+}
+
+.wikaz-dashboard-card .card-icon {
+    width: 70px;
+    height: 70px;
+    background: rgba(41, 128, 185, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: var(--wikaz-primary);
+    transition: all 0.3s ease;
+}
+
+.wikaz-dashboard-card:hover .card-icon {
+    background: var(--wikaz-primary);
+    color: var(--wikaz-white);
+    transform: scale(1.1);
+}
+
+.wikaz-dashboard-card .card-icon span.dashicons {
+    font-size: 35px;
+    width: 35px;
+    height: 35px;
+}
+
+.wikaz-dashboard-card h3 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    color: var(--wikaz-dark);
+}
+
+.wikaz-dashboard-card p {
+    color: var(--wikaz-gray);
+    margin-bottom: 25px;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.wikaz-dashboard-card .button {
+    margin-top: auto;
+    width: 80%;
+}
+
+.wikaz-dashboard-footer-section {
+    margin-top: 50px;
+    max-width: 800px;
+}
+
+.wikaz-dashboard-footer-section .footer-links {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.footer-link {
+    text-decoration: none;
+    color: var(--wikaz-primary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+}

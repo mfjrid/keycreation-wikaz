@@ -55,7 +55,7 @@ class Wikaz_Admin
             __('Wikaz Design', 'keycreation-wikaz'),
             'manage_options',
             'wikaz-design',
-            array($this, 'render_carousel_page'),
+            array($this, 'render_general_dashboard_page'),
             'dashicons-art',
             2
         );
@@ -83,7 +83,7 @@ class Wikaz_Admin
             __('Carousel', 'keycreation-wikaz'),
             __('Carousel', 'keycreation-wikaz'),
             'manage_options',
-            'wikaz-design',
+            'wikaz-carousel',
             array($this, 'render_carousel_page')
         );
 
@@ -105,7 +105,9 @@ class Wikaz_Admin
         if (
             strpos($hook, 'wikaz-design') === false &&
             strpos($hook, 'wikaz-marquee') === false &&
-            strpos($hook, 'wikaz-product-manager') === false
+            strpos($hook, 'wikaz-product-manager') === false &&
+            strpos($hook, 'wikaz-master-data') === false &&
+            strpos($hook, 'wikaz-carousel') === false
         ) {
             return;
         }
@@ -142,6 +144,14 @@ class Wikaz_Admin
                 'error' => __('An error occurred', 'keycreation-wikaz'),
             )
         ));
+    }
+
+    /**
+     * Render general dashboard page
+     */
+    public function render_general_dashboard_page()
+    {
+        require_once WIKAZ_PLUGIN_DIR . 'admin/general-dashboard.php';
     }
 
     /**
