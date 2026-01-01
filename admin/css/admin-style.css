@@ -958,3 +958,207 @@
     font-family: inherit;
     resize: vertical;
 }
+
+/* Master Data Module Styles */
+.master-data-container {
+    background: var(--wikaz-white);
+    border-radius: 0 0 var(--wikaz-radius) var(--wikaz-radius);
+    padding: 24px;
+    box-shadow: var(--wikaz-shadow);
+    min-height: 400px;
+}
+
+.pm-tabs-wrapper {
+    margin-bottom: 0 !important;
+    padding: 0 10px !important;
+    background: #f0f0f1;
+    border: 1px solid #dcdcde;
+    border-bottom: none;
+    border-radius: var(--wikaz-radius) var(--wikaz-radius) 0 0;
+}
+
+.pm-tabs-wrapper .nav-tab {
+    cursor: pointer;
+    background: #e0e0e0;
+    margin-left: 5px;
+    margin-top: 5px;
+    border-radius: 6px 6px 0 0;
+    border-bottom: none;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+.pm-tabs-wrapper .nav-tab-active {
+    background: var(--wikaz-white) !important;
+    border-bottom: 1px solid var(--wikaz-white) !important;
+    color: var(--wikaz-primary) !important;
+}
+
+.pm-tab-content {
+    display: none;
+}
+
+.pm-tab-content.active {
+    display: block;
+}
+
+.master-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--wikaz-dark);
+}
+
+.panel-header h4 {
+    margin: 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #718096;
+}
+
+/* Attributes Two-Panel Layout */
+.master-two-panel {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.master-sidebar {
+    background: #fcfcfd;
+    border: 1px solid var(--wikaz-border);
+    border-radius: var(--wikaz-radius);
+    padding: 20px;
+}
+
+.master-side-list {
+    margin: 15px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-side-list li {
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--wikaz-white);
+    border: 1px solid var(--wikaz-border);
+}
+
+.master-side-list li:hover {
+    border-color: var(--wikaz-primary);
+    background: #f0f7ff;
+}
+
+.master-side-list li.active {
+    background: var(--wikaz-primary);
+    color: white;
+    border-color: var(--wikaz-primary);
+}
+
+.master-side-list li .attr-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.master-side-list .attr-count {
+    font-size: 11px;
+    background: #edf2f7;
+    color: #4a5568;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.master-side-list li.active .attr-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.master-side-list .attr-actions {
+    display: flex;
+    gap: 5px;
+    opacity: 0.2;
+    transition: opacity 0.2s;
+}
+
+.master-side-list li:hover .attr-actions,
+.master-side-list li.active .attr-actions {
+    opacity: 1;
+}
+
+.master-side-list li.active .attr-actions .dashicons {
+    color: white;
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* Master Modals & Helpers */
+.master-data-container .column-actions {
+    display: flex;
+    gap: 8px;
+}
+
+#master-image-preview {
+    width: 120px;
+    height: 120px;
+    cursor: pointer;
+    overflow: hidden;
+    background: #f8fafc;
+    border: 2px dashed var(--wikaz-border);
+    border-radius: var(--wikaz-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+#master-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+#master-image-preview .placeholder {
+    text-align: center;
+    color: var(--wikaz-gray);
+}
+
+/* Master Table Actions */
+.column-actions button.wikaz-edit-master,
+.column-actions button.wikaz-delete-master {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.column-actions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.column-actions button span.dashicons {
+    pointer-events: none;
+}

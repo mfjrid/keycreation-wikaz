@@ -116,13 +116,6 @@
             pmAttrPromise = loadPMAttributes();
         }
 
-        // Initialize Select2
-        if ($.fn.select2) {
-            $('.pm-select2').select2({
-                width: '100%',
-                dropdownParent: $pmModal
-            });
-        }
     }
 
     /**
@@ -687,6 +680,7 @@
      */
     function openPMProductModal(productId = 0) {
         resetPMForm();
+        initSelect2($pmModal);
         if (productId > 0) {
             $('#wikaz-pm-modal-title').text('Edit Product');
             $('#pm-product-id').val(productId);
@@ -995,7 +989,466 @@
         });
     }
 
+    /**
+     * Master Data Manager Logic
+     */
+    const $masterTabs = $('.pm-tabs-wrapper .nav-tab');
+    const $masterContents = $('.pm-tab-content');
+
+    function initMasterData() {
+        if (!$('.master-data-container').length) return;
+
+        // Tab Switching
+        $masterTabs.on('click', function (e) {
+            e.preventDefault();
+            const tab = $(this).data('tab');
+            $masterTabs.removeClass('nav-tab-active');
+            $(this).addClass('nav-tab-active');
+            $masterContents.removeClass('active');
+            $('#tab-' + tab).addClass('active');
+
+            // Load initial data for tab if needed
+            if (tab === 'categories') loadMasterCategories();
+            if (tab === 'tags') loadMasterTags();
+            if (tab === 'attributes') loadMasterAttributes();
+        });
+
+        // Delegate all master events on the container for reliability
+        const $container = $('.master-data-container');
+
+        // Add Item Buttons
+        $container.on('click', '.add-master-item', function (e) {
+            e.preventDefault();
+            const type = $(this).data('type');
+            openMasterModal(type);
+        });
+
+        // Add Master Term
+        $container.on('click', '.add-master-term', function (e) {
+            e.preventDefault();
+            const taxonomy = $(this).data('taxonomy');
+            openMasterModal('term', 0, taxonomy);
+        });
+
+        // Edit Item
+        $container.on('click', '.wikaz-edit-master', function (e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+            const type = $(this).data('type');
+            const taxonomy = $(this).data('taxonomy') || '';
+            openMasterModal(type, id, taxonomy);
+        });
+
+        // Delete Item
+        $container.on('click', '.wikaz-delete-master', function (e) {
+            e.preventDefault();
+
+            if (!confirm('Are you sure you want to delete this item?')) return;
+
+            const $btn = $(this);
+            const id = $btn.data('id');
+            const type = $btn.data('type');
+            const realType = $btn.data('type');
+            let taxonomy = $btn.data('taxonomy');
+
+            if (realType === 'category') taxonomy = 'product_cat';
+            if (realType === 'tag') taxonomy = 'product_tag';
+
+            $.ajax({
+                url: wikazAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'wikaz_delete_master_item',
+                    nonce: wikazAdmin.nonce,
+                    id: id,
+                    taxonomy: taxonomy
+                },
+                success: function (response) {
+                    if (response.success) {
+                        $btn.closest('tr').fadeOut();
+                    } else {
+                        alert('Error: ' + response.data);
+                    }
+                }
+            });
+        });
+
+        // Initial Load (Categories by default)
+        loadMasterCategories();
+    }
+
+    function loadMasterCategories() {
+        const $list = $('#master-categories-list');
+        $list.html('<tr><td colspan="5" align="center">Loading...</td></tr>');
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_get_master_categories',
+                nonce: wikazAdmin.nonce
+            },
+            success: function (response) {
+                if (response.success) {
+                    let html = '';
+                    if (response.data.length === 0) {
+                        html = '<tr><td colspan="5" align="center">No categories found.</td></tr>';
+                    } else {
+                        response.data.forEach(cat => {
+                            html += `
+                                <tr>
+                                    <td><img src="${cat.image || ''}" width="40" height="40" style="object-fit:cover; border-radius:4px;"></td>
+                                    <td><strong>${cat.name}</strong></td>
+                                    <td><code>${cat.slug}</code></td>
+                                    <td>${cat.count}</td>
+                                    <td class="column-actions">
+                                        <button type="button" class="button button-small wikaz-edit-master" data-type="category" data-id="${cat.id}"><span class="dashicons dashicons-edit"></span></button>
+                                        <button type="button" class="button button-small wikaz-delete-master" data-type="category" data-id="${cat.id}"><span class="dashicons dashicons-trash"></span></button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    $list.html(html);
+                }
+            }
+        });
+    }
+
+    function loadMasterTags() {
+        const $list = $('#master-tags-list');
+        $list.html('<tr><td colspan="4" align="center">Loading...</td></tr>');
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_get_master_tags',
+                nonce: wikazAdmin.nonce
+            },
+            success: function (response) {
+                if (response.success) {
+                    let html = '';
+                    if (response.data.length === 0) {
+                        html = '<tr><td colspan="4" align="center">No tags found.</td></tr>';
+                    } else {
+                        response.data.forEach(tag => {
+                            html += `
+                                <tr>
+                                    <td><strong>${tag.name}</strong></td>
+                                    <td><code>${tag.slug}</code></td>
+                                    <td>${tag.count}</td>
+                                    <td class="column-actions">
+                                        <button type="button" class="button button-small wikaz-edit-master" data-type="tag" data-id="${tag.id}"><span class="dashicons dashicons-edit"></span></button>
+                                        <button type="button" class="button button-small wikaz-delete-master" data-type="tag" data-id="${tag.id}"><span class="dashicons dashicons-trash"></span></button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    $list.html(html);
+                }
+            }
+        });
+    }
+
+    function loadMasterAttributes() {
+        const $list = $('#master-attributes-type-list');
+        $list.html('<li>Loading attributes...</li>');
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_get_pm_attributes',
+                nonce: wikazAdmin.nonce
+            },
+            success: function (response) {
+                if (response.success) {
+                    let html = '';
+                    response.data.forEach(attr => {
+                        html += `
+                            <li data-slug="${attr.slug}" data-label="${attr.label}" data-id="${attr.id || 0}">
+                                <div class="attr-info">
+                                    <span>${attr.label}</span>
+                                    <span class="attr-count">${attr.terms.length}</span>
+                                </div>
+                                <div class="attr-actions" style="display:flex; gap:5px;">
+                                    <span class="dashicons dashicons-edit edit-attr-type" title="Edit Type" style="cursor:pointer; font-size:16px;"></span>
+                                    <span class="dashicons dashicons-trash delete-attr-type" title="Delete Type" style="cursor:pointer; font-size:16px;"></span>
+                                </div>
+                            </li>
+                        `;
+                    });
+                    $list.html(html);
+
+                    // Attribute Side List Click
+                    $list.find('li').on('click', function (e) {
+                        if ($(e.target).closest('.attr-actions').length) return;
+
+                        const slug = $(this).data('slug');
+                        const label = $(this).data('label');
+                        $list.find('li').removeClass('active');
+                        $(this).addClass('active');
+                        $('#current-attribute-label').text(label);
+                        $('.add-master-term').show().data('taxonomy', 'pa_' + slug);
+                        loadMasterTerms('pa_' + slug);
+                    });
+
+                    // Edit Attribute Type
+                    $list.find('.edit-attr-type').on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const $li = $(this).closest('li');
+                        openMasterModal('attribute_type', $li.data('id'));
+                    });
+
+                    // Delete Attribute Type
+                    $list.find('.delete-attr-type').on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const $li = $(this).closest('li');
+                        if (!confirm('Delete this attribute type and all its values?')) return;
+
+                        $.ajax({
+                            url: wikazAdmin.ajaxUrl,
+                            type: 'POST',
+                            data: {
+                                action: 'wikaz_delete_master_attribute_type',
+                                nonce: wikazAdmin.nonce,
+                                id: $li.data('id')
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    loadMasterAttributes();
+                                } else {
+                                    alert('Error: ' + response.data);
+                                }
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    }
+
+    $('.add-attribute-type').on('click', function () {
+        openMasterModal('attribute_type');
+    });
+
+    function loadMasterTerms(taxonomy) {
+        const $list = $('#master-terms-list');
+        $list.html('<tr><td colspan="3" align="center">Loading values...</td></tr>');
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_get_master_terms',
+                nonce: wikazAdmin.nonce,
+                taxonomy: taxonomy
+            },
+            success: function (response) {
+                if (response.success) {
+                    let html = '';
+                    if (response.data.length === 0) {
+                        html = '<tr><td colspan="3" align="center">No values found for this attribute.</td></tr>';
+                    } else {
+                        response.data.forEach(term => {
+                            html += `
+                                <tr>
+                                    <td><strong>${term.name}</strong></td>
+                                    <td><code>${term.slug}</code></td>
+                                    <td class="column-actions">
+                                        <button type="button" class="button button-small wikaz-edit-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}"><span class="dashicons dashicons-edit"></span></button>
+                                        <button type="button" class="button button-small wikaz-delete-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}"><span class="dashicons dashicons-trash"></span></button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    $list.html(html);
+                }
+            }
+        });
+    }
+
+    // Modal Handling
+    const $masterModal = $('#wikaz-master-modal');
+    const $masterForm = $('#wikaz-master-form');
+
+    function openMasterModal(type, id = 0, taxonomy = '') {
+        resetMasterForm();
+        initSelect2($masterModal);
+        $('#master-item-type').val(type);
+        $('#master-item-id').val(id);
+        $('#master-item-taxonomy').val(taxonomy);
+
+        $('#master-attr-type-fields').hide();
+
+        if (type === 'category') {
+            $('#master-image-group, #master-parent-group').show();
+            $('#wikaz-master-modal-title').text(id > 0 ? 'Edit Category' : 'Add New Category');
+            loadParentCategories(id);
+        } else if (type === 'tag') {
+            $('#master-image-group, #master-parent-group').hide();
+            // Tags don't have parents or images
+            $('#wikaz-master-modal-title').text(id > 0 ? 'Edit Tag' : 'Add New Tag');
+        } else if (type === 'attribute_type') {
+            $('#master-image-group, #master-parent-group').hide();
+            $('#master-attr-type-fields').show();
+            $('#wikaz-master-modal-title').text(id > 0 ? 'Edit Attribute Type' : 'Add New Attribute Type');
+        } else {
+            $('#master-image-group, #master-parent-group').hide();
+            $('#wikaz-master-modal-title').text(id > 0 ? 'Edit Value' : 'Add New Value');
+        }
+
+        if (id > 0) {
+            fetchMasterItem(type, id, taxonomy);
+        }
+
+        $masterModal.addClass('active');
+    }
+
+    function resetMasterForm() {
+        $masterForm[0].reset();
+        $('#master-item-id').val(0);
+        $('#master-item-image-id').val('');
+        $('#master-image-preview img').hide().attr('src', '');
+        $('#master-image-preview .placeholder').show();
+        $('#master-item-parent').val(0).trigger('change');
+    }
+
+    function closeMasterModal() {
+        $masterModal.removeClass('active');
+    }
+
+    $('.wikaz-modal-close').on('click', closeMasterModal);
+
+    // Image Upload for Category
+    $('#master-image-preview').on('click', function () {
+        const frame = wp.media({
+            title: 'Select Category Image',
+            button: { text: 'Use this image' },
+            multiple: false
+        });
+
+        frame.on('select', function () {
+            const attachment = frame.state().get('selection').first().toJSON();
+            $('#master-item-image-id').val(attachment.id);
+            $('#master-image-preview img').attr('src', attachment.url).show();
+            $('#master-image-preview .placeholder').hide();
+        });
+
+        frame.open();
+    });
+
+    function loadParentCategories(excludeId = 0) {
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_get_master_categories',
+                nonce: wikazAdmin.nonce
+            },
+            success: function (response) {
+                if (response.success) {
+                    let options = '<option value="0">None</option>';
+                    response.data.forEach(cat => {
+                        if (cat.id != excludeId) {
+                            options += `<option value="${cat.id}">${cat.name}</option>`;
+                        }
+                    });
+                    $('#master-item-parent').html(options).trigger('change');
+                }
+            }
+        });
+    }
+
+    function fetchMasterItem(type, id, taxonomy) {
+        if (type === 'attribute_type') {
+            const $li = $(`li[data-id="${id}"]`);
+            $('#master-item-name').val($li.data('label'));
+            $('#master-item-slug').val($li.data('slug'));
+            return;
+        }
+
+        // Populate from the table row we clicked for speed
+        const $row = $(`.wikaz-edit-master[data-id="${id}"][data-type="${type}"]`).closest('tr');
+        $('#master-item-name').val($row.find('strong').text());
+        $('#master-item-slug').val($row.find('code').text());
+
+        if (type === 'category') {
+            const img = $row.find('img').attr('src');
+            if (img && !img.includes('placeholder')) {
+                $('#master-image-preview img').attr('src', img).show();
+                $('#master-image-preview .placeholder').hide();
+            }
+        }
+    }
+
+    $masterForm.on('submit', function (e) {
+        e.preventDefault();
+        const $btn = $('#master-save-btn');
+        const originalText = $btn.text();
+        $btn.prop('disabled', true).text('Saving...');
+
+        const type = $('#master-item-type').val();
+        const action = (type === 'attribute_type') ? 'wikaz_save_master_attribute_type' : 'wikaz_save_master_item';
+
+        const formData = {
+            action: action,
+            nonce: wikazAdmin.nonce,
+            id: $('#master-item-id').val(),
+            type: type,
+            name: $('#master-item-name').val(),
+            slug: $('#master-item-slug').val(),
+            taxonomy: $('#master-item-taxonomy').val(),
+            parent: $('#master-item-parent').val(),
+            image_id: $('#master-item-image-id').val(),
+        };
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    closeMasterModal();
+                    // Reload current tab
+                    const activeTab = $('.pm-tabs-wrapper .nav-tab-active').data('tab');
+                    if (activeTab === 'categories') loadMasterCategories();
+                    if (activeTab === 'tags') loadMasterTags();
+                    if (activeTab === 'attributes') {
+                        loadMasterAttributes();
+                        if (type === 'term') loadMasterTerms(formData.taxonomy);
+                    }
+                } else {
+                    alert('Error: ' + response.data);
+                }
+            },
+            complete: () => {
+                $btn.prop('disabled', false).text(originalText);
+            }
+        });
+    });
+
+
+    function initSelect2($modal) {
+        if ($.fn.select2) {
+            $modal.find('.pm-select2').each(function () {
+                $(this).select2({
+                    width: '100%',
+                    dropdownParent: $modal
+                });
+            });
+        }
+    }
+
     // Initialize when DOM ready
-    $(document).ready(init);
+    $(document).ready(function () {
+        init();
+        initMasterData();
+    });
 
 })(jQuery);

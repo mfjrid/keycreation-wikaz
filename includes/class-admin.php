@@ -33,6 +33,15 @@ class Wikaz_Admin
         add_action('wp_ajax_wikaz_save_pm_product', array($this, 'ajax_save_pm_product'));
         add_action('wp_ajax_wikaz_delete_pm_product', array($this, 'ajax_delete_pm_product'));
         add_action('wp_ajax_wikaz_get_pm_attributes', array($this, 'ajax_get_pm_attributes'));
+
+        // Master Data Handlers
+        add_action('wp_ajax_wikaz_get_master_categories', array($this, 'ajax_get_master_categories'));
+        add_action('wp_ajax_wikaz_get_master_tags', array($this, 'ajax_get_master_tags'));
+        add_action('wp_ajax_wikaz_get_master_terms', array($this, 'ajax_get_master_terms'));
+        add_action('wp_ajax_wikaz_save_master_item', array($this, 'ajax_save_master_item'));
+        add_action('wp_ajax_wikaz_delete_master_item', array($this, 'ajax_delete_master_item'));
+        add_action('wp_ajax_wikaz_save_master_attribute_type', array($this, 'ajax_save_master_attribute_type'));
+        add_action('wp_ajax_wikaz_delete_master_attribute_type', array($this, 'ajax_delete_master_attribute_type'));
         add_action('wp_ajax_wikaz_get_pm_product', array($this, 'ajax_get_pm_product'));
     }
 
@@ -58,6 +67,15 @@ class Wikaz_Admin
             'manage_options',
             'wikaz-marquee',
             array($this, 'render_marquee_page')
+        );
+
+        add_submenu_page(
+            'wikaz-design',
+            __('Master Data', 'keycreation-wikaz'),
+            __('Master Data', 'keycreation-wikaz'),
+            'manage_options',
+            'wikaz-master-data',
+            array($this, 'render_master_dashboard_page')
         );
 
         add_submenu_page(
@@ -150,6 +168,14 @@ class Wikaz_Admin
     public function render_product_manager_page()
     {
         require_once WIKAZ_PLUGIN_DIR . 'admin/product-dashboard.php';
+    }
+
+    /**
+     * Render master dashboard page
+     */
+    public function render_master_dashboard_page()
+    {
+        require_once WIKAZ_PLUGIN_DIR . 'admin/master-dashboard.php';
     }
 
     /**
@@ -565,10 +591,11 @@ class Wikaz_Admin
             $terms = get_terms(array('taxonomy' => $taxonomy_name, 'hide_empty' => false));
 
             $attributes[] = array(
+                'id' => $tax->attribute_id,
                 'slug' => $tax->attribute_name,
                 'label' => $tax->attribute_label,
                 'terms' => array_map(function ($term) {
-                    return array('name' => $term->name, 'slug' => $term->slug);
+                    return array('id' => $term->term_id, 'name' => $term->name, 'slug' => $term->slug);
                 }, $terms)
             );
         }
@@ -734,5 +761,207 @@ class Wikaz_Admin
 
         $data_store = $product->get_data_store();
         return $data_store->find_matching_product_variation($product, $attributes);
+    }
+
+    /**
+     * AJAX: Get master categories
+     */
+    public function ajax_get_master_categories()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $categories = get_terms(array(
+            'taxonomy' => 'product_cat',
+            'hide_empty' => false,
+        ));
+
+        $data = array();
+        foreach ($categories as $cat) {
+            $thumbnail_id = get_term_meta($cat->term_id, 'thumbnail_id', true);
+            $data[] = array(
+                'id' => $cat->term_id,
+                'name' => $cat->name,
+                'slug' => $cat->slug,
+                'count' => $cat->count,
+                'image' => wp_get_attachment_image_url($thumbnail_id, 'thumbnail') ?: wc_placeholder_img_src('thumbnail'),
+                'parent' => $cat->parent
+            );
+        }
+
+        wp_send_json_success($data);
+    }
+
+    /**
+     * AJAX: Get master tags
+     */
+    public function ajax_get_master_tags()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $tags = get_terms(array(
+            'taxonomy' => 'product_tag',
+            'hide_empty' => false,
+        ));
+
+        $data = array();
+        foreach ($tags as $tag) {
+            $data[] = array(
+                'id' => $tag->term_id,
+                'name' => $tag->name,
+                'slug' => $tag->slug,
+                'count' => $tag->count,
+            );
+        }
+
+        wp_send_json_success($data);
+    }
+
+    /**
+     * AJAX: Get master terms for an attribute
+     */
+    public function ajax_get_master_terms()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $taxonomy = sanitize_text_field($_POST['taxonomy']);
+        $terms = get_terms(array(
+            'taxonomy' => $taxonomy,
+            'hide_empty' => false,
+        ));
+
+        $data = array();
+        foreach ($terms as $term) {
+            $data[] = array(
+                'id' => $term->term_id,
+                'name' => $term->name,
+                'slug' => $term->slug,
+            );
+        }
+
+        wp_send_json_success($data);
+    }
+
+    /**
+     * AJAX: Save master item
+     */
+    public function ajax_save_master_item()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $id = intval($_POST['id']);
+        $type = sanitize_text_field($_POST['type']); // category, tag, term
+        $name = sanitize_text_field($_POST['name']);
+        $slug = sanitize_text_field($_POST['slug']);
+        $taxonomy = ($type === 'term') ? sanitize_text_field($_POST['taxonomy']) : (($type === 'category') ? 'product_cat' : 'product_tag');
+
+        $args = array(
+            'name' => $name,
+            'slug' => $slug,
+        );
+
+        if ($type === 'category') {
+            $args['parent'] = intval($_POST['parent']);
+        }
+
+        if ($id > 0) {
+            $result = wp_update_term($id, $taxonomy, $args);
+        } else {
+            $result = wp_insert_term($name, $taxonomy, $args);
+            if (!is_wp_error($result))
+                $id = $result['term_id'];
+        }
+
+        if (is_wp_error($result)) {
+            wp_send_json_error($result->get_error_message());
+        }
+
+        // Handle category image
+        if ($type === 'category' && isset($_POST['image_id'])) {
+            update_term_meta($id, 'thumbnail_id', intval($_POST['image_id']));
+        }
+
+        wp_send_json_success($id);
+    }
+
+    /**
+     * AJAX: Delete master item
+     */
+    public function ajax_delete_master_item()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $id = intval($_POST['id']);
+        $taxonomy = sanitize_text_field($_POST['taxonomy']);
+
+        $result = wp_delete_term($id, $taxonomy);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error($result->get_error_message());
+        }
+
+        wp_send_json_success();
+    }
+
+    /**
+     * AJAX: Save master attribute type (taxonomy)
+     */
+    public function ajax_save_master_attribute_type()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        $name = sanitize_text_field($_POST['name']);
+        $slug = sanitize_text_field($_POST['slug']);
+
+        $args = array(
+            'name' => $name,
+            'slug' => $slug,
+            'type' => 'select',
+            'order_by' => 'menu_order',
+            'has_archives' => false,
+        );
+
+        if ($id > 0) {
+            $result = wc_update_attribute($id, $args);
+        } else {
+            $result = wc_create_attribute($args);
+        }
+
+        if (is_wp_error($result)) {
+            wp_send_json_error($result->get_error_message());
+        }
+
+        wp_send_json_success($result);
+    }
+
+    /**
+     * AJAX: Delete master attribute type
+     */
+    public function ajax_delete_master_attribute_type()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options'))
+            wp_send_json_error('Unauthorized');
+
+        $id = intval($_POST['id']);
+        $result = wc_delete_attribute($id);
+
+        if (!$result) {
+            wp_send_json_error('Failed to delete attribute type');
+        }
+
+        wp_send_json_success();
     }
 }
