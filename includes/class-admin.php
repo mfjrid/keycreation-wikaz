@@ -53,20 +53,20 @@ class Wikaz_Admin
 
         add_submenu_page(
             'wikaz-design',
+            __('Running Text Settings', 'keycreation-wikaz'),
+            __('Running Text', 'keycreation-wikaz'),
+            'manage_options',
+            'wikaz-marquee',
+            array($this, 'render_marquee_page')
+        );
+
+        add_submenu_page(
+            'wikaz-design',
             __('Carousel', 'keycreation-wikaz'),
             __('Carousel', 'keycreation-wikaz'),
             'manage_options',
             'wikaz-design',
             array($this, 'render_carousel_page')
-        );
-
-        add_submenu_page(
-            'wikaz-design',
-            __('Marquee Settings', 'keycreation-wikaz'),
-            __('Marquee', 'keycreation-wikaz'),
-            'manage_options',
-            'wikaz-marquee',
-            array($this, 'render_marquee_page')
         );
 
         add_submenu_page(
@@ -450,11 +450,18 @@ class Wikaz_Admin
         $data = array();
 
         foreach ($products->products as $product) {
+            $price = $product->get_price();
+            if ($product->is_type('variable')) {
+                $min = $product->get_variation_regular_price('min');
+                $max = $product->get_variation_regular_price('max');
+                $price = ($min === $max) ? $min : $min . ' - ' . $max;
+            }
+
             $data[] = array(
                 'id' => $product->get_id(),
                 'name' => $product->get_name(),
                 'sku' => $product->get_sku(),
-                'price' => $product->get_price(),
+                'price' => $price,
                 'image' => wp_get_attachment_image_url($product->get_image_id(), 'thumbnail') ?: wc_placeholder_img_src('thumbnail'),
                 'type' => $product->get_type(),
                 'stock' => $product->get_stock_quantity(),
@@ -531,8 +538,8 @@ class Wikaz_Admin
                 $data['variations'][] = array(
                     'id' => $var_id,
                     'sku' => $var->get_sku(),
-                    'price' => $var->get_regular_price(),
-                    'stock' => $var->get_stock_quantity(),
+                    'price' => $var->get_regular_price('edit') ?: $var->get_price('edit'),
+                    'stock' => $var->get_stock_quantity('edit'),
                     'attributes' => $var->get_attributes()
                 );
             }

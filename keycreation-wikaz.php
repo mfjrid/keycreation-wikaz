@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Keycreation Wikaz
- * Plugin URI: https://wikaz.id
- * Description: Custom design enhancements for Wikaz website - Carousel, banners, and more.
+ * Plugin URI: https://keycreationofficial.com
+ * Description: Custom design enhancements for Wikaz website - Carousel, product management, and more.
  * Version: 1.0.0
  * Author: Keycreation
- * Author URI: https://wikaz.id
+ * Author URI: https://keycreationofficial.com
  * License: GPL v2 or later
  * Text Domain: keycreation-wikaz
  * Requires at least: 5.0

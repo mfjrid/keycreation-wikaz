@@ -17,6 +17,7 @@
 
     // Media uploader instance
     let mediaUploader;
+    let pmAttrPromise;
 
     /**
      * Initialize
@@ -112,7 +113,7 @@
         // Initial Load
         if ($pmProductList.length) {
             loadPMProducts();
-            loadPMAttributes();
+            pmAttrPromise = loadPMAttributes();
         }
 
         // Initialize Select2
@@ -653,7 +654,7 @@
      */
     function loadPMAttributes() {
         const $container = $('#pm-attributes-container');
-        $.ajax({
+        return $.ajax({
             url: wikazAdmin.ajaxUrl,
             type: 'POST',
             data: { action: 'wikaz_get_pm_attributes', nonce: wikazAdmin.nonce },
@@ -695,78 +696,80 @@
             // Show loading state
             $pmForm.addClass('wikaz-loading');
 
-            $.ajax({
-                url: wikazAdmin.ajaxUrl,
-                type: 'POST',
-                data: {
-                    action: 'wikaz_get_pm_product',
-                    nonce: wikazAdmin.nonce,
-                    product_id: productId
-                },
-                success: function (response) {
-                    if (response.success) {
-                        const p = response.data;
-                        $('#pm-product-name').val(p.name);
-                        $('#pm-product-sku').val(p.sku);
-                        $('#pm-product-price').val(p.price);
-                        $('#pm-product-short-description').val(p.short_description || '');
-                        $('#pm-product-description').val(p.description || '');
-                        $('#pm-product-category').val(p.categories ? p.categories.map(String) : []).trigger('change');
-                        $('#pm-product-tags').val(p.tags ? p.tags.map(String) : []).trigger('change');
-                        $('#pm-product-video-url').val(p.video_url || '');
+            $.when(pmAttrPromise).done(function () {
+                $.ajax({
+                    url: wikazAdmin.ajaxUrl,
+                    type: 'POST',
+                    data: {
+                        action: 'wikaz_get_pm_product',
+                        nonce: wikazAdmin.nonce,
+                        product_id: productId
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            const p = response.data;
+                            $('#pm-product-name').val(p.name);
+                            $('#pm-product-sku').val(p.sku);
+                            $('#pm-product-price').val(p.price);
+                            $('#pm-product-short-description').val(p.short_description || '');
+                            $('#pm-product-description').val(p.description || '');
+                            $('#pm-product-category').val(p.categories ? p.categories.map(String) : []).trigger('change');
+                            $('#pm-product-tags').val(p.tags ? p.tags.map(String) : []).trigger('change');
+                            $('#pm-product-video-url').val(p.video_url || '');
 
-                        if (p.image_url) {
-                            $('#pm-product-image-id').val(p.image_id);
-                            $('#pm-image-preview img').attr('src', p.image_url).show();
-                            $('#pm-image-preview .placeholder').hide();
-                        }
+                            if (p.image_url) {
+                                $('#pm-product-image-id').val(p.image_id);
+                                $('#pm-image-preview img').attr('src', p.image_url).show();
+                                $('#pm-image-preview .placeholder').hide();
+                            }
 
-                        // Populate Gallery
-                        if (p.gallery_images) {
-                            p.gallery_images.forEach(img => addGalleryThumbnail(img.id, img.url));
-                            updateGalleryIDs();
-                        }
+                            // Populate Gallery
+                            if (p.gallery_images) {
+                                p.gallery_images.forEach(img => addGalleryThumbnail(img.id, img.url));
+                                updateGalleryIDs();
+                            }
 
-                        // Populate Attributes
-                        if (p.attributes) {
-                            Object.keys(p.attributes).forEach(cleanSlug => {
-                                const options = p.attributes[cleanSlug];
-                                if (Array.isArray(options)) {
-                                    options.forEach(optSlug => {
-                                        $(`.pm-attribute-row[data-slug="${cleanSlug}"] input[value="${optSlug}"]`).prop('checked', true);
-                                    });
-                                }
-                            });
-                        }
-
-                        // Generate Matrix
-                        generateVariationMatrix();
-
-                        // Match variations by attributes
-                        if (p.variations && p.variations.length > 0) {
-                            p.variations.forEach(v => {
-                                // WooCommerce variation attributes can have various prefixes
-                                const cleanVarAttrs = {};
-                                Object.keys(v.attributes).forEach(k => {
-                                    const ck = k.replace('attribute_pa_', '').replace('attribute_', '').replace('pa_', '');
-                                    cleanVarAttrs[ck] = v.attributes[k];
-                                });
-
-                                $('#pm-variation-matrix-body tr').each(function () {
-                                    const $row = $(this);
-                                    const rowCombo = $row.data('combo');
-                                    // Row combo is slug -> slug
-                                    if (rowCombo && isMatch(rowCombo, cleanVarAttrs)) {
-                                        $row.find('.pm-var-sku').val(v.sku);
-                                        $row.find('.pm-var-price').val(v.price);
-                                        $row.find('.pm-var-stock').val(v.stock);
+                            // Populate Attributes
+                            if (p.attributes) {
+                                Object.keys(p.attributes).forEach(cleanSlug => {
+                                    const options = p.attributes[cleanSlug];
+                                    if (Array.isArray(options)) {
+                                        options.forEach(optSlug => {
+                                            $(`.pm-attribute-row[data-slug="${cleanSlug}"] input[value="${optSlug}"]`).prop('checked', true);
+                                        });
                                     }
                                 });
-                            });
+                            }
+
+                            // Generate Matrix
+                            generateVariationMatrix();
+
+                            // Match variations by attributes
+                            if (p.variations && p.variations.length > 0) {
+                                p.variations.forEach(v => {
+                                    // WooCommerce variation attributes can have various prefixes
+                                    const cleanVarAttrs = {};
+                                    Object.keys(v.attributes).forEach(k => {
+                                        const ck = k.replace('attribute_pa_', '').replace('attribute_', '').replace('pa_', '');
+                                        cleanVarAttrs[ck] = v.attributes[k];
+                                    });
+
+                                    $('#pm-variation-matrix-body tr').each(function () {
+                                        const $row = $(this);
+                                        const rowCombo = $row.data('combo');
+                                        // Row combo is slug -> slug
+                                        if (rowCombo && isMatch(rowCombo, cleanVarAttrs)) {
+                                            $row.find('.pm-var-sku').val(v.sku);
+                                            $row.find('.pm-var-price').val(v.price);
+                                            $row.find('.pm-var-stock').val(v.stock);
+                                        }
+                                    });
+                                });
+                            }
                         }
-                    }
-                },
-                complete: () => $pmForm.removeClass('wikaz-loading')
+                    },
+                    complete: () => $pmForm.removeClass('wikaz-loading')
+                });
             });
         } else {
             $('#wikaz-pm-modal-title').text('Add New Product');

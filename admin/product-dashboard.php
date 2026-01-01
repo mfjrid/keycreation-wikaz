@@ -77,11 +77,11 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                 <div class="wikaz-form-row">
                     <div class="wikaz-form-group">
                         <label><?php _e('Product Name', 'keycreation-wikaz'); ?> <span class="required">*</span></label>
-                        <input type="text" id="pm-product-name" required placeholder="Juice Slim Green Tea...">
+                        <input type="text" id="pm-product-name" required placeholder="KHIMAR KHADIJAH...">
                     </div>
                     <div class="wikaz-form-group">
                         <label><?php _e('Base SKU', 'keycreation-wikaz'); ?></label>
-                        <input type="text" id="pm-product-sku" placeholder="WIZ-TEA">
+                        <input type="text" id="pm-product-sku" placeholder="WIZ-KMR">
                         <p class="description"><?php _e('Used as prefix for variations', 'keycreation-wikaz'); ?></p>
                     </div>
                 </div>
@@ -127,7 +127,8 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                         <label><?php _e('Video URL', 'keycreation-wikaz'); ?></label>
                         <input type="url" id="pm-product-video-url" placeholder="https://youtube.com/watch?v=...">
                         <p class="description">
-                            <?php _e('YouTube or Vimeo link for video thumbnail', 'keycreation-wikaz'); ?></p>
+                            <?php _e('YouTube or Vimeo link for video thumbnail', 'keycreation-wikaz'); ?>
+                        </p>
                     </div>
                 </div>
 
