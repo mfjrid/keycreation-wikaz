@@ -117,6 +117,8 @@ class Wikaz_Admin
         wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_style('select2');
         wp_enqueue_script('select2');
+        wp_enqueue_style('wp-color-picker');
+        wp_enqueue_script('wp-color-picker');
 
         wp_enqueue_style(
             'wikaz-admin-style',
@@ -128,7 +130,7 @@ class Wikaz_Admin
         wp_enqueue_script(
             'wikaz-admin-script',
             WIKAZ_PLUGIN_URL . 'admin/js/admin-script.js',
-            array('jquery', 'jquery-ui-sortable'),
+            array('jquery', 'jquery-ui-sortable', 'wp-color-picker'),
             WIKAZ_VERSION,
             true
         );
@@ -678,8 +680,14 @@ class Wikaz_Admin
                 'id' => $tax->attribute_id,
                 'slug' => $tax->attribute_name,
                 'label' => $tax->attribute_label,
+                'type' => $tax->attribute_type,
                 'terms' => array_map(function ($term) {
-                    return array('id' => $term->term_id, 'name' => $term->name, 'slug' => $term->slug);
+                    return array(
+                        'id' => $term->term_id,
+                        'name' => $term->name,
+                        'slug' => $term->slug,
+                        'color' => get_term_meta($term->term_id, '_wikaz_color', true) ?: (get_term_meta($term->term_id, 'swatches_color', true) ?: '#ffffff'),
+                    );
                 }, $terms)
             );
         }
@@ -937,6 +945,7 @@ class Wikaz_Admin
                 'id' => $term->term_id,
                 'name' => $term->name,
                 'slug' => $term->slug,
+                'color' => get_term_meta($term->term_id, '_wikaz_color', true) ?: (get_term_meta($term->term_id, 'swatches_color', true) ?: '#ffffff'),
             );
         }
 
@@ -984,6 +993,13 @@ class Wikaz_Admin
             update_term_meta($id, 'thumbnail_id', intval($_POST['image_id']));
         }
 
+        // Handle color meta
+        if (isset($_POST['color'])) {
+            $color = sanitize_hex_color($_POST['color']);
+            update_term_meta($id, '_wikaz_color', $color);
+            update_term_meta($id, 'swatches_color', $color); // Sync with WCBoost
+        }
+
         wp_send_json_success($id);
     }
 
@@ -1020,11 +1036,12 @@ class Wikaz_Admin
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
         $name = sanitize_text_field($_POST['name']);
         $slug = sanitize_text_field($_POST['slug']);
+        $type = isset($_POST['type']) ? sanitize_text_field($_POST['type']) : 'select';
 
         $args = array(
             'name' => $name,
             'slug' => $slug,
-            'type' => 'select',
+            'type' => $type,
             'order_by' => 'menu_order',
             'has_archives' => false,
         );

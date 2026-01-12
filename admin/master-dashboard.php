@@ -148,6 +148,20 @@ if (!defined('ABSPATH'))
                         <p class="description" style="margin-bottom:15px;">
                             <?php _e('Creating/Editing an attribute type (e.g., Material, Brand).', 'keycreation-wikaz'); ?>
                         </p>
+                        <div class="wikaz-form-group">
+                            <label><?php _e('Attribute Type', 'keycreation-wikaz'); ?></label>
+                            <select id="master-attribute-type" class="widefat">
+                                <option value="select"><?php _e('Select', 'keycreation-wikaz'); ?></option>
+                                <option value="color"><?php _e('Color', 'keycreation-wikaz'); ?></option>
+                                <option value="image"><?php _e('Image', 'keycreation-wikaz'); ?></option>
+                                <option value="button"><?php _e('Button', 'keycreation-wikaz'); ?></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="wikaz-form-group" id="master-color-group" style="display:none;">
+                        <label><?php _e('Color', 'keycreation-wikaz'); ?></label>
+                        <input type="text" id="master-term-color" class="wikaz-color-picker" value="#ffffff">
                     </div>
 
                     <div class="wikaz-form-group" id="master-image-group" style="display:none;">

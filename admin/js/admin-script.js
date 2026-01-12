@@ -25,6 +25,13 @@
     function init() {
         initSortable();
         bindEvents();
+        initColorPicker();
+    }
+
+    function initColorPicker() {
+        if ($.fn.wpColorPicker) {
+            $('.wikaz-color-picker').wpColorPicker();
+        }
     }
 
     /**
@@ -1350,7 +1357,7 @@
                     let html = '';
                     response.data.forEach(attr => {
                         html += `
-                        <li data-slug="${attr.slug}" data-label="${attr.label}" data-id="${attr.id || 0}">
+                        <li data-slug="${attr.slug}" data-label="${attr.label}" data-type="${attr.type}" data-id="${attr.id || 0}">
                                 <div class="attr-info">
                                     <span>${attr.label}</span>
                                     <span class="attr-count">${attr.terms.length}</span>
@@ -1370,11 +1377,12 @@
 
                         const slug = $(this).data('slug');
                         const label = $(this).data('label');
+                        const type = $(this).data('type');
                         $list.find('li').removeClass('active');
                         $(this).addClass('active');
                         $('#current-attribute-label').text(label);
-                        $('.add-master-term').show().data('taxonomy', 'pa_' + slug);
-                        loadMasterTerms('pa_' + slug);
+                        $('.add-master-term').show().data('taxonomy', 'pa_' + slug).data('attr-type', type);
+                        loadMasterTerms('pa_' + slug, type);
                     });
 
                     // Edit Attribute Type
@@ -1418,9 +1426,19 @@
         openMasterModal('attribute_type');
     });
 
-    function loadMasterTerms(taxonomy) {
+    function loadMasterTerms(taxonomy, attrType = 'select') {
         const $list = $('#master-terms-list');
-        $list.html('<tr><td colspan="3" align="center">Loading values...</td></tr>');
+        $list.html('<tr><td colspan="4" align="center">Loading values...</td></tr>');
+
+        // Update table header if color
+        const $thead = $list.closest('table').find('thead tr');
+        if (attrType === 'color') {
+            if (!$thead.find('.col-color').length) {
+                $thead.find('th:first').after('<th class="col-color" width="60">Color</th>');
+            }
+        } else {
+            $thead.find('.col-color').remove();
+        }
 
         $.ajax({
             url: wikazAdmin.ajaxUrl,
@@ -1434,15 +1452,20 @@
                 if (response.success) {
                     let html = '';
                     if (response.data.length === 0) {
-                        html = '<tr><td colspan="3" align="center">No values found for this attribute.</td></tr>';
+                        html = `<tr><td colspan="${attrType === 'color' ? 4 : 3}" align="center">No values found for this attribute.</td></tr>`;
                     } else {
                         response.data.forEach(term => {
+                            let colorCell = '';
+                            if (attrType === 'color') {
+                                colorCell = `<td><span class="color-swatch" style="background-color:${term.color || '#fff'}; border:1px solid #ddd; width:24px; height:24px; display:block; border-radius:4px;" title="${term.color}"></span></td>`;
+                            }
                             html += `
                         <tr>
                                     <td><strong>${term.name}</strong></td>
+                                    ${colorCell}
                                     <td><code>${term.slug}</code></td>
                                     <td class="column-actions">
-                                        <button type="button" class="button button-small wikaz-edit-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}"><span class="dashicons dashicons-edit"></span></button>
+                                        <button type="button" class="button button-small wikaz-edit-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}" data-color="${term.color || ''}"><span class="dashicons dashicons-edit"></span></button>
                                         <button type="button" class="button button-small wikaz-delete-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
                                 </tr>
@@ -1477,11 +1500,24 @@
             // Tags don't have parents or images
             $('#wikaz-master-modal-title').text(id > 0 ? 'Edit Tag' : 'Add New Tag');
         } else if (type === 'attribute_type') {
-            $('#master-image-group, #master-parent-group').hide();
+            $('#master-image-group, #master-parent-group, #master-color-group').hide();
             $('#master-attr-type-fields').show();
             $('#wikaz-master-modal-title').text(id > 0 ? 'Edit Attribute Type' : 'Add New Attribute Type');
         } else {
-            $('#master-image-group, #master-parent-group').hide();
+            // It's a term (value)
+            $('#master-image-group, #master-parent-group, #master-attr-type-fields').hide();
+
+            // Show color picker if attribute type is color
+            const attrType = $('.add-master-term').data('attr-type');
+            if (attrType === 'color') {
+                $('#master-color-group').show();
+                if ($('#master-term-color').data('wpColorPicker')) {
+                    $('#master-term-color').wpColorPicker('color', '#ffffff');
+                }
+            } else {
+                $('#master-color-group').hide();
+            }
+
             $('#wikaz-master-modal-title').text(id > 0 ? 'Edit Value' : 'Add New Value');
         }
 
@@ -1499,6 +1535,10 @@
         $('#master-image-preview img').hide().attr('src', '');
         $('#master-image-preview .placeholder').show();
         $('#master-item-parent').val(0).trigger('change');
+        $('#master-attribute-type').val('select');
+        if ($('#master-term-color').data('wpColorPicker')) {
+            $('#master-term-color').wpColorPicker('color', '#ffffff');
+        }
     }
 
     function closeMasterModal() {
@@ -1552,6 +1592,7 @@
             const $li = $(`li[data-id="${id}"]`);
             $('#master-item-name').val($li.data('label'));
             $('#master-item-slug').val($li.data('slug'));
+            $('#master-attribute-type').val($li.data('type') || 'select');
             return;
         }
 
@@ -1559,6 +1600,13 @@
         const $row = $(`.wikaz-edit-master[data-id="${id}"][data-type="${type}"]`).closest('tr');
         $('#master-item-name').val($row.find('strong').text());
         $('#master-item-slug').val($row.find('code').text());
+
+        if (type === 'term') {
+            const color = $(`.wikaz-edit-master[data-id="${id}"][data-type="term"]`).data('color');
+            if (color && $('#master-term-color').data('wpColorPicker')) {
+                $('#master-term-color').wpColorPicker('color', color);
+            }
+        }
 
         if (type === 'category') {
             const img = $row.find('img').attr('src');
@@ -1588,7 +1636,14 @@
             taxonomy: $('#master-item-taxonomy').val(),
             parent: $('#master-item-parent').val(),
             image_id: $('#master-item-image-id').val(),
+            type_attr: $('#master-attribute-type').val(), // Use different key to avoid clash with 'type'
+            color: $('#master-term-color').val(),
         };
+
+        // If it's an attribute type, override the 'type' field that WooCommerce expects
+        if (type === 'attribute_type') {
+            formData.type = formData.type_attr;
+        }
 
         $.ajax({
             url: wikazAdmin.ajaxUrl,
