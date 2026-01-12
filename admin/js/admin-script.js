@@ -665,7 +665,7 @@
         const index = $container.find('.marquee-item-row').length;
 
         const html = `
-                        < div class="marquee-item-row" data - index="${index}" >
+                <div class="marquee-item-row" data-index="${index}">
                 <div class="wikaz-form-group">
                     <label>Text</label>
                     <input type="text" name="marquee_items[${index}][text]" value="" class="widefat" placeholder="Scrolling text...">
@@ -806,7 +806,7 @@
                             <button type="button" class="button button-small wikaz-pm-edit" data-id="${p.id}" title="Edit"><span class="dashicons dashicons-edit"></span></button>
                             <button type="button" class="button button-small wikaz-pm-delete" data-id="${p.id}" title="Delete" style="color:#a00;"><span class="dashicons dashicons-trash"></span></button>
                         </td>
-                    </tr >
+                    </tr>
                         `;
             });
         }
@@ -817,7 +817,7 @@
         if (totalPages <= 1) { $('#wikaz-pm-pagination').empty(); return; }
         let html = '';
         for (let i = 1; i <= totalPages; i++) {
-            html += `< button type = "button" class="button ${i === currentPage ? 'button-primary' : ''} pm-page-btn" data - page="${i}" > ${i}</button > `;
+            html += `<button type="button" class="button ${i === currentPage ? 'button-primary' : ''} pm-page-btn" data-page="${i}">${i}</button>`;
         }
         $('#wikaz-pm-pagination').html(html).find('.pm-page-btn').on('click', function () {
             loadPMProducts($(this).data('page'));
@@ -838,7 +838,7 @@
                     let html = '';
                     response.data.forEach(attr => {
                         html += `
-                        < div class="pm-attribute-row" data - slug="${attr.slug}" >
+                        <div class="pm-attribute-row" data-slug="${attr.slug}">
                                 <span class="pm-attribute-label">${attr.label}</span>
                                 <div class="pm-terms-grid">
                                     ${attr.terms.map(term => `
@@ -848,7 +848,7 @@
                                         </label>
                                     `).join('')}
                                 </div>
-                            </div >
+                            </div>
                         `;
                     });
                     $container.html(html);
@@ -911,7 +911,7 @@
                                     const options = p.attributes[cleanSlug];
                                     if (Array.isArray(options)) {
                                         options.forEach(optSlug => {
-                                            $(`.pm - attribute - row[data - slug="${cleanSlug}"]input[value = "${optSlug}"]`).prop('checked', true);
+                                            $(`.pm-attribute-row[data-slug="${cleanSlug}"] input[value="${optSlug}"]`).prop('checked', true);
                                         });
                                     }
                                 });
@@ -999,9 +999,9 @@
     }
 
     function addGalleryThumbnail(id, url) {
-        if ($(`.pm - gallery - item[data - id="${id}"]`).length) return;
+        if ($(`.pm-gallery-item[data-id="${id}"]`).length) return;
         const html = `
-                        < div class="pm-gallery-item" data - id="${id}" >
+                        <div class="pm-gallery-item" data-id="${id}">
                             <img src="${url}">
                                 <button type="button" class="pm-gallery-remove">&times;</button>
                             </div>
@@ -1050,12 +1050,12 @@
             Object.keys(combo).forEach(k => cleanCombo[k] = combo[k].slug);
 
             const html = `
-                        < tr data - combo='${JSON.stringify(cleanCombo)}' >
+                        <tr data-combo='${JSON.stringify(cleanCombo)}'>
                     <td><strong>${labels}</strong></td>
                     <td><input type="text" class="pm-var-sku" data-idx="${idx}" value="${baseSku}-${skuSuffix}"></td>
                     <td><input type="number" class="pm-var-price" data-idx="${idx}" value="${$('#pm-product-price').val() || ''}"></td>
                     <td><input type="number" class="pm-var-stock" data-idx="${idx}" value="0"></td>
-                </tr >
+                </tr>
                         `;
             $tableBody.append(html);
         });
@@ -1278,7 +1278,7 @@
                     } else {
                         response.data.forEach(cat => {
                             html += `
-                        < tr >
+                        <tr>
                                     <td><img src="${cat.image || ''}" width="40" height="40" style="object-fit:cover; border-radius:4px;"></td>
                                     <td><strong>${cat.name}</strong></td>
                                     <td><code>${cat.slug}</code></td>
@@ -1287,7 +1287,7 @@
                                         <button type="button" class="button button-small wikaz-edit-master" data-type="category" data-id="${cat.id}"><span class="dashicons dashicons-edit"></span></button>
                                         <button type="button" class="button button-small wikaz-delete-master" data-type="category" data-id="${cat.id}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
-                                </tr >
+                                </tr>
                         `;
                         });
                     }
@@ -1316,7 +1316,7 @@
                     } else {
                         response.data.forEach(tag => {
                             html += `
-                        < tr >
+                        <tr>
                                     <td><strong>${tag.name}</strong></td>
                                     <td><code>${tag.slug}</code></td>
                                     <td>${tag.count}</td>
@@ -1324,7 +1324,7 @@
                                         <button type="button" class="button button-small wikaz-edit-master" data-type="tag" data-id="${tag.id}"><span class="dashicons dashicons-edit"></span></button>
                                         <button type="button" class="button button-small wikaz-delete-master" data-type="tag" data-id="${tag.id}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
-                                </tr >
+                                </tr>
                         `;
                         });
                     }
@@ -1350,7 +1350,7 @@
                     let html = '';
                     response.data.forEach(attr => {
                         html += `
-                        < li data - slug="${attr.slug}" data - label="${attr.label}" data - id="${attr.id || 0}" >
+                        <li data-slug="${attr.slug}" data-label="${attr.label}" data-id="${attr.id || 0}">
                                 <div class="attr-info">
                                     <span>${attr.label}</span>
                                     <span class="attr-count">${attr.terms.length}</span>
@@ -1359,7 +1359,7 @@
                                     <span class="dashicons dashicons-edit edit-attr-type" title="Edit Type" style="cursor:pointer; font-size:16px;"></span>
                                     <span class="dashicons dashicons-trash delete-attr-type" title="Delete Type" style="cursor:pointer; font-size:16px;"></span>
                                 </div>
-                            </li >
+                            </li>
                         `;
                     });
                     $list.html(html);
@@ -1438,14 +1438,14 @@
                     } else {
                         response.data.forEach(term => {
                             html += `
-                        < tr >
+                        <tr>
                                     <td><strong>${term.name}</strong></td>
                                     <td><code>${term.slug}</code></td>
                                     <td class="column-actions">
                                         <button type="button" class="button button-small wikaz-edit-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}"><span class="dashicons dashicons-edit"></span></button>
                                         <button type="button" class="button button-small wikaz-delete-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
-                                </tr >
+                                </tr>
                         `;
                         });
                     }
@@ -1538,7 +1538,7 @@
                     let options = '<option value="0">None</option>';
                     response.data.forEach(cat => {
                         if (cat.id != excludeId) {
-                            options += `< option value = "${cat.id}" > ${cat.name}</option > `;
+                            options += `<option value="${cat.id}">${cat.name}</option>`;
                         }
                     });
                     $('#master-item-parent').html(options).trigger('change');
@@ -1549,14 +1549,14 @@
 
     function fetchMasterItem(type, id, taxonomy) {
         if (type === 'attribute_type') {
-            const $li = $(`li[data - id= "${id}"]`);
+            const $li = $(`li[data-id="${id}"]`);
             $('#master-item-name').val($li.data('label'));
             $('#master-item-slug').val($li.data('slug'));
             return;
         }
 
         // Populate from the table row we clicked for speed
-        const $row = $(`.wikaz - edit - master[data - id="${id}"][data - type="${type}"]`).closest('tr');
+        const $row = $(`.wikaz-edit-master[data-id="${id}"][data-type="${type}"]`).closest('tr');
         $('#master-item-name').val($row.find('strong').text());
         $('#master-item-slug').val($row.find('code').text());
 

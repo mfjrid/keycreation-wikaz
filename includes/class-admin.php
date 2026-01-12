@@ -663,6 +663,10 @@ class Wikaz_Admin
         if (!current_user_can('manage_options'))
             wp_send_json_error('Unauthorized');
 
+        if (!function_exists('wc_get_attribute_taxonomies')) {
+            wp_send_json_error('WooCommerce is not active.');
+        }
+
         $attribute_taxonomies = wc_get_attribute_taxonomies();
         $attributes = array();
 
@@ -857,6 +861,10 @@ class Wikaz_Admin
             'hide_empty' => false,
         ));
 
+        if (is_wp_error($categories)) {
+            wp_send_json_error($categories->get_error_message());
+        }
+
         $data = array();
         foreach ($categories as $cat) {
             $thumbnail_id = get_term_meta($cat->term_id, 'thumbnail_id', true);
@@ -887,6 +895,10 @@ class Wikaz_Admin
             'hide_empty' => false,
         ));
 
+        if (is_wp_error($tags)) {
+            wp_send_json_error($tags->get_error_message());
+        }
+
         $data = array();
         foreach ($tags as $tag) {
             $data[] = array(
@@ -914,6 +926,10 @@ class Wikaz_Admin
             'taxonomy' => $taxonomy,
             'hide_empty' => false,
         ));
+
+        if (is_wp_error($terms)) {
+            wp_send_json_error($terms->get_error_message());
+        }
 
         $data = array();
         foreach ($terms as $term) {
