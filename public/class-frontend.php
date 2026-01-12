@@ -149,10 +149,9 @@ class Wikaz_Frontend
                         ?>
                         <div class="swiper-slide wikaz-slide layout-<?php echo esc_attr($layout); ?>">
                             <div class="wikaz-slide-image">
-                                <?php if ($slide->background_video): ?>
-                                    <video class="wikaz-slide-video" src="<?php echo esc_url($slide->background_video); ?>" autoplay
-                                        muted loop playsinline poster="<?php echo esc_url($slide->background_image); ?>"></video>
-                                <?php else: ?>
+                                <?php if ($slide->background_video):
+                                    echo $this->get_video_embed($slide->background_video);
+                                else: ?>
                                     <div class="wikaz-slide-bg"
                                         style="background-image: url('<?php echo esc_url($slide->background_image); ?>');"></div>
                                 <?php endif; ?>
@@ -201,5 +200,30 @@ class Wikaz_Frontend
         </div>
         <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Get video embed code (YouTube, TikTok, or Local)
+     */
+    private function get_video_embed($url)
+    {
+        $url = trim($url);
+
+        // YouTube Detection
+        if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $matches)) {
+            $video_id = $matches[1];
+            $embed_url = "https://www.youtube.com/embed/{$video_id}?autoplay=1&mute=1&controls=0&loop=1&playlist={$video_id}&showinfo=0&disablekb=1&fs=0&modestbranding=1&rel=0";
+            return '<div class="wikaz-slide-video"><iframe class="wikaz-video-embed" src="' . esc_url($embed_url) . '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
+        }
+
+        // TikTok Detection
+        if (preg_match('/tiktok\.com\/.*\/video\/(\d+)/i', $url, $matches)) {
+            $video_id = $matches[1];
+            $embed_url = "https://www.tiktok.com/embed/v2/{$video_id}";
+            return '<div class="wikaz-slide-video"><iframe class="wikaz-video-embed" src="' . esc_url($embed_url) . '" frameborder="0" allow="autoplay; encrypted-media"></iframe></div>';
+        }
+
+        // Fallback to Local Video
+        return '<video class="wikaz-slide-video" src="' . esc_url($url) . '" autoplay muted loop playsinline></video>';
     }
 }

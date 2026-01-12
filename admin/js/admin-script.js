@@ -75,9 +75,11 @@
         $settingsForm.on('submit', saveSettings);
 
         // Image upload
+        // Image upload
         $('#wikaz-remove-image').on('click', removeImage);
-        $('#wikaz-select-video, #wikaz-video-preview').on('click', selectVideo);
+        $('#wikaz-select-video').on('click', selectVideo); // Removed preview click trigger as it might conflict with iframe
         $('#wikaz-remove-video').on('click', removeVideo);
+        $('#wikaz-background-video').on('change input', debounce(updateVideoPreview, 500));
 
         // Media Type Toggle
         $('input[name="media_type"]').on('change', toggleMediaType);
@@ -217,10 +219,7 @@
         }
 
         if (data.background_video) {
-            $('#wikaz-background-video').val(data.background_video);
-            $('#wikaz-video-preview video').attr('src', data.background_video).show();
-            $('#wikaz-video-preview .wikaz-video-placeholder').hide();
-            $('#wikaz-remove-video').show();
+            $('#wikaz-background-video').val(data.background_video).trigger('change');
             // Switch to video tab
             $('input[name="media_type"][value="video"]').prop('checked', true).trigger('change');
         } else {
@@ -409,11 +408,7 @@
         videoUploader.on('select', function () {
             const attachment = videoUploader.state().get('selection').first().toJSON();
             const videoUrl = attachment.url;
-
-            $('#wikaz-background-video').val(videoUrl);
-            $('#wikaz-video-preview video').attr('src', videoUrl).show();
-            $('#wikaz-video-preview .wikaz-video-placeholder').hide();
-            $('#wikaz-remove-video').show();
+            $('#wikaz-background-video').val(videoUrl).trigger('change');
         });
 
         videoUploader.open();
@@ -424,10 +419,50 @@
      */
     function removeVideo(e) {
         e.preventDefault();
-        $('#wikaz-background-video').val('');
-        $('#wikaz-video-preview video').hide().attr('src', '');
-        $('#wikaz-video-preview .wikaz-video-placeholder').show();
-        $('#wikaz-remove-video').hide();
+        $('#wikaz-background-video').val('').trigger('change');
+    }
+
+    /**
+     * Update video preview based on input URL
+     */
+    function updateVideoPreview() {
+        const url = $('#wikaz-background-video').val().trim();
+        const $preview = $('#wikaz-video-preview');
+        const $placeholder = $preview.find('.wikaz-video-placeholder');
+
+        // Clear existing preview content (except placeholder)
+        $preview.find('video, iframe').remove();
+
+        if (!url) {
+            $placeholder.show();
+            $('#wikaz-remove-video').hide();
+            return;
+        }
+
+        $('#wikaz-remove-video').show();
+        $placeholder.hide();
+
+        let embedHtml = '';
+        let match;
+
+        // YouTube
+        if (match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i)) {
+            const videoId = match[1];
+            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&showinfo=0&modestbranding=1`;
+            embedHtml = `<iframe src="${embedUrl}" style="width:100%; height:100%; aspect-ratio:16/9;" frameborder="0" allowfullscreen></iframe>`;
+        }
+        // TikTok
+        else if (match = url.match(/tiktok\.com\/.*\/video\/(\d+)/i)) {
+            const videoId = match[1];
+            const embedUrl = `https://www.tiktok.com/embed/v2/${videoId}`;
+            embedHtml = `<iframe src="${embedUrl}" style="width:100%; height:100%; aspect-ratio:9/16;" frameborder="0" allowfullscreen></iframe>`;
+        }
+        // Local / Standard Video
+        else {
+            embedHtml = `<video src="${url}" style="width:100%; height:100%;" controls></video>`;
+        }
+
+        $preview.prepend(embedHtml);
     }
 
     /**

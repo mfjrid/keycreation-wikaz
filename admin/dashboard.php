@@ -198,16 +198,20 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
                         <video src="" style="display: none;" muted loop autoplay></video>
                         <div class="wikaz-video-placeholder">
                             <span class="dashicons dashicons-video-alt3"></span>
-                            <p><?php _e('Click to select video', 'keycreation-wikaz'); ?></p>
+                            <p><?php _e('Click to select video or paste URL', 'keycreation-wikaz'); ?></p>
                         </div>
                     </div>
-                    <input type="hidden" name="background_video" id="wikaz-background-video" value="">
-                    <div class="wikaz-video-actions">
+
+                    <div class="wikaz-video-input-group" style="margin-top: 10px; display: flex; gap: 10px;">
+                        <input type="text" name="background_video" id="wikaz-background-video" value="" class="widefat"
+                            placeholder="<?php _e('Paste YouTube, TikTok, or video URL here...', 'keycreation-wikaz'); ?>">
                         <button type="button" class="button"
-                            id="wikaz-select-video"><?php _e('Select Video', 'keycreation-wikaz'); ?></button>
-                        <button type="button" class="button" id="wikaz-remove-video"
-                            style="display: none;"><?php _e('Remove', 'keycreation-wikaz'); ?></button>
+                            id="wikaz-select-video"><?php _e('Select File', 'keycreation-wikaz'); ?></button>
                     </div>
+
+                    <button type="button" class="button button-link-delete" id="wikaz-remove-video"
+                        style="display: none; margin-top: 5px; color: #a00;"><?php _e('Remove Video', 'keycreation-wikaz'); ?></button>
+
                     <p class="description">
                         <?php _e('Video will replace default background image.', 'keycreation-wikaz'); ?>
                     </p>
