@@ -184,18 +184,24 @@
     z-index: 1;
 }
 
-/* Background Video */
-.wikaz-slide-video {
+.wikaz-slide-video-container {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
     z-index: 0;
 }
 
-iframe.wikaz-video-embed {
+/* Background Video */
+.wikaz-slide-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+iframe.wikaz-video-embed,
+.wikaz-slide-video-container iframe {
     position: absolute !important;
     top: 50% !important;
     left: 50% !important;
@@ -231,8 +237,8 @@ iframe.wikaz-video-embed {
 }
 
 /* Full bleed for split layouts with video */
-.layout-split-left .wikaz-slide-video,
-.layout-split-right .wikaz-slide-video {
+.layout-split-left .wikaz-slide-video-container,
+.layout-split-right .wikaz-slide-video-container {
     inset: 0 !important;
     top: 0 !important;
     width: 100% !important;

@@ -222,21 +222,57 @@ class Wikaz_Frontend
     {
         $url = trim($url);
 
+        // Detect if it's a direct video file (mp4, webm, ogg, mov)
+        $is_video_file = preg_match('/\.(mp4|webm|ogg|mov)(\?.*)?$/i', $url);
+
+        if ($is_video_file) {
+            $player_url = WIKAZ_PLUGIN_URL . 'public/video-player.php?src=' . urlencode($url);
+            return sprintf(
+                '<div class="wikaz-slide-video-container">
+                    <iframe class="wikaz-video-embed" src="%s" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>',
+                esc_url($player_url)
+            );
+        }
+
         // YouTube Detection
         if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $matches)) {
             $video_id = $matches[1];
             $embed_url = "https://www.youtube.com/embed/{$video_id}?autoplay=1&mute=1&controls=0&loop=1&playlist={$video_id}&showinfo=0&disablekb=1&fs=0&modestbranding=1&rel=0";
-            return '<div class="wikaz-slide-video"><iframe class="wikaz-video-embed" src="' . esc_url($embed_url) . '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
+            return '<div class="wikaz-slide-video-container"><iframe class="wikaz-video-embed" src="' . esc_url($embed_url) . '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';
         }
 
         // TikTok Detection
         if (preg_match('/tiktok\.com\/.*\/video\/(\d+)/i', $url, $matches)) {
             $video_id = $matches[1];
             $embed_url = "https://www.tiktok.com/embed/v2/{$video_id}";
-            return '<div class="wikaz-slide-video"><iframe class="wikaz-video-embed" src="' . esc_url($embed_url) . '" frameborder="0" allow="autoplay; encrypted-media"></iframe></div>';
+            return '<div class="wikaz-slide-video-container"><iframe class="wikaz-video-embed" src="' . esc_url($embed_url) . '" frameborder="0" allow="autoplay; encrypted-media"></iframe></div>';
         }
 
-        // Fallback to Local Video
-        return '<video class="wikaz-slide-video" src="' . esc_url($url) . '" autoplay muted loop playsinline></video>';
+        // Vimeo Detection
+        if (preg_match('/vimeo\.com\/(\d+)/i', $url, $matches)) {
+            $video_id = $matches[1];
+            $embed_url = "https://player.vimeo.com/video/{$video_id}?autoplay=1&muted=1&loop=1&background=1";
+            return '<div class="wikaz-slide-video-container"><iframe class="wikaz-video-embed" src="' . esc_url($embed_url) . '" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>';
+        }
+
+        // Generic oEmbed fallback (for other providers like DailyMotion, etc.)
+        $embed_code = wp_oembed_get($url, array('width' => 1920, 'height' => 1080));
+        if ($embed_code) {
+            return '<div class="wikaz-slide-video-container">' . $embed_code . '</div>';
+        }
+
+        // Last resort: treat as video file if nothing else matches but it looks like a URL
+        if (filter_var($url, FILTER_VALIDATE_URL)) {
+            $player_url = WIKAZ_PLUGIN_URL . 'public/video-player.php?src=' . urlencode($url);
+            return sprintf(
+                '<div class="wikaz-slide-video-container">
+                    <iframe class="wikaz-video-embed" src="%s" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>',
+                esc_url($player_url)
+            );
+        }
+
+        return '';
     }
 }
