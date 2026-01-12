@@ -268,8 +268,29 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
                         placeholder="<?php _e('Enter slide description...', 'keycreation-wikaz'); ?>"></textarea>
                 </div>
 
-                <!-- 6. Product Search -->
+                <!-- 6. Link Source -->
                 <div class="wikaz-form-group">
+                    <label><?php _e('Link Source', 'keycreation-wikaz'); ?></label>
+                    <div class="wikaz-media-type-selector">
+                        <label class="wikaz-media-option">
+                            <input type="radio" name="link_source" value="product" checked>
+                            <span class="media-label">
+                                <span class="dashicons dashicons-cart"></span>
+                                <?php _e('Product', 'keycreation-wikaz'); ?>
+                            </span>
+                        </label>
+                        <label class="wikaz-media-option">
+                            <input type="radio" name="link_source" value="post">
+                            <span class="media-label">
+                                <span class="dashicons dashicons-admin-post"></span>
+                                <?php _e('Article/Post', 'keycreation-wikaz'); ?>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 7a. Product Search -->
+                <div class="wikaz-form-group" id="wikaz-product-search-group">
                     <label
                         for="wikaz-product-search"><?php _e('Link to Product (Optional)', 'keycreation-wikaz'); ?></label>
                     <div class="wikaz-product-search-wrap">
@@ -281,6 +302,23 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
                             <img src="" alt="">
                             <span class="product-name"></span>
                             <button type="button" class="remove-product">&times;</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7b. Post Search -->
+                <div class="wikaz-form-group" id="wikaz-post-search-group" style="display:none;">
+                    <label
+                        for="wikaz-post-search"><?php _e('Link to Article (Optional)', 'keycreation-wikaz'); ?></label>
+                    <div class="wikaz-product-search-wrap">
+                        <input type="text" id="wikaz-post-search"
+                            placeholder="<?php _e('Search articles...', 'keycreation-wikaz'); ?>" autocomplete="off">
+                        <input type="hidden" name="post_id" id="wikaz-post-id" value="">
+                        <div class="wikaz-product-results" id="wikaz-post-results"></div>
+                        <div class="wikaz-selected-product" id="wikaz-selected-post" style="display: none;">
+                            <img src="" alt="">
+                            <span class="product-name"></span>
+                            <button type="button" class="remove-product" data-type="post">&times;</button>
                         </div>
                     </div>
                 </div>

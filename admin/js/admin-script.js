@@ -74,10 +74,10 @@
         // Save settings
         $settingsForm.on('submit', saveSettings);
 
-        // Image upload
-        // Image upload
+        // Media upload
+        $('#wikaz-select-image, #wikaz-image-preview').on('click', selectImage);
         $('#wikaz-remove-image').on('click', removeImage);
-        $('#wikaz-select-video').on('click', selectVideo); // Removed preview click trigger as it might conflict with iframe
+        $('#wikaz-select-video, #wikaz-video-preview .wikaz-video-placeholder').on('click', selectVideo);
         $('#wikaz-remove-video').on('click', removeVideo);
         $('#wikaz-background-video').on('change input', debounce(updateVideoPreview, 500));
 
@@ -86,8 +86,12 @@
 
         // Product search
         $('#wikaz-product-search').on('input', debounce(searchProducts, 300));
-        $('#wikaz-product-results').on('click', '.wikaz-product-item', selectProduct);
-        $('#wikaz-selected-product .remove-product').on('click', removeProduct);
+        $('#wikaz-product-results').on('click', '.product-result-item', selectItem);
+
+        // Post search
+        $('#wikaz-post-search').on('input', debounce(searchPosts, 300));
+        $('#wikaz-post-results').on('click', '.product-result-item', selectItem);
+        $(document).on('click', '.remove-product', removeItem);
 
         // Marquee events
         $('#add-marquee-item').on('click', addMarqueeItem);
@@ -477,6 +481,9 @@
             return;
         }
 
+        // Show loading state
+        $results.addClass('active').html('<div class="wikaz-search-loading"><span class="dashicons dashicons-update spin"></span> ' + wikazAdmin.strings.searching + '</div>');
+
         $.ajax({
             url: wikazAdmin.ajaxUrl,
             type: 'POST',
@@ -490,7 +497,7 @@
                     let html = '';
                     response.data.forEach(function (product) {
                         html += `
-                            <div class="wikaz-product-item" data-id="${product.id}" data-title="${product.title}" data-image="${product.image}" data-url="${product.url}">
+                            <div class="product-result-item" data-id="${product.id}" data-title="${product.title}" data-image="${product.image}" data-url="${product.url}" data-type="product">
                                 <img src="${product.image}" alt="">
                                 <div class="wikaz-product-item-info">
                                     <strong>${product.title}</strong>
@@ -501,48 +508,118 @@
                     });
                     $results.html(html).addClass('active');
                 } else {
-                    $results.removeClass('active').empty();
+                    $results.html('<div class="wikaz-search-no-results">No products found</div>');
                 }
             }
         });
     }
 
     /**
-     * Select product
+     * Select product or post
      */
-    function selectProduct() {
+    function selectItem() {
         const $item = $(this);
-        const productId = $item.data('id');
-        const productTitle = $item.data('title');
-        const productImage = $item.data('image');
-        const productUrl = $item.data('url');
+        const id = $item.data('id');
+        const title = $item.data('title');
+        const image = $item.data('image');
+        const url = $item.data('url');
+        const type = $item.data('type'); // product or post
 
-        $('#wikaz-product-id').val(productId);
-        $('#wikaz-product-search').hide();
-        $('#wikaz-product-results').removeClass('active');
-
-        $('#wikaz-selected-product').show()
-            .find('img').attr('src', productImage);
-        $('#wikaz-selected-product .product-name').text(productTitle);
+        if (type === 'post') {
+            $('#wikaz-post-id').val(id);
+            $('#wikaz-post-search').hide();
+            $('#wikaz-post-results').removeClass('active');
+            $('#wikaz-selected-post').show().find('img').attr('src', image);
+            $('#wikaz-selected-post .product-name').text(title);
+        } else {
+            $('#wikaz-product-id').val(id);
+            $('#wikaz-product-search').hide();
+            $('#wikaz-product-results').removeClass('active');
+            $('#wikaz-selected-product').show().find('img').attr('src', image);
+            $('#wikaz-selected-product .product-name').text(title);
+        }
 
         // Auto-fill title and URL if empty
         if (!$('#wikaz-title').val()) {
-            $('#wikaz-title').val(productTitle);
+            $('#wikaz-title').val(title);
         }
         if (!$('#wikaz-button-url').val()) {
-            $('#wikaz-button-url').val(productUrl);
+            $('#wikaz-button-url').val(url);
         }
     }
 
     /**
-     * Remove selected product
+     * Remove selected item
      */
-    function removeProduct(e) {
+    function removeItem(e) {
         e.preventDefault();
-        $('#wikaz-product-id').val('');
-        $('#wikaz-selected-product').hide();
-        $('#wikaz-product-search').val('').show();
+        const type = $(this).data('type');
+
+        if (type === 'post') {
+            $('#wikaz-post-id').val('');
+            $('#wikaz-selected-post').hide();
+            $('#wikaz-post-search').val('').show();
+        } else {
+            $('#wikaz-product-id').val('');
+            $('#wikaz-selected-product').hide();
+            $('#wikaz-product-search').val('').show();
+        }
     }
+
+    /**
+     * Search Posts
+     */
+    function searchPosts() {
+        const search = $('#wikaz-post-search').val();
+        const $results = $('#wikaz-post-results');
+
+        if (search.length < 2) {
+            $results.removeClass('active').empty();
+            return;
+        }
+
+        // Show loading state
+        $results.addClass('active').html('<div class="wikaz-search-loading"><span class="dashicons dashicons-update spin"></span> ' + wikazAdmin.strings.searching + '</div>');
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_search_posts',
+                nonce: wikazAdmin.nonce,
+                search: search
+            },
+            success: function (response) {
+                if (response.success && response.data.length > 0) {
+                    let html = '';
+                    response.data.forEach(post => {
+                        html += `
+                            <div class="product-result-item" data-id="${post.id}" data-title="${post.title}" data-image="${post.image}" data-url="${post.url}" data-type="post">
+                                <img src="${post.image}" alt="">
+                                <span>${post.title}</span>
+                            </div>
+                        `;
+                    });
+                    $results.html(html).addClass('active');
+                } else {
+                    $results.html('<div class="wikaz-search-no-results">No posts found</div>');
+                }
+            }
+        });
+    }
+
+    // Toggle Link Source
+    $('input[name="link_source"]').on('change', function () {
+        const source = $(this).val();
+        if (source === 'post') {
+            $('#wikaz-product-search-group').hide();
+            $('#wikaz-post-search-group').show();
+            // Clear product if switching? Maybe optional
+        } else {
+            $('#wikaz-product-search-group').show();
+            $('#wikaz-post-search-group').hide();
+        }
+    });
 
     /**
      * Save settings
@@ -588,7 +665,7 @@
         const index = $container.find('.marquee-item-row').length;
 
         const html = `
-            <div class="marquee-item-row" data-index="${index}">
+                        < div class="marquee-item-row" data - index="${index}" >
                 <div class="wikaz-form-group">
                     <label>Text</label>
                     <input type="text" name="marquee_items[${index}][text]" value="" class="widefat" placeholder="Scrolling text...">
@@ -600,8 +677,8 @@
                 <button type="button" class="button remove-marquee-item" title="Remove">
                     <span class="dashicons dashicons-no-alt"></span>
                 </button>
-            </div>
-        `;
+            </div >
+                        `;
 
         $container.append(html);
     }
@@ -714,11 +791,11 @@
     function renderPMProductList(products) {
         let html = '';
         if (!products.length) {
-            html = `<tr><td colspan="7" style="text-align:center;">No products found.</td></tr>`;
+            html = `< tr > <td colspan="7" style="text-align:center;">No products found.</td></tr > `;
         } else {
             products.forEach(p => {
                 html += `
-                    <tr>
+                        < tr >
                         <td class="column-thumb"><img src="${p.image}" alt=""></td>
                         <td><strong>${p.name}</strong></td>
                         <td><code>${p.sku || '-'}</code></td>
@@ -729,8 +806,8 @@
                             <button type="button" class="button button-small wikaz-pm-edit" data-id="${p.id}" title="Edit"><span class="dashicons dashicons-edit"></span></button>
                             <button type="button" class="button button-small wikaz-pm-delete" data-id="${p.id}" title="Delete" style="color:#a00;"><span class="dashicons dashicons-trash"></span></button>
                         </td>
-                    </tr>
-                `;
+                    </tr >
+                        `;
             });
         }
         $pmProductList.html(html);
@@ -740,7 +817,7 @@
         if (totalPages <= 1) { $('#wikaz-pm-pagination').empty(); return; }
         let html = '';
         for (let i = 1; i <= totalPages; i++) {
-            html += `<button type="button" class="button ${i === currentPage ? 'button-primary' : ''} pm-page-btn" data-page="${i}">${i}</button> `;
+            html += `< button type = "button" class="button ${i === currentPage ? 'button-primary' : ''} pm-page-btn" data - page="${i}" > ${i}</button > `;
         }
         $('#wikaz-pm-pagination').html(html).find('.pm-page-btn').on('click', function () {
             loadPMProducts($(this).data('page'));
@@ -761,7 +838,7 @@
                     let html = '';
                     response.data.forEach(attr => {
                         html += `
-                            <div class="pm-attribute-row" data-slug="${attr.slug}">
+                        < div class="pm-attribute-row" data - slug="${attr.slug}" >
                                 <span class="pm-attribute-label">${attr.label}</span>
                                 <div class="pm-terms-grid">
                                     ${attr.terms.map(term => `
@@ -771,7 +848,7 @@
                                         </label>
                                     `).join('')}
                                 </div>
-                            </div>
+                            </div >
                         `;
                     });
                     $container.html(html);
@@ -834,7 +911,7 @@
                                     const options = p.attributes[cleanSlug];
                                     if (Array.isArray(options)) {
                                         options.forEach(optSlug => {
-                                            $(`.pm-attribute-row[data-slug="${cleanSlug}"] input[value="${optSlug}"]`).prop('checked', true);
+                                            $(`.pm - attribute - row[data - slug="${cleanSlug}"]input[value = "${optSlug}"]`).prop('checked', true);
                                         });
                                     }
                                 });
@@ -922,13 +999,13 @@
     }
 
     function addGalleryThumbnail(id, url) {
-        if ($(`.pm-gallery-item[data-id="${id}"]`).length) return;
+        if ($(`.pm - gallery - item[data - id="${id}"]`).length) return;
         const html = `
-            <div class="pm-gallery-item" data-id="${id}">
-                <img src="${url}">
-                <button type="button" class="pm-gallery-remove">&times;</button>
-            </div>
-        `;
+                        < div class="pm-gallery-item" data - id="${id}" >
+                            <img src="${url}">
+                                <button type="button" class="pm-gallery-remove">&times;</button>
+                            </div>
+                    `;
         $('#pm-add-gallery-item').before(html);
     }
 
@@ -973,13 +1050,13 @@
             Object.keys(combo).forEach(k => cleanCombo[k] = combo[k].slug);
 
             const html = `
-                <tr data-combo='${JSON.stringify(cleanCombo)}'>
+                        < tr data - combo='${JSON.stringify(cleanCombo)}' >
                     <td><strong>${labels}</strong></td>
                     <td><input type="text" class="pm-var-sku" data-idx="${idx}" value="${baseSku}-${skuSuffix}"></td>
                     <td><input type="number" class="pm-var-price" data-idx="${idx}" value="${$('#pm-product-price').val() || ''}"></td>
                     <td><input type="number" class="pm-var-stock" data-idx="${idx}" value="0"></td>
-                </tr>
-            `;
+                </tr >
+                        `;
             $tableBody.append(html);
         });
 
@@ -1201,7 +1278,7 @@
                     } else {
                         response.data.forEach(cat => {
                             html += `
-                                <tr>
+                        < tr >
                                     <td><img src="${cat.image || ''}" width="40" height="40" style="object-fit:cover; border-radius:4px;"></td>
                                     <td><strong>${cat.name}</strong></td>
                                     <td><code>${cat.slug}</code></td>
@@ -1210,8 +1287,8 @@
                                         <button type="button" class="button button-small wikaz-edit-master" data-type="category" data-id="${cat.id}"><span class="dashicons dashicons-edit"></span></button>
                                         <button type="button" class="button button-small wikaz-delete-master" data-type="category" data-id="${cat.id}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
-                                </tr>
-                            `;
+                                </tr >
+                        `;
                         });
                     }
                     $list.html(html);
@@ -1239,7 +1316,7 @@
                     } else {
                         response.data.forEach(tag => {
                             html += `
-                                <tr>
+                        < tr >
                                     <td><strong>${tag.name}</strong></td>
                                     <td><code>${tag.slug}</code></td>
                                     <td>${tag.count}</td>
@@ -1247,8 +1324,8 @@
                                         <button type="button" class="button button-small wikaz-edit-master" data-type="tag" data-id="${tag.id}"><span class="dashicons dashicons-edit"></span></button>
                                         <button type="button" class="button button-small wikaz-delete-master" data-type="tag" data-id="${tag.id}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
-                                </tr>
-                            `;
+                                </tr >
+                        `;
                         });
                     }
                     $list.html(html);
@@ -1273,7 +1350,7 @@
                     let html = '';
                     response.data.forEach(attr => {
                         html += `
-                            <li data-slug="${attr.slug}" data-label="${attr.label}" data-id="${attr.id || 0}">
+                        < li data - slug="${attr.slug}" data - label="${attr.label}" data - id="${attr.id || 0}" >
                                 <div class="attr-info">
                                     <span>${attr.label}</span>
                                     <span class="attr-count">${attr.terms.length}</span>
@@ -1282,7 +1359,7 @@
                                     <span class="dashicons dashicons-edit edit-attr-type" title="Edit Type" style="cursor:pointer; font-size:16px;"></span>
                                     <span class="dashicons dashicons-trash delete-attr-type" title="Delete Type" style="cursor:pointer; font-size:16px;"></span>
                                 </div>
-                            </li>
+                            </li >
                         `;
                     });
                     $list.html(html);
@@ -1361,15 +1438,15 @@
                     } else {
                         response.data.forEach(term => {
                             html += `
-                                <tr>
+                        < tr >
                                     <td><strong>${term.name}</strong></td>
                                     <td><code>${term.slug}</code></td>
                                     <td class="column-actions">
                                         <button type="button" class="button button-small wikaz-edit-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}"><span class="dashicons dashicons-edit"></span></button>
                                         <button type="button" class="button button-small wikaz-delete-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
-                                </tr>
-                            `;
+                                </tr >
+                        `;
                         });
                     }
                     $list.html(html);
@@ -1461,7 +1538,7 @@
                     let options = '<option value="0">None</option>';
                     response.data.forEach(cat => {
                         if (cat.id != excludeId) {
-                            options += `<option value="${cat.id}">${cat.name}</option>`;
+                            options += `< option value = "${cat.id}" > ${cat.name}</option > `;
                         }
                     });
                     $('#master-item-parent').html(options).trigger('change');
@@ -1472,14 +1549,14 @@
 
     function fetchMasterItem(type, id, taxonomy) {
         if (type === 'attribute_type') {
-            const $li = $(`li[data-id="${id}"]`);
+            const $li = $(`li[data - id= "${id}"]`);
             $('#master-item-name').val($li.data('label'));
             $('#master-item-slug').val($li.data('slug'));
             return;
         }
 
         // Populate from the table row we clicked for speed
-        const $row = $(`.wikaz-edit-master[data-id="${id}"][data-type="${type}"]`).closest('tr');
+        const $row = $(`.wikaz - edit - master[data - id="${id}"][data - type="${type}"]`).closest('tr');
         $('#master-item-name').val($row.find('strong').text());
         $('#master-item-slug').val($row.find('code').text());
 

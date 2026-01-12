@@ -93,6 +93,7 @@ class Keycreation_Wikaz
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             id INT NOT NULL AUTO_INCREMENT,
             product_id BIGINT DEFAULT NULL,
+            post_id BIGINT DEFAULT NULL,
             title VARCHAR(255) DEFAULT NULL,
             subtitle VARCHAR(255) DEFAULT NULL,
             background_image VARCHAR(500) DEFAULT NULL,
@@ -127,6 +128,12 @@ class Keycreation_Wikaz
         $video_row = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table_name' AND COLUMN_NAME = 'background_video' AND TABLE_SCHEMA = '" . DB_NAME . "'");
         if (empty($video_row)) {
             $wpdb->query("ALTER TABLE $table_name ADD background_video VARCHAR(500) DEFAULT NULL AFTER background_image");
+        }
+
+        // Manually ensure post_id column exists
+        $post_row = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table_name' AND COLUMN_NAME = 'post_id' AND TABLE_SCHEMA = '" . DB_NAME . "'");
+        if (empty($post_row)) {
+            $wpdb->query("ALTER TABLE $table_name ADD post_id BIGINT DEFAULT NULL AFTER product_id");
         }
 
         // Set default options

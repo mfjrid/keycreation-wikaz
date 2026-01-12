@@ -142,9 +142,22 @@ class Wikaz_Frontend
                 <div class="swiper-wrapper">
                     <?php foreach ($slides as $slide):
                         $product = $slide->product_id ? wc_get_product($slide->product_id) : null;
-                        $title = $slide->title ?: ($product ? $product->get_name() : '');
-                        $url = $slide->button_url ?: ($product ? get_permalink($product->get_id()) : '#');
-                        $button_text = $slide->button_text ?: 'Belanja Sekarang';
+                        $post = $slide->post_id ? get_post($slide->post_id) : null;
+
+                        $title = $slide->title ?: ($product ? $product->get_name() : ($post ? $post->post_title : ''));
+
+                        // URL Priority: Button URL -> Product URL -> Post URL -> #
+                        if ($slide->button_url) {
+                            $url = $slide->button_url;
+                        } elseif ($product) {
+                            $url = get_permalink($product->get_id());
+                        } elseif ($post) {
+                            $url = get_permalink($post->ID);
+                        } else {
+                            $url = '#';
+                        }
+
+                        $button_text = $slide->button_text ?: 'Shop Now';
                         $layout = $slide->layout ?: 'full-bg';
                         ?>
                         <div class="swiper-slide wikaz-slide layout-<?php echo esc_attr($layout); ?>">
