@@ -195,9 +195,12 @@ class Wikaz_Admin
     {
         global $wpdb;
         $table_name = $wpdb->prefix . 'wikaz_carousel_slides';
-        $column_exists = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table_name' AND COLUMN_NAME = 'layout' AND TABLE_SCHEMA = '" . DB_NAME . "'");
+        $columns = $wpdb->get_col("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table_name' AND TABLE_SCHEMA = '" . DB_NAME . "'");
 
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name || empty($column_exists)) {
+        $required_columns = array('layout', 'description', 'background_video');
+        $missing_columns = array_diff($required_columns, $columns);
+
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name || !empty($missing_columns)) {
             $plugin = Keycreation_Wikaz::get_instance();
             $plugin->activate();
         }
@@ -225,6 +228,7 @@ class Wikaz_Admin
         }
 
         global $wpdb;
+        $this->maybe_create_table();
         $table_name = $wpdb->prefix . 'wikaz_carousel_slides';
 
         $slide_id = isset($_POST['slide_id']) ? intval($_POST['slide_id']) : 0;
@@ -233,7 +237,9 @@ class Wikaz_Admin
             'title' => sanitize_text_field($_POST['title']),
             'subtitle' => sanitize_text_field($_POST['subtitle']),
             'background_image' => esc_url_raw($_POST['background_image']),
+            'background_video' => esc_url_raw($_POST['background_video']),
             'layout' => sanitize_text_field($_POST['layout']),
+            'description' => wp_kses_post($_POST['description']),
             'button_text' => sanitize_text_field($_POST['button_text']),
             'button_url' => esc_url_raw($_POST['button_url']),
             'is_active' => isset($_POST['is_active']) ? 1 : 0,

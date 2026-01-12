@@ -157,8 +157,23 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
             <input type="hidden" name="slide_id" id="wikaz-slide-id" value="0">
 
             <div class="wikaz-modal-body">
+                <!-- 1. Media Type Selector -->
+                <div class="wikaz-form-group">
+                    <label><?php _e('Media Type', 'keycreation-wikaz'); ?></label>
+                    <div class="wikaz-media-type-selector">
+                        <label class="wikaz-type-option">
+                            <input type="radio" name="media_type" value="image" checked>
+                            <span class="type-label"><?php _e('Image', 'keycreation-wikaz'); ?></span>
+                        </label>
+                        <label class="wikaz-type-option">
+                            <input type="radio" name="media_type" value="video">
+                            <span class="type-label"><?php _e('Video', 'keycreation-wikaz'); ?></span>
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Background Image -->
-                <div class="wikaz-form-group wikaz-image-upload">
+                <div class="wikaz-image-upload wikaz-media-section" id="section-media-image">
                     <label><?php _e('Background Image', 'keycreation-wikaz'); ?></label>
                     <div class="wikaz-image-preview" id="wikaz-image-preview">
                         <img src="" alt="" style="display: none;">
@@ -168,30 +183,38 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
                         </div>
                     </div>
                     <input type="hidden" name="background_image" id="wikaz-background-image" value="">
-                    <button type="button" class="button"
-                        id="wikaz-select-image"><?php _e('Select Image', 'keycreation-wikaz'); ?></button>
-                    <button type="button" class="button" id="wikaz-remove-image"
-                        style="display: none;"><?php _e('Remove', 'keycreation-wikaz'); ?></button>
-                </div>
-
-                <div class="wikaz-form-row">
-                    <!-- Title -->
-                    <div class="wikaz-form-group">
-                        <label for="wikaz-title"><?php _e('Title', 'keycreation-wikaz'); ?></label>
-                        <input type="text" id="wikaz-title" name="title"
-                            placeholder="<?php _e('Enter slide title...', 'keycreation-wikaz'); ?>">
-                    </div>
-
-                    <!-- Subtitle -->
-                    <div class="wikaz-form-group">
-                        <label for="wikaz-subtitle"><?php _e('Subtitle', 'keycreation-wikaz'); ?></label>
-                        <input type="text" id="wikaz-subtitle" name="subtitle"
-                            placeholder="<?php _e('Enter slide subtitle...', 'keycreation-wikaz'); ?>">
+                    <div class="wikaz-image-actions">
+                        <button type="button" class="button"
+                            id="wikaz-select-image"><?php _e('Select Image', 'keycreation-wikaz'); ?></button>
+                        <button type="button" class="button" id="wikaz-remove-image"
+                            style="display: none;"><?php _e('Remove', 'keycreation-wikaz'); ?></button>
                     </div>
                 </div>
 
-                <!-- Layout Selection -->
-                <div class="wikaz-form-group">
+                <!-- Background Video -->
+                <div class="wikaz-video-upload wikaz-media-section" id="section-media-video" style="display: none;">
+                    <label><?php _e('Background Video', 'keycreation-wikaz'); ?></label>
+                    <div class="wikaz-video-preview" id="wikaz-video-preview">
+                        <video src="" style="display: none;" muted loop autoplay></video>
+                        <div class="wikaz-video-placeholder">
+                            <span class="dashicons dashicons-video-alt3"></span>
+                            <p><?php _e('Click to select video', 'keycreation-wikaz'); ?></p>
+                        </div>
+                    </div>
+                    <input type="hidden" name="background_video" id="wikaz-background-video" value="">
+                    <div class="wikaz-video-actions">
+                        <button type="button" class="button"
+                            id="wikaz-select-video"><?php _e('Select Video', 'keycreation-wikaz'); ?></button>
+                        <button type="button" class="button" id="wikaz-remove-video"
+                            style="display: none;"><?php _e('Remove', 'keycreation-wikaz'); ?></button>
+                    </div>
+                    <p class="description">
+                        <?php _e('Video will replace default background image.', 'keycreation-wikaz'); ?>
+                    </p>
+                </div>
+
+                <!-- 2. Layout Selection -->
+                <div class="wikaz-form-group" style="margin-top: 20px;">
                     <label><?php _e('Slide Layout', 'keycreation-wikaz'); ?></label>
                     <div class="wikaz-layout-selector">
                         <label class="wikaz-layout-option">
@@ -220,7 +243,28 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
                     </div>
                 </div>
 
-                <!-- Product Search -->
+                <!-- 3. Subtitle -->
+                <div class="wikaz-form-group">
+                    <label for="wikaz-subtitle"><?php _e('Subtitle', 'keycreation-wikaz'); ?></label>
+                    <input type="text" id="wikaz-subtitle" name="subtitle"
+                        placeholder="<?php _e('Enter slide subtitle...', 'keycreation-wikaz'); ?>">
+                </div>
+
+                <!-- 4. Title -->
+                <div class="wikaz-form-group">
+                    <label for="wikaz-title"><?php _e('Title', 'keycreation-wikaz'); ?></label>
+                    <input type="text" id="wikaz-title" name="title"
+                        placeholder="<?php _e('Enter slide title...', 'keycreation-wikaz'); ?>">
+                </div>
+
+                <!-- 5. Description -->
+                <div class="wikaz-form-group">
+                    <label for="wikaz-description"><?php _e('Description', 'keycreation-wikaz'); ?></label>
+                    <textarea class="textarea-form-control" id="wikaz-description" name="description" rows="3"
+                        placeholder="<?php _e('Enter slide description...', 'keycreation-wikaz'); ?>"></textarea>
+                </div>
+
+                <!-- 6. Product Search -->
                 <div class="wikaz-form-group">
                     <label
                         for="wikaz-product-search"><?php _e('Link to Product (Optional)', 'keycreation-wikaz'); ?></label>
@@ -260,15 +304,16 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
                         <?php _e('Active (Show this slide)', 'keycreation-wikaz'); ?>
                     </label>
                 </div>
-            </div>
 
-            <div class="wikaz-modal-footer">
-                <button type="button"
-                    class="button wikaz-modal-cancel"><?php _e('Cancel', 'keycreation-wikaz'); ?></button>
-                <button type="submit" class="button button-primary" id="wikaz-save-slide">
-                    <span class="dashicons dashicons-yes"></span>
-                    <?php _e('Save Slide', 'keycreation-wikaz'); ?>
-                </button>
+                <!-- 8. Action Buttons -->
+                <div class="wikaz-modal-footer">
+                    <button type="button"
+                        class="button wikaz-modal-cancel"><?php _e('Cancel', 'keycreation-wikaz'); ?></button>
+                    <button type="submit" class="button button-primary" id="wikaz-save-slide">
+                        <span class="dashicons dashicons-yes"></span>
+                        <?php _e('Save Slide', 'keycreation-wikaz'); ?>
+                    </button>
+                </div>
             </div>
         </form>
     </div>

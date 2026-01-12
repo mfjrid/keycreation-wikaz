@@ -96,7 +96,9 @@ class Keycreation_Wikaz
             title VARCHAR(255) DEFAULT NULL,
             subtitle VARCHAR(255) DEFAULT NULL,
             background_image VARCHAR(500) DEFAULT NULL,
+            background_video VARCHAR(500) DEFAULT NULL,
             layout VARCHAR(20) DEFAULT 'full-bg',
+            description TEXT DEFAULT NULL,
             button_text VARCHAR(100) DEFAULT 'Shop Now',
             button_url VARCHAR(500) DEFAULT NULL,
             sort_order INT DEFAULT 0,
@@ -113,6 +115,18 @@ class Keycreation_Wikaz
         $row = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table_name' AND COLUMN_NAME = 'layout' AND TABLE_SCHEMA = '" . DB_NAME . "'");
         if (empty($row)) {
             $wpdb->query("ALTER TABLE $table_name ADD layout VARCHAR(20) DEFAULT 'full-bg' AFTER background_image");
+        }
+
+        // Manually ensure description column exists
+        $desc_row = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table_name' AND COLUMN_NAME = 'description' AND TABLE_SCHEMA = '" . DB_NAME . "'");
+        if (empty($desc_row)) {
+            $wpdb->query("ALTER TABLE $table_name ADD description TEXT DEFAULT NULL AFTER layout");
+        }
+
+        // Manually ensure background_video column exists
+        $video_row = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table_name' AND COLUMN_NAME = 'background_video' AND TABLE_SCHEMA = '" . DB_NAME . "'");
+        if (empty($video_row)) {
+            $wpdb->query("ALTER TABLE $table_name ADD background_video VARCHAR(500) DEFAULT NULL AFTER background_image");
         }
 
         // Set default options

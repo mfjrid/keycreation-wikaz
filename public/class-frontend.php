@@ -144,13 +144,18 @@ class Wikaz_Frontend
                         $product = $slide->product_id ? wc_get_product($slide->product_id) : null;
                         $title = $slide->title ?: ($product ? $product->get_name() : '');
                         $url = $slide->button_url ?: ($product ? get_permalink($product->get_id()) : '#');
-                        $button_text = $slide->button_text ?: 'Shop Now';
+                        $button_text = $slide->button_text ?: 'Belanja Sekarang';
                         $layout = $slide->layout ?: 'full-bg';
                         ?>
                         <div class="swiper-slide wikaz-slide layout-<?php echo esc_attr($layout); ?>">
                             <div class="wikaz-slide-image">
-                                <div class="wikaz-slide-bg"
-                                    style="background-image: url('<?php echo esc_url($slide->background_image); ?>');"></div>
+                                <?php if ($slide->background_video): ?>
+                                    <video class="wikaz-slide-video" src="<?php echo esc_url($slide->background_video); ?>" autoplay
+                                        muted loop playsinline poster="<?php echo esc_url($slide->background_image); ?>"></video>
+                                <?php else: ?>
+                                    <div class="wikaz-slide-bg"
+                                        style="background-image: url('<?php echo esc_url($slide->background_image); ?>');"></div>
+                                <?php endif; ?>
                                 <div class="wikaz-slide-overlay"></div>
                             </div>
                             <div class="wikaz-slide-content">
@@ -160,6 +165,11 @@ class Wikaz_Frontend
                                     <?php endif; ?>
                                     <?php if ($title): ?>
                                         <h2 class="wikaz-slide-title"><?php echo esc_html($title); ?></h2>
+                                    <?php endif; ?>
+                                    <?php if ($slide->description): ?>
+                                        <div class="wikaz-slide-description">
+                                            <?php echo wp_kses_post($slide->description); ?>
+                                        </div>
                                     <?php endif; ?>
                                     <?php if ($product): ?>
                                         <div class="wikaz-slide-price">

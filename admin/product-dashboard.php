@@ -104,7 +104,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                 <div class="wikaz-form-row">
                     <div class="wikaz-form-group">
                         <label><?php _e('Short Description', 'keycreation-wikaz'); ?></label>
-                        <textarea id="pm-product-short-description" rows="2"
+                        <textarea class="textarea-form-control" id="pm-product-short-description" rows="2"
                             placeholder="<?php _e('Write a brief summary...', 'keycreation-wikaz'); ?>"></textarea>
                     </div>
                     <div class="wikaz-form-group">
@@ -120,7 +120,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                 <div class="wikaz-form-row">
                     <div class="wikaz-form-group">
                         <label><?php _e('Full Description', 'keycreation-wikaz'); ?></label>
-                        <textarea id="pm-product-description" rows="4"
+                        <textarea class="textarea-form-control" id="pm-product-description" rows="4"
                             placeholder="<?php _e('Write a detailed description...', 'keycreation-wikaz'); ?>"></textarea>
                     </div>
                     <div class="wikaz-form-group">
