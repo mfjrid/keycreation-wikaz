@@ -43,22 +43,22 @@
 }
 
 .wikaz-admin-wrap .page-title-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 8px 16px;
-    background: var(--wikaz-primary);
-    color: white;
-    border: none;
-    border-radius: var(--wikaz-radius-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    padding: 8px 16px !important;
+    background: var(--wikaz-primary) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--wikaz-radius-sm) !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
 }
 
 .wikaz-admin-wrap .page-title-action:hover {
-    background: var(--wikaz-primary-hover);
-    color: white;
+    background: var(--wikaz-primary-hover) !important;
+    color: white !important;
 }
 
 /* Media Type Selector */

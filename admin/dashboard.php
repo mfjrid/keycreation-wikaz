@@ -204,7 +204,7 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
 
                     <div class="wikaz-video-input-group" style="margin-top: 10px; display: flex; gap: 10px;">
                         <input type="text" name="background_video" id="wikaz-background-video" value="" class="widefat"
-                            placeholder="<?php _e('Paste YouTube, TikTok, or video URL here...', 'keycreation-wikaz'); ?>">
+                            placeholder="<?php _e('Paste YouTube or video URL here...', 'keycreation-wikaz'); ?>">
                         <button type="button" class="button"
                             id="wikaz-select-video"><?php _e('Select File', 'keycreation-wikaz'); ?></button>
                     </div>
