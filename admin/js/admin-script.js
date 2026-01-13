@@ -1039,6 +1039,21 @@
             if (selected.length) attributes.push({ slug: $row.data('slug'), selected: selected });
         });
 
+        // Scrape existing data to preserve it
+        const savedData = {};
+        $('#pm-variation-matrix-body tr').each(function () {
+            const $row = $(this);
+            const combo = $row.data('combo');
+            if (combo) {
+                const key = JSON.stringify(combo);
+                savedData[key] = {
+                    sku: $row.find('.pm-var-sku').val(),
+                    price: $row.find('.pm-var-price').val(),
+                    stock: $row.find('.pm-var-stock').val()
+                };
+            }
+        });
+
         if (attributes.length < 1) {
             $('#pm-variation-matrix-wrap').hide();
             return;
@@ -1051,6 +1066,7 @@
         $tableBody.empty();
 
         const baseSku = $('#pm-product-sku').val() || 'SKU';
+        const basePrice = $('#pm-product-price').val() || '';
 
         combinations.forEach((combo, idx) => {
             const labels = Object.values(combo).map(v => v.name).join(' / ');
@@ -1059,15 +1075,21 @@
             // Create a clean combo object for matching (slug -> slug)
             const cleanCombo = {};
             Object.keys(combo).forEach(k => cleanCombo[k] = combo[k].slug);
+            const comboKey = JSON.stringify(cleanCombo);
+
+            const preserved = savedData[comboKey] || null;
+            const sku = preserved ? preserved.sku : `${baseSku}-${skuSuffix}`;
+            const price = preserved ? preserved.price : basePrice;
+            const stock = preserved ? preserved.stock : '0';
 
             const html = `
-                        <tr data-combo='${JSON.stringify(cleanCombo)}'>
+                <tr data-combo='${comboKey}'>
                     <td><strong>${labels}</strong></td>
-                    <td><input type="text" class="pm-var-sku" data-idx="${idx}" value="${baseSku}-${skuSuffix}"></td>
-                    <td><input type="number" class="pm-var-price" data-idx="${idx}" value="${$('#pm-product-price').val() || ''}"></td>
-                    <td><input type="number" class="pm-var-stock" data-idx="${idx}" value="0"></td>
+                    <td><input type="text" class="pm-var-sku" data-idx="${idx}" value="${sku}"></td>
+                    <td><input type="number" class="pm-var-price" data-idx="${idx}" value="${price}"></td>
+                    <td><input type="number" class="pm-var-stock" data-idx="${idx}" value="${stock}"></td>
                 </tr>
-                        `;
+            `;
             $tableBody.append(html);
         });
 
@@ -1104,23 +1126,10 @@
         const baseSku = $('#pm-product-sku').val();
 
         if (Object.keys(attributes).length > 0) {
-            // Re-generate combinations to ensure we have mapping
-            const attrArray = Object.keys(attributes).map(slug => ({
-                slug,
-                selected: attributes[slug].map(s => ({ slug: s })) // Map to same structure as combinations generator
-            }));
-
-            // Simplified combination logic to match attributes array structure
-            const combinations = Object.keys(attributes).reduce((acc, slug) => {
-                const values = attributes[slug];
-                if (acc.length === 0) return values.map(v => ({ [slug]: v }));
-                return acc.flatMap(combo => values.map(v => ({ ...combo, [slug]: v })));
-            }, []);
-
-            $('#pm-variation-matrix-body tr').each(function (i) {
+            $('#pm-variation-matrix-body tr').each(function () {
                 const $row = $(this);
                 variations.push({
-                    attributes: combinations[i],
+                    attributes: $row.data('combo'),
                     sku: $row.find('.pm-var-sku').val(),
                     price: $row.find('.pm-var-price').val(),
                     stock: $row.find('.pm-var-stock').val()

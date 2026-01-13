@@ -779,9 +779,24 @@ class Wikaz_Admin
             foreach ($attributes_data as $tax_slug => $terms) {
                 $taxonomy = wc_attribute_taxonomy_name($tax_slug);
                 $attribute = new WC_Product_Attribute();
-                $attribute->set_id(wc_attribute_taxonomy_id_by_name($tax_slug));
+
+                $tax_id = wc_attribute_taxonomy_id_by_name($tax_slug);
+                $attribute->set_id($tax_id);
                 $attribute->set_name($taxonomy);
-                $attribute->set_options($terms);
+
+                // If it's a taxonomy, we should use Term IDs for the parent product options
+                if ($tax_id > 0) {
+                    $term_ids = array();
+                    foreach ($terms as $term_slug) {
+                        $term = get_term_by('slug', $term_slug, $taxonomy);
+                        if ($term) {
+                            $term_ids[] = $term->term_id;
+                        }
+                    }
+                    $attribute->set_options($term_ids);
+                } else {
+                    $attribute->set_options($terms);
+                }
 
                 // Set position based on importance
                 $pos = 99;
@@ -806,26 +821,58 @@ class Wikaz_Admin
         $product_id = $product->save();
 
         // 5. Handle Variations
-        if ($type === 'variable' && $product_id) {
-            $existing_variations = $product->get_children();
+        if ($type === 'variable' && $product_id && is_array($variations_data)) {
+            $existing_variation_ids = $product->get_children();
             $processed_variation_ids = array();
 
             foreach ($variations_data as $v_data) {
+                if (!isset($v_data['attributes']) || !is_array($v_data['attributes']))
+                    continue;
+
                 $v_attributes = array();
+                $v_attributes_for_matching = array();
                 foreach ($v_data['attributes'] as $slug => $val) {
-                    $v_attributes[wc_attribute_taxonomy_name($slug)] = $val;
+                    $tax_name = wc_attribute_taxonomy_name($slug);
+                    $v_attributes[$tax_name] = $val;
+                    $v_attributes_for_matching['attribute_' . $tax_name] = $val;
                 }
 
-                // Check if variation with these attributes already exists
-                $variation_id = $this->find_matching_variation($product_id, $v_attributes);
+                // Try standard matching first
+                $variation_id = $this->find_matching_variation($product_id, $v_attributes_for_matching);
+
+                // Fallback: search manually if standard matching fails but we might have it
+                if (!$variation_id && !empty($existing_variation_ids)) {
+                    foreach ($existing_variation_ids as $evid) {
+                        $ev = wc_get_product($evid);
+                        if ($ev) {
+                            $ev_attrs = $ev->get_attributes();
+                            // Compare attributes
+                            if (count($ev_attrs) === count($v_attributes)) {
+                                $match = true;
+                                foreach ($v_attributes as $k => $v) {
+                                    if (!isset($ev_attrs[$k]) || $ev_attrs[$k] !== $v) {
+                                        $match = false;
+                                        break;
+                                    }
+                                }
+                                if ($match) {
+                                    $variation_id = $evid;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 if ($variation_id) {
                     $variation = new WC_Product_Variation($variation_id);
+                    $processed_variation_ids[] = $variation_id;
                 } else {
                     $variation = new WC_Product_Variation();
                     $variation->set_parent_id($product_id);
-                    $variation->set_attributes($v_attributes);
                 }
+
+                $variation->set_attributes($v_attributes);
 
                 $variation->set_regular_price(sanitize_text_field($v_data['price']));
                 $variation->set_sku(sanitize_text_field($v_data['sku']));
@@ -834,9 +881,6 @@ class Wikaz_Admin
                 $variation->set_status('publish');
                 $variation->save();
             }
-
-            // Optional: Remove variations that are no longer in the matrix?
-            // For now, let's just keep them to avoid accidental data loss.
         }
 
         wp_send_json_success(array('id' => $product_id));
