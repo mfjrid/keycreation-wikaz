@@ -731,156 +731,168 @@ class Wikaz_Admin
         $type = !empty($variations_data) ? 'variable' : 'simple';
 
         // 1. Create or Load Product
-        if ($is_new) {
-            $product = ($type === 'variable') ? new WC_Product_Variable() : new WC_Product_Simple();
-        } else {
-            $product = wc_get_product($product_id);
-            // If type changed (rare but possible), it's tricky. We'll stick to original type if editing.
-            if ($product->get_type() !== $type) {
-                // Force type change logic if needed, but for now we follow the creator's flow.
+        try {
+            if ($is_new) {
+                if ($type === 'variable') {
+                    $product = new WC_Product_Variable();
+                } else {
+                    $product = new WC_Product_Simple();
+                }
+            } else {
+                $product = wc_get_product($product_id);
+                if (!$product) {
+                    wp_send_json_error('Product not found for ID: ' . $product_id);
+                }
+
+                // If type changed (rare but possible), it might fail.
+                // For now, we don't handle type switching for existing products here.
             }
-        }
 
-        if (!$product)
-            wp_send_json_error('Failed to load product');
+            if (!$product) {
+                wp_send_json_error('Failed to create/load product object');
+            }
 
-        // 2. Set Basic Data
-        $product->set_name(sanitize_text_field($_POST['name']));
-        $product->set_status('publish');
-        $product->set_sku(sanitize_text_field($_POST['sku']));
-        $product->set_description(wp_kses_post($_POST['description']));
-        $product->set_short_description(wp_kses_post($_POST['short_description']));
-        $product->set_category_ids(isset($_POST['categories']) ? array_map('intval', $_POST['categories']) : array());
-        $product->set_tag_ids(isset($_POST['tags']) ? array_map('intval', $_POST['tags']) : array());
+            // 2. Set Basic Data
+            $product->set_name(sanitize_text_field($_POST['name']));
+            $product->set_status('publish');
+            $product->set_sku(sanitize_text_field($_POST['sku']));
+            $product->set_description(wp_kses_post($_POST['description']));
+            $product->set_short_description(wp_kses_post($_POST['short_description']));
+            $product->set_category_ids(isset($_POST['categories']) ? array_map('intval', $_POST['categories']) : array());
+            $product->set_tag_ids(isset($_POST['tags']) ? array_map('intval', $_POST['tags']) : array());
 
-        if (isset($_POST['video_url'])) {
-            $product->update_meta_data('_video_url', esc_url_raw($_POST['video_url']));
-        }
+            if (isset($_POST['video_url'])) {
+                $product->update_meta_data('_video_url', esc_url_raw($_POST['video_url']));
+            }
 
-        if (!empty($_POST['image_id'])) {
-            $product->set_image_id(intval($_POST['image_id']));
-        }
+            if (!empty($_POST['image_id'])) {
+                $product->set_image_id(intval($_POST['image_id']));
+            }
 
-        if (!empty($_POST['gallery_ids'])) {
-            $gallery_ids = array_map('intval', explode(',', $_POST['gallery_ids']));
-            $product->set_gallery_image_ids($gallery_ids);
-        }
+            if (!empty($_POST['gallery_ids'])) {
+                $gallery_ids = array_map('intval', explode(',', $_POST['gallery_ids']));
+                $product->set_gallery_image_ids($gallery_ids);
+            }
 
-        if ($type === 'simple') {
-            $product->set_regular_price(sanitize_text_field($_POST['price']));
-        }
+            if ($type === 'simple') {
+                $product->set_regular_price(sanitize_text_field($_POST['price']));
+            }
 
-        // 3. Handle Variable Product Attributes
-        if ($type === 'variable') {
-            $attributes_data = isset($_POST['attributes']) ? $_POST['attributes'] : array();
-            $product_attributes = array();
-            $index = 2;
+            // 3. Handle Variable Product Attributes
+            if ($type === 'variable') {
+                $attributes_data = isset($_POST['attributes']) ? $_POST['attributes'] : array();
+                $product_attributes = array();
+                $index = 2;
 
-            foreach ($attributes_data as $tax_slug => $terms) {
-                $taxonomy = wc_attribute_taxonomy_name($tax_slug);
-                $attribute = new WC_Product_Attribute();
+                foreach ($attributes_data as $tax_slug => $terms) {
+                    $taxonomy = wc_attribute_taxonomy_name($tax_slug);
+                    $attribute = new WC_Product_Attribute();
 
-                $tax_id = wc_attribute_taxonomy_id_by_name($tax_slug);
-                $attribute->set_id($tax_id);
-                $attribute->set_name($taxonomy);
+                    $tax_id = wc_attribute_taxonomy_id_by_name($tax_slug);
+                    $attribute->set_id($tax_id);
+                    $attribute->set_name($taxonomy);
 
-                // If it's a taxonomy, we should use Term IDs for the parent product options
-                if ($tax_id > 0) {
-                    $term_ids = array();
-                    foreach ($terms as $term_slug) {
-                        $term = get_term_by('slug', $term_slug, $taxonomy);
-                        if ($term) {
-                            $term_ids[] = $term->term_id;
+                    // If it's a taxonomy, we should use Term IDs for the parent product options
+                    if ($tax_id > 0) {
+                        $term_ids = array();
+                        foreach ($terms as $term_slug) {
+                            $term = get_term_by('slug', $term_slug, $taxonomy);
+                            if ($term) {
+                                $term_ids[] = $term->term_id;
+                            }
                         }
+                        $attribute->set_options($term_ids);
+                    } else {
+                        $attribute->set_options($terms);
                     }
-                    $attribute->set_options($term_ids);
-                } else {
-                    $attribute->set_options($terms);
-                }
 
-                // Set position based on importance
-                $pos = 99;
-                $slug_lower = strtolower($tax_slug);
-                if (strpos($slug_lower, 'size') !== false || strpos($slug_lower, 'ukuran') !== false) {
-                    $pos = 0;
-                } elseif (strpos($slug_lower, 'color') !== false || strpos($slug_lower, 'warna') !== false) {
-                    $pos = 1;
-                } else {
-                    $pos = $index++;
-                }
+                    // Set position based on importance
+                    $pos = 99;
+                    $slug_lower = strtolower($tax_slug);
+                    if (strpos($slug_lower, 'size') !== false || strpos($slug_lower, 'ukuran') !== false) {
+                        $pos = 0;
+                    } elseif (strpos($slug_lower, 'color') !== false || strpos($slug_lower, 'warna') !== false) {
+                        $pos = 1;
+                    } else {
+                        $pos = $index++;
+                    }
 
-                $attribute->set_position($pos);
-                $attribute->set_visible(true);
-                $attribute->set_variation(true);
-                $product_attributes[] = $attribute;
+                    $attribute->set_position($pos);
+                    $attribute->set_visible(true);
+                    $attribute->set_variation(true);
+                    $product_attributes[] = $attribute;
+                }
+                $product->set_attributes($product_attributes);
             }
-            $product->set_attributes($product_attributes);
-        }
 
-        // 4. Save Parent Product (Crucial: save BEFORE creating variations)
-        $product_id = $product->save();
+            // 4. Save Parent Product (Crucial: save BEFORE creating variations)
+            $product_id = $product->save();
 
-        // 5. Handle Variations
-        if ($type === 'variable' && $product_id && is_array($variations_data)) {
-            $existing_variation_ids = $product->get_children();
-            $processed_variation_ids = array();
+            // 5. Handle Variations
+            if ($type === 'variable' && $product_id && is_array($variations_data)) {
+                $existing_variation_ids = $product->get_children();
+                $processed_variation_ids = array();
 
-            foreach ($variations_data as $v_data) {
-                if (!isset($v_data['attributes']) || !is_array($v_data['attributes']))
-                    continue;
+                foreach ($variations_data as $v_data) {
+                    if (!isset($v_data['attributes']) || !is_array($v_data['attributes']))
+                        continue;
 
-                $v_attributes = array();
-                $v_attributes_for_matching = array();
-                foreach ($v_data['attributes'] as $slug => $val) {
-                    $tax_name = wc_attribute_taxonomy_name($slug);
-                    $v_attributes[$tax_name] = $val;
-                    $v_attributes_for_matching['attribute_' . $tax_name] = $val;
-                }
+                    $v_attributes = array();
+                    $v_attributes_for_matching = array();
+                    foreach ($v_data['attributes'] as $slug => $val) {
+                        $tax_name = wc_attribute_taxonomy_name($slug);
+                        $v_attributes[$tax_name] = $val;
+                        $v_attributes_for_matching['attribute_' . $tax_name] = $val;
+                    }
 
-                // Try standard matching first
-                $variation_id = $this->find_matching_variation($product_id, $v_attributes_for_matching);
+                    // Try standard matching first
+                    $variation_id = $this->find_matching_variation($product_id, $v_attributes_for_matching);
 
-                // Fallback: search manually if standard matching fails but we might have it
-                if (!$variation_id && !empty($existing_variation_ids)) {
-                    foreach ($existing_variation_ids as $evid) {
-                        $ev = wc_get_product($evid);
-                        if ($ev) {
-                            $ev_attrs = $ev->get_attributes();
-                            // Compare attributes
-                            if (count($ev_attrs) === count($v_attributes)) {
-                                $match = true;
-                                foreach ($v_attributes as $k => $v) {
-                                    if (!isset($ev_attrs[$k]) || $ev_attrs[$k] !== $v) {
-                                        $match = false;
+                    // Fallback: search manually if standard matching fails but we might have it
+                    if (!$variation_id && !empty($existing_variation_ids)) {
+                        foreach ($existing_variation_ids as $evid) {
+                            $ev = wc_get_product($evid);
+                            if ($ev) {
+                                $ev_attrs = $ev->get_attributes();
+                                // Compare attributes
+                                if (count($ev_attrs) === count($v_attributes)) {
+                                    $match = true;
+                                    foreach ($v_attributes as $k => $v) {
+                                        if (!isset($ev_attrs[$k]) || $ev_attrs[$k] !== $v) {
+                                            $match = false;
+                                            break;
+                                        }
+                                    }
+                                    if ($match) {
+                                        $variation_id = $evid;
                                         break;
                                     }
-                                }
-                                if ($match) {
-                                    $variation_id = $evid;
-                                    break;
                                 }
                             }
                         }
                     }
+
+                    if ($variation_id) {
+                        $variation = new WC_Product_Variation($variation_id);
+                        $processed_variation_ids[] = $variation_id;
+                    } else {
+                        $variation = new WC_Product_Variation();
+                        $variation->set_parent_id($product_id);
+                    }
+
+                    $variation->set_attributes($v_attributes);
+
+                    $variation->set_regular_price(sanitize_text_field($v_data['price']));
+                    $variation->set_sku(sanitize_text_field($v_data['sku']));
+                    $variation->set_manage_stock(true);
+                    $variation->set_stock_quantity(intval($v_data['stock']));
+                    $variation->set_status('publish');
+                    $variation->save();
                 }
-
-                if ($variation_id) {
-                    $variation = new WC_Product_Variation($variation_id);
-                    $processed_variation_ids[] = $variation_id;
-                } else {
-                    $variation = new WC_Product_Variation();
-                    $variation->set_parent_id($product_id);
-                }
-
-                $variation->set_attributes($v_attributes);
-
-                $variation->set_regular_price(sanitize_text_field($v_data['price']));
-                $variation->set_sku(sanitize_text_field($v_data['sku']));
-                $variation->set_manage_stock(true);
-                $variation->set_stock_quantity(intval($v_data['stock']));
-                $variation->set_status('publish');
-                $variation->save();
             }
+
+        } catch (Throwable $e) {
+            wp_send_json_error('System Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
         }
 
         wp_send_json_success(array('id' => $product_id));

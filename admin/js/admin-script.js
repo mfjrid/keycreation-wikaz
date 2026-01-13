@@ -1163,8 +1163,9 @@
                 if (response.success) {
                     closePMModal();
                     loadPMProducts();
+                    showNotification('Product saved successfully!', 'success');
                 } else {
-                    alert('Error: ' + response.data);
+                    showNotification('Error: ' + response.data, 'error');
                 }
             },
             complete: () => {
@@ -1185,8 +1186,13 @@
                 nonce: wikazAdmin.nonce,
                 product_id: id
             },
-            success: function () {
-                loadPMProducts();
+            success: function (response) {
+                if (response.success) {
+                    loadPMProducts();
+                    showNotification('Product deleted successfully!', 'success');
+                } else {
+                    showNotification('Error deleting product', 'error');
+                }
             }
         });
     }
@@ -1268,8 +1274,9 @@
                 success: function (response) {
                     if (response.success) {
                         $btn.closest('tr').fadeOut();
+                        showNotification('Item deleted successfully!', 'success');
                     } else {
-                        alert('Error: ' + response.data);
+                        showNotification('Error deleting item: ' + response.data, 'error');
                     }
                 }
             });
@@ -1694,8 +1701,9 @@
                             loadMasterTerms(formData.taxonomy, attrType);
                         }
                     }
+                    showNotification('Data saved successfully!', 'success');
                 } else {
-                    alert('Error: ' + response.data);
+                    showNotification('Error: ' + response.data, 'error');
                 }
             },
             complete: () => {
@@ -1721,5 +1729,29 @@
         init();
         initMasterData();
     });
+
+    function showNotification(message, type = 'success') {
+        // Remove existing notification if any
+        $('.wikaz-notification').remove();
+
+        const icon = type === 'success' ? 'dashicons-yes' : 'dashicons-warning';
+        const html = `
+            <div class="wikaz-notification ${type}">
+                <span class="wikaz-notification-icon dashicons ${icon}"></span>
+                <div class="wikaz-notification-content">${message}</div>
+            </div>
+        `;
+
+        const $notif = $(html).appendTo('body');
+
+        // Trigger animation
+        setTimeout(() => $notif.addClass('active'), 100);
+
+        // Auto remove
+        setTimeout(() => {
+            $notif.removeClass('active');
+            setTimeout(() => $notif.remove(), 400);
+        }, 5000);
+    }
 
 })(jQuery);
