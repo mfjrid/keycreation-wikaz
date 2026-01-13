@@ -848,12 +848,16 @@
                         <div class="pm-attribute-row" data-slug="${attr.slug}">
                                 <span class="pm-attribute-label">${attr.label}</span>
                                 <div class="pm-terms-grid">
-                                    ${attr.terms.map(term => `
-                                        <label class="pm-term-item">
+                                    ${attr.terms.map(term => {
+                            const isColor = attr.type === 'color';
+                            const style = isColor ? `style="background-color: ${term.color || '#ffffff'}"` : '';
+                            return `
+                                        <label class="pm-term-item ${isColor ? 'is-color' : ''}" title="${term.name}">
                                             <input type="checkbox" name="attr_${attr.slug}[]" value="${term.slug}" data-name="${term.name}">
-                                            <span>${term.name}</span>
+                                            <span ${style}>${isColor ? '' : term.name}</span>
                                         </label>
-                                    `).join('')}
+                                    `;
+                        }).join('')}
                                 </div>
                             </div>
                         `;
@@ -1341,7 +1345,11 @@
         });
     }
 
-    function loadMasterAttributes() {
+    function loadMasterAttributes(reselectSlug = null) {
+        if (!reselectSlug) {
+            reselectSlug = $('#master-attributes-type-list li.active').data('slug');
+        }
+
         const $list = $('#master-attributes-type-list');
         $list.html('<li>Loading attributes...</li>');
 
@@ -1370,6 +1378,15 @@
                         `;
                     });
                     $list.html(html);
+
+                    if (reselectSlug) {
+                        const $target = $list.find(`li[data-slug="${reselectSlug}"]`);
+                        if ($target.length) {
+                            $target.addClass('active');
+                            $('#current-attribute-label').text($target.data('label'));
+                            $('.add-master-term').show().data('taxonomy', 'pa_' + reselectSlug).data('attr-type', $target.data('type'));
+                        }
+                    }
 
                     // Attribute Side List Click
                     $list.find('li').on('click', function (e) {
@@ -1428,7 +1445,8 @@
 
     function loadMasterTerms(taxonomy, attrType = 'select') {
         const $list = $('#master-terms-list');
-        $list.html('<tr><td colspan="4" align="center">Loading values...</td></tr>');
+        const colspan = (attrType === 'color') ? 4 : 3;
+        $list.html(`<tr><td colspan="${colspan}" align="center">Loading values...</td></tr>`);
 
         // Update table header if color
         const $thead = $list.closest('table').find('thead tr');
@@ -1488,6 +1506,9 @@
         $('#master-item-type').val(type);
         $('#master-item-id').val(id);
         $('#master-item-taxonomy').val(taxonomy);
+
+        const attrType = $('.add-master-term').data('attr-type') || 'select';
+        $('#master-item-attr-type').val(attrType);
 
         $('#master-attr-type-fields').hide();
 
@@ -1657,8 +1678,12 @@
                     if (activeTab === 'categories') loadMasterCategories();
                     if (activeTab === 'tags') loadMasterTags();
                     if (activeTab === 'attributes') {
-                        loadMasterAttributes();
-                        if (type === 'term') loadMasterTerms(formData.taxonomy);
+                        const currentSlug = $('#master-attributes-type-list li.active').data('slug');
+                        loadMasterAttributes(currentSlug);
+                        if (type === 'term') {
+                            const attrType = $('#master-item-attr-type').val();
+                            loadMasterTerms(formData.taxonomy, attrType);
+                        }
                     }
                 } else {
                     alert('Error: ' + response.data);

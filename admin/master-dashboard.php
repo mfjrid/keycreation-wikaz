@@ -142,6 +142,7 @@ if (!defined('ABSPATH'))
                 <input type="hidden" id="master-item-id" value="0">
                 <input type="hidden" id="master-item-type" value="">
                 <input type="hidden" id="master-item-taxonomy" value="">
+                <input type="hidden" id="master-item-attr-type" value="">
 
                 <div class="wikaz-modal-body">
                     <div id="master-attr-type-fields" style="display:none;">

@@ -1014,6 +1014,37 @@
     box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
 }
 
+.pm-term-item.is-color span {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    position: relative;
+    border: 2px solid #e2e8f0;
+}
+
+.pm-term-item.is-color input:checked+span {
+    border-color: var(--wikaz-primary);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--wikaz-primary);
+}
+
+.pm-term-item.is-color span::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+}
+
+.pm-term-item.is-color input:checked+span::after {
+    transform: translate(-50%, -50%) scale(1);
+}
+
 .pm-variation-table {
     width: 100%;
     border-spacing: 0;
