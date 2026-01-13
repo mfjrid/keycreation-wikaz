@@ -798,11 +798,11 @@
     function renderPMProductList(products) {
         let html = '';
         if (!products.length) {
-            html = `< tr > <td colspan="7" style="text-align:center;">No products found.</td></tr > `;
+            html = `<tr><td colspan="7" style="text-align:center;">No products found.</td></tr>`;
         } else {
             products.forEach(p => {
                 html += `
-                        < tr >
+                        <tr>
                         <td class="column-thumb"><img src="${p.image}" alt=""></td>
                         <td><strong>${p.name}</strong></td>
                         <td><code>${p.sku || '-'}</code></td>
