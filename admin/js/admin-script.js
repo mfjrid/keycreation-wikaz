@@ -1279,12 +1279,19 @@
             e.preventDefault();
             e.stopPropagation();
 
-            if (!confirm('Are You sure want to delete this item?')) return;
-
             const $btn = $(this);
             const id = $btn.data('id');
             const type = $btn.data('type');
+            const count = parseInt($btn.data('count')) || 0;
             let taxonomy = $btn.data('taxonomy');
+
+            // Build confirmation message
+            let confirmMsg = 'Are you sure you want to delete this item?';
+            if (type === 'term' && count > 0) {
+                confirmMsg = `⚠️ WARNING: This attribute is used by ${count} product variation(s)!\n\nDeleting this will affect those products. Are you sure you want to continue?`;
+            }
+
+            if (!confirm(confirmMsg)) return;
 
             // Set taxonomy based on type if not already set
             if (type === 'category') taxonomy = 'product_cat';
@@ -1523,11 +1530,18 @@
 
     function loadMasterTerms(taxonomy, attrType = 'select') {
         const $list = $('#master-terms-list');
-        const colspan = (attrType === 'color') ? 4 : 3;
-        $list.html(`<tr><td colspan="${colspan}" align="center">Loading values...</td></tr>`);
+        // Add 1 more for count column
+        const baseColspan = (attrType === 'color') ? 5 : 4;
+        $list.html(`<tr><td colspan="${baseColspan}" align="center">Loading values...</td></tr>`);
 
         // Update table header if color
         const $thead = $list.closest('table').find('thead tr');
+
+        // Ensure count column exists
+        if (!$thead.find('.col-count').length) {
+            $thead.find('th:last').before('<th class="col-count" width="80">Products</th>');
+        }
+
         if (attrType === 'color') {
             if (!$thead.find('.col-color').length) {
                 $thead.find('th:first').after('<th class="col-color" width="60">Color</th>');
@@ -1548,21 +1562,25 @@
                 if (response.success) {
                     let html = '';
                     if (response.data.length === 0) {
-                        html = `<tr><td colspan="${attrType === 'color' ? 4 : 3}" align="center">No values found for this attribute.</td></tr>`;
+                        html = `<tr><td colspan="${baseColspan}" align="center">No values found for this attribute.</td></tr>`;
                     } else {
                         response.data.forEach(term => {
                             let colorCell = '';
                             if (attrType === 'color') {
                                 colorCell = `<td><span class="color-swatch" style="background-color:${term.color || '#fff'}; border:1px solid #ddd; width:24px; height:24px; display:block; border-radius:4px;" title="${term.color}"></span></td>`;
                             }
+                            const countBadge = term.count > 0
+                                ? `<span class="count-badge" style="background:#0073aa; color:#fff; padding:2px 8px; border-radius:10px; font-size:11px;">${term.count}</span>`
+                                : `<span class="count-badge" style="background:#ddd; color:#666; padding:2px 8px; border-radius:10px; font-size:11px;">0</span>`;
                             html += `
                         <tr>
                                     <td><strong>${term.name}</strong></td>
                                     ${colorCell}
                                     <td><code>${term.slug}</code></td>
+                                    <td>${countBadge}</td>
                                     <td class="column-actions">
                                         <button type="button" class="button button-small wikaz-edit-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}" data-color="${term.color || ''}"><span class="dashicons dashicons-edit"></span></button>
-                                        <button type="button" class="button button-small wikaz-delete-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}"><span class="dashicons dashicons-trash"></span></button>
+                                        <button type="button" class="button button-small wikaz-delete-master" data-type="term" data-taxonomy="${taxonomy}" data-id="${term.id}" data-count="${term.count}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
                                 </tr>
                         `;

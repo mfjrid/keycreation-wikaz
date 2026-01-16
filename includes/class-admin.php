@@ -1002,6 +1002,7 @@ class Wikaz_Admin
                 'name' => $term->name,
                 'slug' => $term->slug,
                 'color' => get_term_meta($term->term_id, '_wikaz_color', true) ?: (get_term_meta($term->term_id, 'swatches_color', true) ?: '#ffffff'),
+                'count' => $term->count, // Number of products/variations using this term
             );
         }
 
