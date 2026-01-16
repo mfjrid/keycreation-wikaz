@@ -25,6 +25,24 @@ class Wikaz_Frontend
         if ($position === 'before_content') {
             add_action('wp_body_open', array($this, 'maybe_inject_carousel'), 5);
         }
+
+        // Product page customizations
+        add_filter('woocommerce_get_availability', array($this, 'custom_stock_availability'), 10, 2);
+    }
+
+    /**
+     * Customize stock availability text to show quantity
+     */
+    public function custom_stock_availability($availability, $product)
+    {
+        // Only if managing stock and in stock
+        if ($product->managing_stock() && $product->is_in_stock()) {
+            $stock = $product->get_stock_quantity();
+            if ($stock > 0) {
+                $availability['availability'] = sprintf(__('%d available', 'keycreation-wikaz'), $stock);
+            }
+        }
+        return $availability;
     }
 
     /**
@@ -43,50 +61,78 @@ class Wikaz_Frontend
      */
     public function enqueue_assets()
     {
-        // Only load on front page or if shortcode is used
-        if (!is_front_page() && !$this->has_shortcode()) {
+        // Load on front page (carousel), if shortcode is used, or on single product pages
+        if (!is_front_page() && !$this->has_shortcode() && !is_product()) {
             return;
         }
 
-        // Swiper CSS
-        wp_enqueue_style(
-            'swiper',
-            'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
-            array(),
-            '11.0.0'
-        );
+        // Swiper CSS (Only for carousel pages)
+        if (is_front_page() || $this->has_shortcode()) {
+            wp_enqueue_style(
+                'swiper',
+                'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
+                array(),
+                '11.0.0'
+            );
 
-        // Plugin CSS
-        wp_enqueue_style(
-            'wikaz-carousel-style',
-            WIKAZ_PLUGIN_URL . 'public/css/carousel-style.css',
-            array('swiper'),
-            WIKAZ_VERSION
-        );
+            wp_enqueue_style(
+                'wikaz-carousel-style',
+                WIKAZ_PLUGIN_URL . 'public/css/carousel-style.css',
+                array('swiper'),
+                WIKAZ_VERSION
+            );
 
-        // Swiper JS
-        wp_enqueue_script(
-            'swiper',
-            'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
-            array(),
-            '11.0.0',
-            true
-        );
+            wp_enqueue_script(
+                'swiper',
+                'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
+                array(),
+                '11.0.0',
+                true
+            );
 
-        // Plugin JS
-        wp_enqueue_script(
-            'wikaz-carousel',
-            WIKAZ_PLUGIN_URL . 'public/js/carousel.js',
-            array('swiper'),
-            WIKAZ_VERSION,
-            true
-        );
+            wp_enqueue_script(
+                'wikaz-carousel',
+                WIKAZ_PLUGIN_URL . 'public/js/carousel.js',
+                array('swiper'),
+                WIKAZ_VERSION,
+                true
+            );
 
-        // Pass settings to JS
-        wp_localize_script('wikaz-carousel', 'wikazCarousel', array(
-            'autoplay' => get_option('wikaz_carousel_autoplay', '1') === '1',
-            'speed' => intval(get_option('wikaz_carousel_speed', '5000'))
-        ));
+            wp_localize_script('wikaz-carousel', 'wikazCarousel', array(
+                'autoplay' => get_option('wikaz_carousel_autoplay', '1') === '1',
+                'speed' => intval(get_option('wikaz_carousel_speed', '5000'))
+            ));
+        }
+
+        // Product Page Customizations
+        if (is_product()) {
+            global $product;
+            if (!is_a($product, 'WC_Product')) {
+                $product = wc_get_product(get_the_ID());
+            }
+
+            wp_enqueue_style(
+                'wikaz-frontend-style',
+                WIKAZ_PLUGIN_URL . 'public/css/frontend-style.css',
+                array(),
+                WIKAZ_VERSION
+            );
+
+            wp_enqueue_script(
+                'wikaz-frontend-script',
+                WIKAZ_PLUGIN_URL . 'public/js/frontend-script.js',
+                array('jquery'),
+                WIKAZ_VERSION,
+                true
+            );
+
+            wp_localize_script('wikaz-frontend-script', 'wikazProductData', array(
+                'stockLabel' => __('available', 'keycreation-wikaz'),
+                'viewCountSelector' => '.product-info-view',
+                'stockSelector' => '.stock, .in-stock',
+                'currentStock' => (is_a($product, 'WC_Product') && $product->managing_stock()) ? $product->get_stock_quantity() : ''
+            ));
+        }
     }
 
     /**

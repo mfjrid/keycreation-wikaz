@@ -1,0 +1,8 @@
+/**
+ * Wikaz Frontend Styles (Product Page)
+ */
+
+/* Hide "People are viewing this right now" */
+.product-info-view {
+    display: none !important;
+}
