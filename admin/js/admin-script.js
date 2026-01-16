@@ -116,7 +116,7 @@
         $('#wikaz-add-pm-product').on('click', () => openPMProductModal());
         $('#wikaz-pm-search').on('input', debounce(() => loadPMProducts(1), 500));
         $(document).on('click', '.wikaz-pm-edit', function () { openPMProductModal($(this).data('id')); });
-        $(document).on('click', '.wikaz-pm-delete', function () { deletePMProduct($(this).data('id')); });
+        $(document).on('click', '.wikaz-pm-delete', function () { deletePMProduct($(this).data('id'), $(this)); });
         $(document).on('change', '.pm-term-item input', generateVariationMatrix);
         $pmModal.find('.wikaz-modal-close, .wikaz-modal-cancel').on('click', closePMModal);
         $pmForm.on('submit', savePMProduct);
@@ -1186,8 +1186,13 @@
         });
     }
 
-    function deletePMProduct(id) {
+    function deletePMProduct(id, $btn) {
         if (!confirm('Delete this product permanently from WooCommerce?')) return;
+
+        // Save original button content and show loading state
+        const originalHtml = $btn.html();
+        $btn.prop('disabled', true).html('<span class="spinner is-active" style="margin:0; float:none;"></span>');
+        $btn.closest('tr').css('opacity', '0.5');
 
         $.ajax({
             url: wikazAdmin.ajaxUrl,
@@ -1199,11 +1204,22 @@
             },
             success: function (response) {
                 if (response.success) {
-                    loadPMProducts();
+                    $btn.closest('tr').fadeOut(300, function () {
+                        $(this).remove();
+                    });
                     showNotification('Product deleted successfully!', 'success');
+                    loadPMProducts();
                 } else {
                     showNotification('Error deleting product', 'error');
                 }
+            },
+            error: function (xhr, status, error) {
+                showNotification('Error koneksi: ' + error, 'error');
+            },
+            complete: function () {
+                // Restore button state if row still exists
+                $btn.prop('disabled', false).html(originalHtml);
+                $btn.closest('tr').css('opacity', '1');
             }
         });
     }
