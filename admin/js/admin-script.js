@@ -1261,17 +1261,20 @@
         // Delete Item
         $container.on('click', '.wikaz-delete-master', function (e) {
             e.preventDefault();
+            e.stopPropagation();
 
-            if (!confirm('Are you sure you want to delete this item?')) return;
+            if (!confirm('Apakah Anda yakin ingin menghapus item ini?')) return;
 
             const $btn = $(this);
             const id = $btn.data('id');
             const type = $btn.data('type');
-            const realType = $btn.data('type');
             let taxonomy = $btn.data('taxonomy');
 
-            if (realType === 'category') taxonomy = 'product_cat';
-            if (realType === 'tag') taxonomy = 'product_tag';
+            // Set taxonomy based on type if not already set
+            if (type === 'category') taxonomy = 'product_cat';
+            if (type === 'tag') taxonomy = 'product_tag';
+
+            console.log('Deleting:', { id, type, taxonomy });
 
             $.ajax({
                 url: wikazAdmin.ajaxUrl,
@@ -1283,12 +1286,30 @@
                     taxonomy: taxonomy
                 },
                 success: function (response) {
+                    console.log('Delete response:', response);
                     if (response.success) {
-                        $btn.closest('tr').fadeOut();
-                        showNotification('Item deleted successfully!', 'success');
+                        $btn.closest('tr').fadeOut(300, function () {
+                            $(this).remove();
+                        });
+                        showNotification('Item berhasil dihapus!', 'success');
+
+                        // Reload the list based on type
+                        if (type === 'category') loadMasterCategories();
+                        if (type === 'tag') loadMasterTags();
+                        if (type === 'term') {
+                            const currentSlug = $('#master-attributes-type-list li.active').data('slug');
+                            const attrType = $('#master-attributes-type-list li.active').data('type');
+                            if (currentSlug) {
+                                loadMasterTerms('pa_' + currentSlug, attrType);
+                            }
+                        }
                     } else {
-                        showNotification('Error deleting item: ' + response.data, 'error');
+                        showNotification('Error menghapus item: ' + (response.data || 'Unknown error'), 'error');
                     }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Delete AJAX error:', { xhr, status, error });
+                    showNotification('Error koneksi: ' + error, 'error');
                 }
             });
         });
@@ -1654,9 +1675,33 @@
         $('#master-item-slug').val($row.find('code').text());
 
         if (type === 'term') {
-            const color = $(`.wikaz-edit-master[data-id="${id}"][data-type="term"]`).data('color');
-            if (color && $('#master-term-color').data('wpColorPicker')) {
-                $('#master-term-color').wpColorPicker('color', color);
+            const $editBtn = $(`.wikaz-edit-master[data-id="${id}"][data-type="term"]`);
+            const color = $editBtn.attr('data-color') || $editBtn.data('color');
+
+            if (color && color !== '' && color !== '#ffffff') {
+                // Use setTimeout to ensure color group is visible and picker is ready
+                setTimeout(function () {
+                    const $colorInput = $('#master-term-color');
+
+                    // Set the value directly on the input first
+                    $colorInput.val(color);
+
+                    // Try to update via wpColorPicker if available
+                    try {
+                        if ($colorInput.data('wpColorPicker')) {
+                            $colorInput.wpColorPicker('color', color);
+                        }
+                        // Also try iris directly (underlying color picker)
+                        if ($colorInput.data('a8cIris')) {
+                            $colorInput.iris('color', color);
+                        }
+                    } catch (e) {
+                        console.log('Color picker update error:', e);
+                    }
+
+                    // Update the color preview button background
+                    $colorInput.closest('.wp-picker-container').find('.wp-color-result').css('background-color', color);
+                }, 100);
             }
         }
 
