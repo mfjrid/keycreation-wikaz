@@ -134,10 +134,10 @@
 
 .wikaz-carousel .wikaz-slide.layout-split-left .wikaz-slide-image,
 .wikaz-carousel .wikaz-slide.layout-split-right .wikaz-slide-image {
-    width: 50% !important;
-    min-width: 50% !important;
-    max-width: 50% !important;
-    flex: 0 0 50% !important;
+    width: 36% !important;
+    min-width: 36% !important;
+    max-width: 36% !important;
+    flex: 0 0 36% !important;
     height: 100% !important;
     margin: 0 !important;
     padding: 40px !important;
@@ -162,12 +162,12 @@
 /* Better fit for portrait images in split mode */
 .layout-split-left .wikaz-slide-bg,
 .layout-split-right .wikaz-slide-bg {
-    inset: 40px !important;
-    top: 120px !important;
+    /* inset: 40px !important;
+    top: 120px !important; */
     background-size: cover;
     background-position: center top;
     background-color: transparent;
-    border-radius: 30px;
+    /* border-radius: 30px; */
 }
 
 .swiper-slide-active .wikaz-slide-bg {
@@ -270,7 +270,7 @@ iframe.wikaz-video-embed,
     justify-content: center;
     height: 100%;
     width: 100%;
-    padding: 40px;
+    padding: 70px;
     box-sizing: border-box;
 }
 
@@ -282,10 +282,10 @@ iframe.wikaz-video-embed,
 
 .wikaz-carousel .wikaz-slide.layout-split-left .wikaz-slide-content,
 .wikaz-carousel .wikaz-slide.layout-split-right .wikaz-slide-content {
-    width: 50% !important;
-    min-width: 50% !important;
-    max-width: 50% !important;
-    flex: 0 0 50% !important;
+    width: 64% !important;
+    min-width: 64% !important;
+    max-width: 64% !important;
+    flex: 0 0 64% !important;
     background: var(--wikaz-split-bg);
     display: flex !important;
     flex-direction: column !important;
@@ -496,13 +496,11 @@ iframe.wikaz-video-embed,
         /* Smaller padding on mobile */
     }
 
-    .layout-split-left .wikaz-slide-bg,
+    /* .layout-split-left .wikaz-slide-bg,
     .layout-split-right .wikaz-slide-bg {
         inset: 20px !important;
-        /* Match mobile padding */
         border-radius: 20px !important;
-        /* Slightly smaller radius on mobile */
-    }
+    } */
 
     .layout-split-left .wikaz-slide-content,
     .layout-split-right .wikaz-slide-content {
