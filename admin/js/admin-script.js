@@ -1274,6 +1274,11 @@
             if (type === 'category') taxonomy = 'product_cat';
             if (type === 'tag') taxonomy = 'product_tag';
 
+            // Save original button content and show loading state
+            const originalHtml = $btn.html();
+            $btn.prop('disabled', true).html('<span class="spinner is-active" style="margin:0; float:none;"></span>');
+            $btn.closest('tr').css('opacity', '0.5');
+
             console.log('Deleting:', { id, type, taxonomy });
 
             $.ajax({
@@ -1310,6 +1315,11 @@
                 error: function (xhr, status, error) {
                     console.error('Delete AJAX error:', { xhr, status, error });
                     showNotification('Error koneksi: ' + error, 'error');
+                },
+                complete: function () {
+                    // Restore button state
+                    $btn.prop('disabled', false).html(originalHtml);
+                    $btn.closest('tr').css('opacity', '1');
                 }
             });
         });
