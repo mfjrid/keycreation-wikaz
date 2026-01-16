@@ -126,11 +126,27 @@ class Wikaz_Frontend
                 true
             );
 
+            $current_stock = '';
+            if (is_a($product, 'WC_Product')) {
+                if ($product->is_type('variable')) {
+                    $total_stock = 0;
+                    foreach ($product->get_children() as $child_id) {
+                        $variation = wc_get_product($child_id);
+                        if ($variation && $variation->managing_stock()) {
+                            $total_stock += $variation->get_stock_quantity();
+                        }
+                    }
+                    $current_stock = $total_stock > 0 ? $total_stock : '';
+                } elseif ($product->managing_stock()) {
+                    $current_stock = $product->get_stock_quantity();
+                }
+            }
+
             wp_localize_script('wikaz-frontend-script', 'wikazProductData', array(
                 'stockLabel' => __('available', 'keycreation-wikaz'),
                 'viewCountSelector' => '.product-info-view',
                 'stockSelector' => '.stock, .in-stock',
-                'currentStock' => (is_a($product, 'WC_Product') && $product->managing_stock()) ? $product->get_stock_quantity() : ''
+                'currentStock' => $current_stock
             ));
         }
     }
