@@ -28,6 +28,9 @@ class Wikaz_Frontend
 
         // Product page customizations
         add_filter('woocommerce_get_availability', array($this, 'custom_stock_availability'), 10, 2);
+        
+        // Clear default variation selection on product page
+        add_filter('woocommerce_product_get_default_attributes', array($this, 'clear_default_attributes'), 10, 2);
     }
 
     /**
@@ -43,6 +46,18 @@ class Wikaz_Frontend
             }
         }
         return $availability;
+    }
+
+    /**
+     * Clear default attributes to prevent auto-selection of variations
+     */
+    public function clear_default_attributes($defaults, $product)
+    {
+        // Only clear on frontend single product pages
+        if (is_product() && !is_admin()) {
+            return array();
+        }
+        return $defaults;
     }
 
     /**
