@@ -1263,7 +1263,7 @@
             e.preventDefault();
             e.stopPropagation();
 
-            if (!confirm('Apakah Anda yakin ingin menghapus item ini?')) return;
+            if (!confirm('Are You sure want to delete this item?')) return;
 
             const $btn = $(this);
             const id = $btn.data('id');
@@ -1296,7 +1296,7 @@
                         $btn.closest('tr').fadeOut(300, function () {
                             $(this).remove();
                         });
-                        showNotification('Item berhasil dihapus!', 'success');
+                        showNotification('Item deleted successfully!', 'success');
 
                         // Reload the list based on type
                         if (type === 'category') loadMasterCategories();
