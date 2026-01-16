@@ -1287,8 +1287,14 @@
 
             // Build confirmation message
             let confirmMsg = 'Are you sure you want to delete this item?';
-            if (type === 'term' && count > 0) {
-                confirmMsg = `⚠️ WARNING: This attribute is used by ${count} product variation(s)!\n\nDeleting this will affect those products. Are you sure you want to continue?`;
+            if (count > 0) {
+                if (type === 'term') {
+                    confirmMsg = `⚠️ WARNING: This attribute is used by ${count} product variation(s)!\n\nDeleting this will affect those products. Are you sure you want to continue?`;
+                } else if (type === 'category') {
+                    confirmMsg = `⚠️ WARNING: This category contains ${count} product(s)!\n\nDeleting this will remove the category from those products. Are you sure you want to continue?`;
+                } else if (type === 'tag') {
+                    confirmMsg = `⚠️ WARNING: This tag is used by ${count} product(s)!\n\nDeleting this will remove the tag from those products. Are you sure you want to continue?`;
+                }
             }
 
             if (!confirm(confirmMsg)) return;
@@ -1369,15 +1375,18 @@
                         html = '<tr><td colspan="5" align="center">No categories found.</td></tr>';
                     } else {
                         response.data.forEach(cat => {
+                            const countBadge = cat.count > 0
+                                ? `<span class="count-badge" style="background:#0073aa; color:#fff; padding:2px 8px; border-radius:10px; font-size:11px;">${cat.count}</span>`
+                                : `<span class="count-badge" style="background:#ddd; color:#666; padding:2px 8px; border-radius:10px; font-size:11px;">0</span>`;
                             html += `
                         <tr>
                                     <td><img src="${cat.image || ''}" width="40" height="40" style="object-fit:cover; border-radius:4px;"></td>
                                     <td><strong>${cat.name}</strong></td>
                                     <td><code>${cat.slug}</code></td>
-                                    <td>${cat.count}</td>
+                                    <td>${countBadge}</td>
                                     <td class="column-actions">
                                         <button type="button" class="button button-small wikaz-edit-master" data-type="category" data-id="${cat.id}"><span class="dashicons dashicons-edit"></span></button>
-                                        <button type="button" class="button button-small wikaz-delete-master" data-type="category" data-id="${cat.id}"><span class="dashicons dashicons-trash"></span></button>
+                                        <button type="button" class="button button-small wikaz-delete-master" data-type="category" data-id="${cat.id}" data-count="${cat.count}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
                                 </tr>
                         `;
@@ -1407,14 +1416,17 @@
                         html = '<tr><td colspan="4" align="center">No tags found.</td></tr>';
                     } else {
                         response.data.forEach(tag => {
+                            const countBadge = tag.count > 0
+                                ? `<span class="count-badge" style="background:#0073aa; color:#fff; padding:2px 8px; border-radius:10px; font-size:11px;">${tag.count}</span>`
+                                : `<span class="count-badge" style="background:#ddd; color:#666; padding:2px 8px; border-radius:10px; font-size:11px;">0</span>`;
                             html += `
                         <tr>
                                     <td><strong>${tag.name}</strong></td>
                                     <td><code>${tag.slug}</code></td>
-                                    <td>${tag.count}</td>
+                                    <td>${countBadge}</td>
                                     <td class="column-actions">
                                         <button type="button" class="button button-small wikaz-edit-master" data-type="tag" data-id="${tag.id}"><span class="dashicons dashicons-edit"></span></button>
-                                        <button type="button" class="button button-small wikaz-delete-master" data-type="tag" data-id="${tag.id}"><span class="dashicons dashicons-trash"></span></button>
+                                        <button type="button" class="button button-small wikaz-delete-master" data-type="tag" data-id="${tag.id}" data-count="${tag.count}"><span class="dashicons dashicons-trash"></span></button>
                                     </td>
                                 </tr>
                         `;
