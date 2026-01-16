@@ -61,10 +61,13 @@ class Wikaz_Frontend
      */
     public function enqueue_assets()
     {
-        // Load on front page (carousel), if shortcode is used, or on single product pages
-        if (!is_front_page() && !$this->has_shortcode() && !is_product()) {
-            return;
-        }
+        // Load standard frontend styles globally
+        wp_enqueue_style(
+            'wikaz-frontend-style',
+            WIKAZ_PLUGIN_URL . 'public/css/frontend-style.css',
+            array(),
+            WIKAZ_VERSION
+        );
 
         // Swiper CSS (Only for carousel pages)
         if (is_front_page() || $this->has_shortcode()) {
@@ -111,12 +114,6 @@ class Wikaz_Frontend
                 $product = wc_get_product(get_the_ID());
             }
 
-            wp_enqueue_style(
-                'wikaz-frontend-style',
-                WIKAZ_PLUGIN_URL . 'public/css/frontend-style.css',
-                array(),
-                WIKAZ_VERSION
-            );
 
             wp_enqueue_script(
                 'wikaz-frontend-script',
