@@ -277,15 +277,16 @@
             },
             success: function (response) {
                 if (response.success) {
-                    location.reload();
+                    showNotification('Slide saved successfully!', 'success');
+                    setTimeout(() => window.location.reload(), 2000);
                 } else {
                     const message = response.data && response.data.message ? response.data.message : wikazAdmin.strings.error;
-                    alert(message);
+                    showNotification(message, 'error');
                 }
             },
             error: function (xhr, status, error) {
                 console.error('Save error:', error);
-                alert(wikazAdmin.strings.error);
+                showNotification(wikazAdmin.strings.error, 'error');
             },
             complete: function () {
                 $btn.html(originalText).prop('disabled', false);
@@ -313,13 +314,19 @@
             },
             success: function (response) {
                 if (response.success) {
+                    showNotification('Slide deleted successfully!', 'success');
                     $item.slideUp(300, function () {
                         $(this).remove();
                         if (!$slidesList.find('.wikaz-slide-item').length) {
-                            location.reload();
+                            setTimeout(() => window.location.reload(), 2000);
                         }
                     });
+                } else {
+                    showNotification('Error deleting slide', 'error');
                 }
+            },
+            error: function () {
+                showNotification('Error deleting slide', 'error');
             }
         });
     }
@@ -651,14 +658,17 @@
             },
             success: function (response) {
                 if (response.success) {
+                    showNotification('Settings saved successfully!', 'success');
                     $btn.html('<span class="dashicons dashicons-yes"></span> ' + wikazAdmin.strings.saved);
                     setTimeout(function () {
                         $btn.html(originalText).prop('disabled', false);
                     }, 2000);
+                } else {
+                    showNotification('Error saving settings', 'error');
                 }
             },
             error: function () {
-                alert(wikazAdmin.strings.error);
+                showNotification(wikazAdmin.strings.error, 'error');
                 $btn.html(originalText).prop('disabled', false);
             }
         });
@@ -739,17 +749,18 @@
             data: formData,
             success: function (response) {
                 if (response.success) {
+                    showNotification('Marquee saved successfully!', 'success');
                     $btn.html('<span class="dashicons dashicons-yes"></span> ' + wikazAdmin.strings.saved);
                     setTimeout(function () {
                         $btn.html(originalText).prop('disabled', false);
                     }, 2000);
                 } else {
-                    alert(wikazAdmin.strings.error);
+                    showNotification(wikazAdmin.strings.error, 'error');
                     $btn.html(originalText).prop('disabled', false);
                 }
             },
             error: function () {
-                alert(wikazAdmin.strings.error);
+                showNotification(wikazAdmin.strings.error, 'error');
                 $btn.html(originalText).prop('disabled', false);
             },
             complete: function () {
@@ -1443,10 +1454,14 @@
                             },
                             success: function (response) {
                                 if (response.success) {
+                                    showNotification('Attribute type deleted successfully!', 'success');
                                     loadMasterAttributes();
                                 } else {
-                                    alert('Error: ' + response.data);
+                                    showNotification('Error: ' + response.data, 'error');
                                 }
+                            },
+                            error: function () {
+                                showNotification('Error deleting attribute type', 'error');
                             }
                         });
                     });
