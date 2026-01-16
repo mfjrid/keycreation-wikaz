@@ -31,6 +31,52 @@ class Wikaz_Frontend
         
         // Clear default variation selection on product page
         add_filter('woocommerce_product_get_default_attributes', array($this, 'clear_default_attributes'), 10, 2);
+        
+        // Reorder variation attributes: Color first, then Size
+        add_filter('woocommerce_product_get_attributes', array($this, 'reorder_variation_attributes'), 10, 2);
+        add_filter('woocommerce_get_variation_prices_hash', array($this, 'variation_prices_hash'), 10, 3);
+    }
+
+    /**
+     * Reorder product variation attributes: Color first, then Size
+     */
+    public function reorder_variation_attributes($attributes, $product)
+    {
+        if (empty($attributes) || !is_array($attributes)) {
+            return $attributes;
+        }
+
+        // Define priority order (lower = higher priority)
+        $priority_order = array();
+        foreach ($attributes as $key => $attribute) {
+            $slug_lower = strtolower($key);
+            
+            if (strpos($slug_lower, 'color') !== false || strpos($slug_lower, 'warna') !== false) {
+                $priority_order[$key] = 0; // Color first
+            } elseif (strpos($slug_lower, 'size') !== false || strpos($slug_lower, 'ukuran') !== false) {
+                $priority_order[$key] = 1; // Size second
+            } else {
+                $priority_order[$key] = 99; // Others last
+            }
+        }
+
+        // Sort attributes by priority
+        uksort($attributes, function($a, $b) use ($priority_order) {
+            $pos_a = isset($priority_order[$a]) ? $priority_order[$a] : 99;
+            $pos_b = isset($priority_order[$b]) ? $priority_order[$b] : 99;
+            return $pos_a - $pos_b;
+        });
+
+        return $attributes;
+    }
+
+    /**
+     * Ensure variation prices hash includes our reordering
+     */
+    public function variation_prices_hash($hash, $product, $for_display)
+    {
+        $hash[] = 'wikaz_attribute_order';
+        return $hash;
     }
 
     /**

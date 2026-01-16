@@ -806,12 +806,12 @@ class Wikaz_Admin
                         $attribute->set_options($terms);
                     }
 
-                    // Set position based on importance
+                    // Set position based on importance (Color first, then Size)
                     $pos = 99;
                     $slug_lower = strtolower($tax_slug);
-                    if (strpos($slug_lower, 'size') !== false || strpos($slug_lower, 'ukuran') !== false) {
+                    if (strpos($slug_lower, 'color') !== false || strpos($slug_lower, 'warna') !== false) {
                         $pos = 0;
-                    } elseif (strpos($slug_lower, 'color') !== false || strpos($slug_lower, 'warna') !== false) {
+                    } elseif (strpos($slug_lower, 'size') !== false || strpos($slug_lower, 'ukuran') !== false) {
                         $pos = 1;
                     } else {
                         $pos = $index++;
