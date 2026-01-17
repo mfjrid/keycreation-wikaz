@@ -19,6 +19,7 @@ class Wikaz_Frontend
         // Add body class for transparent header
         add_filter('body_class', array($this, 'add_body_class'));
         add_shortcode('wikaz_carousel', array($this, 'render_carousel'));
+        add_shortcode('wikaz_header_slider', array($this, 'render_header_slider'));
 
         // Auto-inject carousel based on position setting
         $position = get_option('wikaz_carousel_position', 'before_content');
@@ -167,6 +168,39 @@ class Wikaz_Frontend
                 'speed' => intval(get_option('wikaz_carousel_speed', '5000'))
             ));
         }
+        
+        // Enqueue Header Slider Script if needed
+        if ($this->has_header_slider_shortcode()) {
+             wp_enqueue_style(
+                'swiper',
+                'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
+                array(),
+                '11.0.0'
+            );
+
+            wp_enqueue_style(
+                'wikaz-carousel-style',
+                WIKAZ_PLUGIN_URL . 'public/css/carousel-style.css',
+                array('swiper'),
+                WIKAZ_VERSION
+            );
+
+             wp_enqueue_script(
+                'swiper',
+                'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
+                array(),
+                '11.0.0',
+                true
+            );
+
+            wp_enqueue_script(
+                'wikaz-header-slider',
+                WIKAZ_PLUGIN_URL . 'public/js/header-slider.js',
+                array('swiper'),
+                WIKAZ_VERSION,
+                true
+            );
+        }
 
         // Product Page Customizations
         if (is_product()) {
@@ -216,6 +250,27 @@ class Wikaz_Frontend
     {
         global $post;
         return is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'wikaz_carousel');
+    }
+
+    /**
+     * Check if current page has header slider shortcode
+     */
+    private function has_header_slider_shortcode()
+    {
+        global $post;
+        if (!is_a($post, 'WP_Post')) return false;
+        
+        // Robust check for Elementor or other page builders
+        if (has_shortcode($post->post_content, 'wikaz_header_slider')) {
+            return true;
+        }
+        
+        // Manual string check as fallback for nested locations
+        if (strpos($post->post_content, '[wikaz_header_slider') !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -330,6 +385,136 @@ class Wikaz_Frontend
             <!-- Pagination -->
             <div class="wikaz-carousel-pagination"></div>
         </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Get header slides for a specific slider
+     */
+    private function get_header_slides($slider_id)
+    {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wikaz_header_slider_slides';
+        // Removed is_active check to show all slides (since existing ones might be 0)
+        return $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE slider_id = %d ORDER BY sort_order ASC", $slider_id));
+    }
+
+    /**
+     * Render header slider
+     */
+    public function render_header_slider($atts)
+    {
+        $atts = shortcode_atts(array(
+            'id' => 0
+        ), $atts, 'wikaz_header_slider');
+
+        $slider_id = intval($atts['id']);
+        if (!$slider_id) return '';
+
+        // Get slider settings
+        global $wpdb;
+        $slider = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}wikaz_header_sliders WHERE id = %d AND is_active = 1", $slider_id));
+
+        if (!$slider) {
+            return '<div style="background:#fee; color:#a00; padding:10px; border:1px solid #a00;"><strong>Wikaz Slider Error:</strong> Slider with ID ' . esc_html($slider_id) . ' not found.</div>';
+        }
+
+        $slides = $this->get_header_slides($slider_id);
+        if (empty($slides)) {
+            return '<div style="background:#fee; color:#a00; padding:10px; border:1px solid #a00;"><strong>Wikaz Slider Error:</strong> Slider found, but no slides have been added yet.</div>';
+        }
+
+        // Force enqueue assets here to ensure they load even in page builders
+        wp_enqueue_style('swiper', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.0');
+        wp_enqueue_style('wikaz-carousel-style', WIKAZ_PLUGIN_URL . 'public/css/carousel-style.css', array('swiper'), WIKAZ_VERSION);
+        wp_enqueue_script('swiper', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), '11.0.0', true);
+        wp_enqueue_script('wikaz-header-slider', WIKAZ_PLUGIN_URL . 'public/js/header-slider.js', array('swiper'), WIKAZ_VERSION, true);
+
+        $uid = uniqid();
+        $wrapper_class = 'wikaz-carousel-wrapper header-slider-wrapper'; 
+        
+        // Inline style to strict force visibility
+        $style = 'width: 100%; height: 100vh; min-height: 500px; display: block; position: relative; overflow: hidden; background: #000;';
+
+        ob_start();
+        ?>
+        <div class="<?php echo esc_attr($wrapper_class); ?>" style="<?php echo esc_attr($style); ?>">
+            <div class="swiper wikaz-carousel wikaz-header-slider-instance" 
+                 data-autoplay="<?php echo esc_attr($slider->autoplay); ?>" 
+                 data-speed="<?php echo esc_attr($slider->speed); ?>"
+                 data-uid="<?php echo esc_attr($uid); ?>">
+                 
+                <div class="swiper-wrapper">
+                    <?php foreach ($slides as $slide):
+                        $product = $slide->product_id ? wc_get_product($slide->product_id) : null;
+                        $post = $slide->post_id ? get_post($slide->post_id) : null;
+
+                        $title = $slide->title ?: ($product ? $product->get_name() : ($post ? $post->post_title : ''));
+
+                        // URL Priority: Button URL -> Product URL -> Post URL -> #
+                        if ($slide->button_url) {
+                            $url = $slide->button_url;
+                        } elseif ($product) {
+                            $url = get_permalink($product->get_id());
+                        } elseif ($post) {
+                            $url = get_permalink($post->ID);
+                        } else {
+                            $url = '#';
+                        }
+
+                        $button_text = $slide->button_text ?: 'Shop Now';
+                        $layout = $slide->layout ?: 'full-bg';
+                        ?>
+                        <div class="swiper-slide wikaz-slide layout-<?php echo esc_attr($layout); ?>">
+                            <div class="wikaz-slide-image">
+                                <?php if ($slide->background_video):
+                                    echo $this->get_video_embed($slide->background_video);
+                                else: ?>
+                                    <div class="wikaz-slide-bg"
+                                        style="background-image: url('<?php echo esc_url($slide->background_image); ?>');"></div>
+                                <?php endif; ?>
+                                <div class="wikaz-slide-overlay"></div>
+                            </div>
+                            <div class="wikaz-slide-content">
+                                <div class="wikaz-content-inner">
+                                    <?php if ($slide->subtitle): ?>
+                                        <span class="wikaz-slide-subtitle"><?php echo esc_html($slide->subtitle); ?></span>
+                                    <?php endif; ?>
+                                    <?php if ($title): ?>
+                                        <h2 class="wikaz-slide-title"><?php echo esc_html($title); ?></h2>
+                                    <?php endif; ?>
+                                    <?php if ($slide->description): ?>
+                                        <div class="wikaz-slide-description">
+                                            <?php echo wp_kses_post($slide->description); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if ($product): ?>
+                                        <div class="wikaz-slide-price">
+                                            <?php echo $product->get_price_html(); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if ($url && $url !== '#'): ?>
+                                        <a href="<?php echo esc_url($url); ?>" class="wikaz-slide-button">
+                                            <?php echo esc_html($button_text); ?>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                <polyline points="12 5 19 12 12 19"></polyline>
+                                            </svg>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Pagination -->
+                <div class="wikaz-carousel-pagination wikaz-pagination-<?php echo $uid; ?>"></div>
+            </div>
         </div>
         <?php
         return ob_get_clean();

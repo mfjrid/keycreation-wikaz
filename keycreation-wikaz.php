@@ -140,6 +140,44 @@ class Keycreation_Wikaz
         add_option('wikaz_carousel_autoplay', '1');
         add_option('wikaz_carousel_speed', '5000');
         add_option('wikaz_carousel_position', 'before_content');
+
+        // Header Slider Tables
+        $sliders_table = $wpdb->prefix . 'wikaz_header_sliders';
+        $sql_sliders = "CREATE TABLE IF NOT EXISTS $sliders_table (
+            id INT NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NOT NULL,
+            autoplay TINYINT(1) DEFAULT 1,
+            speed INT DEFAULT 5000,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+        dbDelta($sql_sliders);
+
+        $slider_slides_table = $wpdb->prefix . 'wikaz_header_slider_slides';
+        $sql_slider_slides = "CREATE TABLE IF NOT EXISTS $slider_slides_table (
+            id INT NOT NULL AUTO_INCREMENT,
+            slider_id INT NOT NULL,
+            product_id BIGINT DEFAULT NULL,
+            post_id BIGINT DEFAULT NULL,
+            title VARCHAR(255) DEFAULT NULL,
+            subtitle VARCHAR(255) DEFAULT NULL,
+            background_image VARCHAR(500) DEFAULT NULL,
+            background_video VARCHAR(500) DEFAULT NULL,
+            layout VARCHAR(20) DEFAULT 'full-bg',
+            description TEXT DEFAULT NULL,
+            button_text VARCHAR(100) DEFAULT 'Shop Now',
+            button_url VARCHAR(500) DEFAULT NULL,
+            sort_order INT DEFAULT 0,
+            is_active TINYINT(1) DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY slider_id (slider_id)
+        ) $charset_collate;";
+        dbDelta($sql_slider_slides);
     }
 }
 

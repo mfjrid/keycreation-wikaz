@@ -567,7 +567,8 @@
     color: var(--wikaz-danger);
 }
 
-#wikaz-slide-form {
+#wikaz-slide-form,
+#wikaz-header-slide-form {
     display: flex;
     flex-direction: column;
     flex: 1;

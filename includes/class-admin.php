@@ -44,6 +44,14 @@ class Wikaz_Admin
         add_action('wp_ajax_wikaz_save_master_attribute_type', array($this, 'ajax_save_master_attribute_type'));
         add_action('wp_ajax_wikaz_delete_master_attribute_type', array($this, 'ajax_delete_master_attribute_type'));
         add_action('wp_ajax_wikaz_get_pm_product', array($this, 'ajax_get_pm_product'));
+
+        // Header Slider AJAX
+        add_action('wp_ajax_wikaz_get_header_sliders', array($this, 'ajax_get_header_sliders'));
+        add_action('wp_ajax_wikaz_save_header_slider', array($this, 'ajax_save_header_slider'));
+        add_action('wp_ajax_wikaz_delete_header_slider', array($this, 'ajax_delete_header_slider'));
+        add_action('wp_ajax_wikaz_get_header_slides', array($this, 'ajax_get_header_slides'));
+        add_action('wp_ajax_wikaz_save_header_slide', array($this, 'ajax_save_header_slide'));
+        add_action('wp_ajax_wikaz_delete_header_slide', array($this, 'ajax_delete_header_slide'));
     }
 
     /**
@@ -86,6 +94,15 @@ class Wikaz_Admin
             'manage_options',
             'wikaz-carousel',
             array($this, 'render_carousel_page')
+        );
+
+        add_submenu_page(
+            'wikaz-design',
+            __('Header Sliders', 'keycreation-wikaz'),
+            __('Header Sliders', 'keycreation-wikaz'),
+            'manage_options',
+            'wikaz-header-sliders',
+            array($this, 'render_header_slider_page')
         );
 
         add_submenu_page(
@@ -166,6 +183,28 @@ class Wikaz_Admin
         // Ensure table exists (fallback for activation hook)
         $this->maybe_create_table();
         require_once WIKAZ_PLUGIN_DIR . 'admin/dashboard.php';
+    }
+
+    /**
+     * Render header slider admin page
+     */
+    public function render_header_slider_page()
+    {
+        $this->maybe_create_header_tables();
+        require_once WIKAZ_PLUGIN_DIR . 'admin/header-slider-dashboard.php';
+    }
+
+    /**
+     * Ensure header slider tables exist
+     */
+    private function maybe_create_header_tables()
+    {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wikaz_header_sliders';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+            $plugin = Keycreation_Wikaz::get_instance();
+            $plugin->activate();
+        }
     }
 
     /**
@@ -1130,6 +1169,203 @@ class Wikaz_Admin
 
         if (!$result) {
             wp_send_json_error('Failed to delete attribute type');
+        }
+
+        wp_send_json_success();
+    }
+
+    /**
+     * AJAX: Get all header sliders
+     */
+    public function ajax_get_header_sliders()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wikaz_header_sliders';
+        $sliders = $wpdb->get_results("SELECT * FROM $table_name ORDER BY created_at DESC");
+
+        wp_send_json_success($sliders);
+    }
+
+    /**
+     * AJAX: Save header slider
+     */
+    public function ajax_save_header_slider()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wikaz_header_sliders';
+
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        $name = sanitize_text_field($_POST['name']);
+        
+        if (empty($name)) {
+            wp_send_json_error('Name is required');
+        }
+
+        $slug = sanitize_title($name);
+        $autoplay = isset($_POST['autoplay']) ? intval($_POST['autoplay']) : 1;
+        $speed = isset($_POST['speed']) ? intval($_POST['speed']) : 5000;
+        $is_active = isset($_POST['is_active']) ? intval($_POST['is_active']) : 1;
+
+        $data = array(
+            'name' => $name,
+            'slug' => $slug,
+            'autoplay' => $autoplay,
+            'speed' => $speed,
+            'is_active' => $is_active
+        );
+
+        if ($id > 0) {
+            $wpdb->update($table_name, $data, array('id' => $id));
+        } else {
+            // Uniquify slug
+            if ($wpdb->get_var($wpdb->prepare("SELECT id FROM $table_name WHERE slug = %s", $slug))) {
+                $slug .= '-' . time();
+                $data['slug'] = $slug;
+            }
+            $wpdb->insert($table_name, $data);
+            $id = $wpdb->insert_id;
+        }
+
+        wp_send_json_success(array('id' => $id, 'message' => 'Slider saved successfully'));
+    }
+
+    /**
+     * AJAX: Delete header slider
+     */
+    public function ajax_delete_header_slider()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $id = intval($_POST['id']);
+        global $wpdb;
+        
+        $sliders_table = $wpdb->prefix . 'wikaz_header_sliders';
+        $slides_table = $wpdb->prefix . 'wikaz_header_slider_slides';
+
+        // Delete slides first
+        $wpdb->delete($slides_table, array('slider_id' => $id));
+        
+        // Delete slider
+        $result = $wpdb->delete($sliders_table, array('id' => $id));
+
+        if ($result === false) {
+            wp_send_json_error('Failed to delete slider');
+        }
+
+        wp_send_json_success();
+    }
+
+    /**
+     * AJAX: Get slides for a slider
+     */
+    public function ajax_get_header_slides()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $slider_id = isset($_POST['slider_id']) ? intval($_POST['slider_id']) : 0;
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wikaz_header_slider_slides';
+        
+        $slides = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE slider_id = %d ORDER BY sort_order ASC", $slider_id));
+
+        wp_send_json_success($slides);
+    }
+
+    /**
+     * AJAX: Save header slide
+     */
+    public function ajax_save_header_slide()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wikaz_header_slider_slides';
+
+        $id = isset($_POST['slide_id']) ? intval($_POST['slide_id']) : 0;
+        $slider_id = intval($_POST['slider_id']);
+        
+        if ($slider_id <= 0) {
+            wp_send_json_error('Invalid slider ID');
+        }
+
+        $media_type = sanitize_text_field($_POST['media_type']);
+        $background_image = esc_url_raw($_POST['background_image']);
+        $background_video = esc_url_raw($_POST['background_video']);
+
+        // Validation based on media type
+        if ($media_type === 'image' && empty($background_image)) {
+            wp_send_json_error('Background image is required');
+        }
+        
+        // Use video only if media type is video
+        if ($media_type === 'image') {
+            $background_video = null;
+        }
+
+        $data = array(
+            'slider_id' => $slider_id,
+            'title' => sanitize_text_field($_POST['title']),
+            'subtitle' => sanitize_text_field($_POST['subtitle']),
+            'background_image' => $background_image,
+            'background_video' => $background_video,
+            'layout' => sanitize_text_field($_POST['layout']),
+            'description' => wp_kses_post($_POST['description']),
+            'button_text' => sanitize_text_field($_POST['button_text']),
+            'button_url' => esc_url_raw($_POST['button_url']),
+            'is_active' => 1, // Default to active since we don't have a toggle yet
+            'product_id' => !empty($_POST['product_id']) ? intval($_POST['product_id']) : null,
+            'post_id' => !empty($_POST['post_id']) ? intval($_POST['post_id']) : null,
+        );
+
+        if ($id > 0) {
+            $wpdb->update($table_name, $data, array('id' => $id));
+        } else {
+            // Get max sort_order
+            $max_order = $wpdb->get_var($wpdb->prepare("SELECT MAX(sort_order) FROM $table_name WHERE slider_id = %d", $slider_id));
+            $data['sort_order'] = $max_order !== null ? $max_order + 1 : 0;
+            $wpdb->insert($table_name, $data);
+            $id = $wpdb->insert_id;
+        }
+
+        wp_send_json_success(array('id' => $id, 'message' => 'Slide saved successfully'));
+    }
+
+    /**
+     * AJAX: Delete header slide
+     */
+    public function ajax_delete_header_slide()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $id = intval($_POST['id']);
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wikaz_header_slider_slides';
+        $result = $wpdb->delete($table_name, array('id' => $id));
+
+        if ($result === false) {
+            wp_send_json_error('Failed to delete slide');
         }
 
         wp_send_json_success();
