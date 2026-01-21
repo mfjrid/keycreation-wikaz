@@ -85,6 +85,20 @@ if (!defined('ABSPATH')) {
                 </div>
 
                 <div class="wikaz-form-row">
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Category', 'keycreation-wikaz'); ?></label>
+                        <select id="sp-post-category" class="widefat">
+                            <option value=""><?php _e('Select Category', 'keycreation-wikaz'); ?></option>
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Tags', 'keycreation-wikaz'); ?></label>
+                        <input type="text" id="sp-post-tags" placeholder="<?php _e('Separate with commas', 'keycreation-wikaz'); ?>">
+                    </div>
+                </div>
+
+                <div class="wikaz-form-row">
                     <div class="wikaz-form-group full-width">
                         <label><?php _e('Title', 'keycreation-wikaz'); ?> <span class="required">*</span></label>
                         <input type="text" id="sp-post-title" required placeholder="Enter post title...">

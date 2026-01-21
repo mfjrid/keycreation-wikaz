@@ -642,7 +642,7 @@ a.nav-icon-item {
     color: #f1f1f1 !important;
 }
 
-ul.elementor-icon-list-items a {
+#mainnav ul.elementor-icon-list-items a {
     color: #000000 !important;
 }
 

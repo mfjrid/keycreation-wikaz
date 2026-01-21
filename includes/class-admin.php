@@ -59,6 +59,7 @@ class Wikaz_Admin
         add_action('wp_ajax_wikaz_delete_simple_post', array($this, 'ajax_delete_simple_post'));
         add_action('wp_ajax_wikaz_get_simple_post', array($this, 'ajax_get_simple_post'));
         add_action('wp_ajax_wikaz_upload_summernote_image', array($this, 'ajax_upload_summernote_image'));
+        add_action('wp_ajax_wikaz_get_post_taxonomies', array($this, 'ajax_get_post_taxonomies'));
 
         // Remove admin notices on Wikaz pages
         add_action('admin_head', array($this, 'remove_admin_notices'));
@@ -1483,6 +1484,8 @@ class Wikaz_Admin
         $title = sanitize_text_field($_POST['title']);
         $content = wp_kses_post($_POST['content']);
         $image_id = isset($_POST['image_id']) ? intval($_POST['image_id']) : 0;
+        $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : 0;
+        $tags = isset($_POST['tags']) ? sanitize_text_field($_POST['tags']) : '';
 
         $post_data = array(
             'post_title' => $title,
@@ -1490,6 +1493,14 @@ class Wikaz_Admin
             'post_status' => 'publish',
             'post_type' => 'post'
         );
+
+        if ($category_id > 0) {
+            $post_data['post_category'] = array($category_id);
+        }
+
+        if (!empty($tags)) {
+            $post_data['tags_input'] = $tags;
+        }
 
         if ($post_id > 0) {
             $post_data['ID'] = $post_id;
@@ -1530,16 +1541,52 @@ class Wikaz_Admin
 
         $image_id = get_post_thumbnail_id($post_id);
         $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'medium') : '';
+        
+        $categories = wp_get_post_categories($post_id);
+        $category_id = !empty($categories) ? $categories[0] : '';
+        
+        $tags = get_the_tags($post_id);
+        $tag_names = array();
+        if ($tags) {
+            foreach ($tags as $tag) {
+                $tag_names[] = $tag->name;
+            }
+        }
+        $tags_str = implode(', ', $tag_names);
 
         $data = array(
             'id' => $post->ID,
             'title' => $post->post_title,
             'content' => $post->post_content,
             'image_id' => $image_id,
-            'image_url' => $image_url
+            'image_url' => $image_url,
+            'category_id' => $category_id,
+            'tags' => $tags_str
         );
 
         wp_send_json_success($data);
+    }
+    
+    /**
+     * AJAX: Get Post Taxonomies (Categories)
+     */
+    public function ajax_get_post_taxonomies() 
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $categories = get_categories(array('hide_empty' => false));
+        $cats = array();
+        foreach($categories as $cat) {
+            $cats[] = array(
+                'id' => $cat->term_id,
+                'name' => $cat->name
+            );
+        }
+
+        wp_send_json_success(array('categories' => $cats));
     }
 
     /**

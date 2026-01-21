@@ -1886,6 +1886,7 @@
     function initSimplePost() {
         // Initial load
         loadSimplePosts();
+        loadPostCategories();
 
         // Bind events
         $('#wikaz-add-simple-post').on('click', openSimplePostModal);
@@ -1920,6 +1921,27 @@
             callbacks: {
                 onImageUpload: function (files) {
                     uploadSummernoteImage(files[0]);
+                }
+            }
+        });
+    }
+
+    function loadPostCategories() {
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_get_post_taxonomies',
+                nonce: wikazAdmin.nonce
+            },
+            success: function (response) {
+                if (response.success) {
+                    const cats = response.data.categories;
+                    let options = '<option value="">Select Category</option>';
+                    cats.forEach(c => {
+                        options += `<option value="${c.id}">${c.name}</option>`;
+                    });
+                    $('#sp-post-category').html(options);
                 }
             }
         });
@@ -2040,6 +2062,11 @@
         $('#sp-post-image-id').val('');
         $('#sp-image-preview img').hide().attr('src', '');
         $('#sp-image-preview .placeholder').show();
+
+        // Reset Category and Tags
+        $('#sp-post-category').val('');
+        $('#sp-post-tags').val('');
+
         $('#wikaz-sp-modal-title').text('Add New Post');
         $spModal.addClass('active');
     }
@@ -2063,6 +2090,10 @@
                     $('#sp-post-id').val(data.id);
                     $('#sp-post-title').val(data.title);
                     $('#sp-post-content').summernote('code', data.content);
+
+                    // Set Category and Tags
+                    $('#sp-post-category').val(data.category_id);
+                    $('#sp-post-tags').val(data.tags);
 
                     if (data.image_id) {
                         $('#sp-post-image-id').val(data.image_id);
@@ -2098,7 +2129,9 @@
                 post_id: $('#sp-post-id').val(),
                 title: $('#sp-post-title').val(),
                 content: $('#sp-post-content').summernote('code'),
-                image_id: $('#sp-post-image-id').val()
+                image_id: $('#sp-post-image-id').val(),
+                category_id: $('#sp-post-category').val(),
+                tags: $('#sp-post-tags').val()
             },
             success: function (response) {
                 if (response.success) {
