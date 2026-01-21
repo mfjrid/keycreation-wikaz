@@ -642,6 +642,10 @@ a.nav-icon-item {
     color: #f1f1f1 !important;
 }
 
-li.menu-item.menu-item-type-post_type.menu-item-object-page {
-    padding: 0 !important;
+ul.elementor-icon-list-items a {
+    color: #000000 !important;
 }
+
+/* li.menu-item.menu-item-type-post_type.menu-item-object-page {
+    padding: 0 !important;
+} */
