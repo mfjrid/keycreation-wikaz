@@ -1870,4 +1870,267 @@
         }, 5000);
     }
 
+    /* ==========================================
+       SIMPLE POST MODULE
+       ========================================== */
+
+    const $spList = $('#wikaz-sp-list');
+    const $spModal = $('#wikaz-sp-modal');
+    const $spForm = $('#wikaz-sp-form');
+
+    // Init if on the page
+    if ($('.simple-post-manager').length) {
+        initSimplePost();
+    }
+
+    function initSimplePost() {
+        // Initial load
+        loadSimplePosts();
+
+        // Bind events
+        $('#wikaz-add-simple-post').on('click', openSimplePostModal);
+        $('#wikaz-sp-search').on('input', debounce(() => loadSimplePosts(1), 500));
+
+        // Modal events
+        $spModal.find('.wikaz-modal-close, .wikaz-modal-cancel').on('click', closeSimplePostModal);
+        $spForm.on('submit', saveSimplePost);
+
+        // Edit/Delete
+        $(document).on('click', '.wikaz-sp-edit', function (e) { e.preventDefault(); editSimplePost($(this).data('id')); });
+        $(document).on('click', '.wikaz-sp-delete', function (e) { e.preventDefault(); deleteSimplePost($(this).data('id'), $(this)); });
+
+        // Image Uploader
+        $('#sp-image-preview').on('click', selectSPImage);
+
+        // Init Summernote
+        $('#sp-post-content').summernote({
+            placeholder: 'Write your content here...',
+            tabsize: 2,
+            height: 300,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture', 'video']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            dialogsInBody: true,
+            callbacks: {
+                onImageUpload: function (files) {
+                    uploadSummernoteImage(files[0]);
+                }
+            }
+        });
+    }
+
+    function uploadSummernoteImage(file) {
+        const data = new FormData();
+        data.append('action', 'wikaz_upload_summernote_image');
+        data.append('nonce', wikazAdmin.nonce);
+        data.append('file', file);
+
+        $.ajax({
+            data: data,
+            type: "POST",
+            url: wikazAdmin.ajaxUrl,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                if (response.success) {
+                    $('#sp-post-content').summernote('insertImage', response.data);
+                } else {
+                    showNotification('Image upload failed: ' + (response.data || 'Unknown error'), 'error');
+                }
+            },
+            error: function () {
+                showNotification('Image upload error', 'error');
+            }
+        });
+    }
+
+    function loadSimplePosts(page = 1) {
+        const $loader = $('#wikaz-sp-loader');
+        $loader.show();
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_get_simple_posts',
+                nonce: wikazAdmin.nonce,
+                search: $('#wikaz-sp-search').val(),
+                page: page
+            },
+            success: function (response) {
+                if (response.success) {
+                    let html = '';
+                    if (response.data.posts && response.data.posts.length > 0) {
+                        response.data.posts.forEach(p => {
+                            const img = p.image ? `<img src="${p.image}">` : '<span class="dashicons dashicons-format-image" style="font-size:24px; color:#ccc; width:auto; height:auto;"></span>';
+                            html += `
+                                <tr data-id="${p.id}">
+                                    <td class="column-thumb">${img}</td>
+                                    <td class="column-title">
+                                        <strong>${p.title}</strong>
+                                        <div class="row-actions">
+                                            <span class="edit"><a href="#" class="wikaz-sp-edit" data-id="${p.id}">Edit</a> | </span>
+                                            <span class="trash"><a href="#" class="wikaz-sp-delete" data-id="${p.id}" style="color: #a00;">Delete</a></span>
+                                        </div>
+                                    </td>
+                                    <td class="column-date">${p.date}</td>
+                                    <td class="column-actions">
+                                        <button class="button button-small wikaz-sp-edit" data-id="${p.id}">Edit</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        html = '<tr><td colspan="4">No posts found.</td></tr>';
+                    }
+                    $spList.html(html);
+                }
+            },
+            complete: function () {
+                $loader.hide();
+            }
+        });
+    }
+
+    function openSimplePostModal() {
+        $('#sp-post-id').val(0);
+        $('#sp-post-title').val('');
+        $('#sp-post-content').summernote('code', ''); // Clear summernote
+        $('#sp-post-image-id').val('');
+        $('#sp-image-preview img').hide().attr('src', '');
+        $('#sp-image-preview .placeholder').show();
+        $('#wikaz-sp-modal-title').text('Add New Post');
+        $spModal.addClass('active');
+    }
+
+    function closeSimplePostModal() {
+        $spModal.removeClass('active');
+    }
+
+    function editSimplePost(id) {
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_get_simple_post',
+                nonce: wikazAdmin.nonce,
+                post_id: id
+            },
+            success: function (response) {
+                if (response.success) {
+                    const data = response.data;
+                    $('#sp-post-id').val(data.id);
+                    $('#sp-post-title').val(data.title);
+                    $('#sp-post-content').summernote('code', data.content);
+
+                    if (data.image_id) {
+                        $('#sp-post-image-id').val(data.image_id);
+                        $('#sp-image-preview img').attr('src', data.image_url).show();
+                        $('#sp-image-preview .placeholder').hide();
+                    } else {
+                        $('#sp-post-image-id').val('');
+                        $('#sp-image-preview img').hide().attr('src', '');
+                        $('#sp-image-preview .placeholder').show();
+                    }
+
+                    $('#wikaz-sp-modal-title').text('Edit Post');
+                    $spModal.addClass('active');
+                }
+            }
+        });
+    }
+
+    function saveSimplePost(e) {
+        e.preventDefault();
+        const $btn = $('#sp-save-btn');
+        const $spinner = $('.sp-save-spinner');
+
+        $btn.prop('disabled', true);
+        $spinner.addClass('is-active');
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_save_simple_post',
+                nonce: wikazAdmin.nonce,
+                post_id: $('#sp-post-id').val(),
+                title: $('#sp-post-title').val(),
+                content: $('#sp-post-content').summernote('code'),
+                image_id: $('#sp-post-image-id').val()
+            },
+            success: function (response) {
+                if (response.success) {
+                    showNotification('Post saved successfully!', 'success');
+                    closeSimplePostModal();
+                    loadSimplePosts();
+                } else {
+                    showNotification('Error: ' + response.data, 'error');
+                }
+            },
+            complete: function () {
+                $btn.prop('disabled', false);
+                $spinner.removeClass('is-active');
+            }
+        });
+    }
+
+    function deleteSimplePost(id, $btn) {
+        if (!confirm(wikazAdmin.strings.confirmDelete)) return;
+
+        $.ajax({
+            url: wikazAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wikaz_delete_simple_post',
+                nonce: wikazAdmin.nonce,
+                post_id: id
+            },
+            success: function (response) {
+                if (response.success) {
+                    loadSimplePosts();
+                } else {
+                    showNotification('Error deleting post', 'error');
+                }
+            }
+        });
+    }
+
+    function selectSPImage() {
+        if (mediaUploader) {
+            mediaUploader.open();
+            return;
+        }
+
+        mediaUploader = wp.media({
+            title: wikazAdmin.strings.selectImage,
+            button: { text: wikazAdmin.strings.useImage },
+            multiple: false
+        });
+
+        mediaUploader.on('select', function () {
+            const attachment = mediaUploader.state().get('selection').first().toJSON();
+            // Check if context is SP manager
+            if ($spModal.hasClass('active')) {
+                $('#sp-post-image-id').val(attachment.id);
+                $('#sp-image-preview img').attr('src', attachment.url).show();
+                $('#sp-image-preview .placeholder').hide();
+            } else {
+                // ... logic for other modules if shared
+                const imageUrl = attachment.sizes.large ? attachment.sizes.large.url : attachment.url;
+                $('#wikaz-background-image').val(imageUrl);
+                $('#wikaz-image-preview img').attr('src', imageUrl).show();
+            }
+        });
+
+        mediaUploader.open();
+    }
+
 })(jQuery);

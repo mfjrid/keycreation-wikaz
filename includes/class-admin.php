@@ -52,6 +52,13 @@ class Wikaz_Admin
         add_action('wp_ajax_wikaz_get_header_slides', array($this, 'ajax_get_header_slides'));
         add_action('wp_ajax_wikaz_save_header_slide', array($this, 'ajax_save_header_slide'));
         add_action('wp_ajax_wikaz_delete_header_slide', array($this, 'ajax_delete_header_slide'));
+
+        // Simple Post AJAX
+        add_action('wp_ajax_wikaz_get_simple_posts', array($this, 'ajax_get_simple_posts'));
+        add_action('wp_ajax_wikaz_save_simple_post', array($this, 'ajax_save_simple_post'));
+        add_action('wp_ajax_wikaz_delete_simple_post', array($this, 'ajax_delete_simple_post'));
+        add_action('wp_ajax_wikaz_get_simple_post', array($this, 'ajax_get_simple_post'));
+        add_action('wp_ajax_wikaz_upload_summernote_image', array($this, 'ajax_upload_summernote_image'));
     }
 
     /**
@@ -113,6 +120,14 @@ class Wikaz_Admin
             'wikaz-product-manager',
             array($this, 'render_product_manager_page')
         );
+        add_submenu_page(
+            'wikaz-design',
+            __('Simple Post', 'keycreation-wikaz'),
+            __('Simple Post', 'keycreation-wikaz'),
+            'manage_options',
+            'wikaz-simple-post',
+            array($this, 'render_simple_post_page')
+        );
     }
 
     /**
@@ -125,7 +140,8 @@ class Wikaz_Admin
             strpos($hook, 'wikaz-marquee') === false &&
             strpos($hook, 'wikaz-product-manager') === false &&
             strpos($hook, 'wikaz-master-data') === false &&
-            strpos($hook, 'wikaz-carousel') === false
+            strpos($hook, 'wikaz-carousel') === false &&
+            strpos($hook, 'wikaz-simple-post') === false
         ) {
             return;
         }
@@ -136,6 +152,12 @@ class Wikaz_Admin
         wp_enqueue_script('select2');
         wp_enqueue_style('wp-color-picker');
         wp_enqueue_script('wp-color-picker');
+
+        // Summernote
+        if (strpos($hook, 'wikaz-simple-post') !== false) {
+            wp_enqueue_style('summernote', '//cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css', array(), '0.8.18');
+            wp_enqueue_script('summernote', '//cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js', array('jquery'), '0.8.18', true);
+        }
 
         wp_enqueue_style(
             'wikaz-admin-style',
@@ -156,7 +178,7 @@ class Wikaz_Admin
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('wikaz_admin_nonce'),
             'strings' => array(
-                'confirmDelete' => __('Are you sure you want to delete this slide?', 'keycreation-wikaz'),
+                'confirmDelete' => __('Are you sure you want to delete this item?', 'keycreation-wikaz'),
                 'selectImage' => __('Select Background Image', 'keycreation-wikaz'),
                 'useImage' => __('Use this image', 'keycreation-wikaz'),
                 'saving' => __('Saving...', 'keycreation-wikaz'),
@@ -165,6 +187,14 @@ class Wikaz_Admin
                 'error' => __('An error occurred', 'keycreation-wikaz'),
             )
         ));
+    }
+
+    /**
+     * Render simple post admin page
+     */
+    public function render_simple_post_page()
+    {
+        require_once WIKAZ_PLUGIN_DIR . 'admin/simple-post-dashboard.php';
     }
 
     /**
@@ -1369,5 +1399,178 @@ class Wikaz_Admin
         }
 
         wp_send_json_success();
+    }
+
+    /* ==========================================
+       SIMPLE POST MODULE HANDLERS
+       ========================================== */
+
+    /**
+     * AJAX: Get Simple Posts
+     */
+    public function ajax_get_simple_posts()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $page = isset($_POST['page']) ? intval($_POST['page']) : 1;
+        $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        $per_page = 10;
+
+        $args = array(
+            'post_type' => 'post',
+            'post_status' => 'publish',
+            'posts_per_page' => $per_page,
+            'paged' => $page,
+            's' => $search
+        );
+
+        $query = new WP_Query($args);
+        $posts = array();
+
+        if ($query->have_posts()) {
+            while ($query->have_posts()) {
+                $query->the_post();
+                $image_id = get_post_thumbnail_id();
+                $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'thumbnail') : '';
+
+                $posts[] = array(
+                    'id' => get_the_ID(),
+                    'title' => get_the_title(),
+                    'date' => get_the_date('Y-m-d H:i'),
+                    'image' => $image_url,
+                    'edit_url' => get_edit_post_link()
+                );
+            }
+        }
+
+        wp_send_json_success(array(
+            'posts' => $posts,
+            'total_pages' => $query->max_num_pages,
+            'total_posts' => $query->found_posts
+        ));
+    }
+
+    /**
+     * AJAX: Save Simple Post
+     */
+    public function ajax_save_simple_post()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+        $title = sanitize_text_field($_POST['title']);
+        $content = wp_kses_post($_POST['content']);
+        $image_id = isset($_POST['image_id']) ? intval($_POST['image_id']) : 0;
+
+        $post_data = array(
+            'post_title' => $title,
+            'post_content' => $content,
+            'post_status' => 'publish',
+            'post_type' => 'post'
+        );
+
+        if ($post_id > 0) {
+            $post_data['ID'] = $post_id;
+            $updated_post_id = wp_update_post($post_data);
+        } else {
+            $updated_post_id = wp_insert_post($post_data);
+        }
+
+        if (is_wp_error($updated_post_id)) {
+            wp_send_json_error($updated_post_id->get_error_message());
+        }
+
+        if ($image_id > 0) {
+            set_post_thumbnail($updated_post_id, $image_id);
+        } else {
+            delete_post_thumbnail($updated_post_id);
+        }
+
+        wp_send_json_success();
+    }
+
+    /**
+     * AJAX: Get Simple Post
+     */
+    public function ajax_get_simple_post()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $post_id = intval($_POST['post_id']);
+        $post = get_post($post_id);
+
+        if (!$post || $post->post_type !== 'post') {
+            wp_send_json_error('Post not found');
+        }
+
+        $image_id = get_post_thumbnail_id($post_id);
+        $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'medium') : '';
+
+        $data = array(
+            'id' => $post->ID,
+            'title' => $post->post_title,
+            'content' => $post->post_content,
+            'image_id' => $image_id,
+            'image_url' => $image_url
+        );
+
+        wp_send_json_success($data);
+    }
+
+    /**
+     * AJAX: Delete Simple Post
+     */
+    public function ajax_delete_simple_post()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $post_id = intval($_POST['post_id']);
+        $deleted = wp_delete_post($post_id, true);
+
+        if ($deleted) {
+            wp_send_json_success();
+        } else {
+            wp_send_json_error('Failed to delete post');
+        }
+    }
+
+    /**
+     * AJAX: Upload Summernote Image
+     */
+    public function ajax_upload_summernote_image()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        if (empty($_FILES['file'])) {
+            wp_send_json_error('No file uploaded');
+        }
+
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        require_once(ABSPATH . 'wp-admin/includes/media.php');
+
+        $attachment_id = media_handle_upload('file', 0);
+
+        if (is_wp_error($attachment_id)) {
+            wp_send_json_error($attachment_id->get_error_message());
+        }
+
+        $url = wp_get_attachment_url($attachment_id);
+        wp_send_json_success($url);
     }
 }

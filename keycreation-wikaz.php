@@ -78,6 +78,35 @@ class Keycreation_Wikaz
 
         // Init frontend
         new Wikaz_Frontend();
+
+        // Register CPT
+        // add_action('init', array($this, 'register_cpt'));
+    }
+
+    /**
+     * Register Custom Post Type
+     */
+    public function register_cpt()
+    {
+        register_post_type('wikaz_simple_post', array(
+            'labels' => array(
+                'name' => __('Simple Posts', 'keycreation-wikaz'),
+                'singular_name' => __('Simple Post', 'keycreation-wikaz'),
+                'add_new' => __('Add New', 'keycreation-wikaz'),
+                'add_new_item' => __('Add New Simple Post', 'keycreation-wikaz'),
+                'edit_item' => __('Edit Simple Post', 'keycreation-wikaz'),
+                'new_item' => __('New Simple Post', 'keycreation-wikaz'),
+                'view_item' => __('View Simple Post', 'keycreation-wikaz'),
+                'search_items' => __('Search Simple Posts', 'keycreation-wikaz'),
+                'not_found' => __('No simple posts found', 'keycreation-wikaz'),
+                'not_found_in_trash' => __('No simple posts found in Trash', 'keycreation-wikaz'),
+            ),
+            'public' => true,
+            'has_archive' => true,
+            'rewrite' => array('slug' => 'simple-post'),
+            'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
+            'show_in_menu' => false, // We use our custom menu
+        ));
     }
 
     /**
