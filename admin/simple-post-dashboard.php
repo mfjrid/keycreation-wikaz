@@ -69,6 +69,22 @@ if (!defined('ABSPATH')) {
                 <input type="hidden" id="sp-post-id" value="0">
 
                 <div class="wikaz-form-row">
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Featured Image', 'keycreation-wikaz'); ?></label>
+                        <div class="pm-image-uploader main-uploader" id="sp-image-uploader">
+                            <input type="hidden" id="sp-post-image-id">
+                            <div class="pm-image-preview" id="sp-image-preview">
+                                <div class="placeholder">
+                                    <span class="dashicons dashicons-admin-media"></span>
+                                    <p><?php _e('Set Featured Image', 'keycreation-wikaz'); ?></p>
+                                </div>
+                                <img src="" style="display:none;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wikaz-form-row">
                     <div class="wikaz-form-group full-width">
                         <label><?php _e('Title', 'keycreation-wikaz'); ?> <span class="required">*</span></label>
                         <input type="text" id="sp-post-title" required placeholder="Enter post title...">
@@ -84,21 +100,7 @@ if (!defined('ABSPATH')) {
                     </div>
                 </div>
 
-                <div class="wikaz-form-row">
-                    <div class="wikaz-form-group">
-                        <label><?php _e('Featured Image', 'keycreation-wikaz'); ?></label>
-                        <div class="pm-image-uploader main-uploader" id="sp-image-uploader">
-                            <input type="hidden" id="sp-post-image-id">
-                            <div class="pm-image-preview" id="sp-image-preview">
-                                <div class="placeholder">
-                                    <span class="dashicons dashicons-admin-media"></span>
-                                    <p><?php _e('Set Featured Image', 'keycreation-wikaz'); ?></p>
-                                </div>
-                                <img src="" style="display:none;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
 
             </form>
         </div>
@@ -174,10 +176,13 @@ if (!defined('ABSPATH')) {
     .wikaz-modal-content.large-modal {
         max-width: 900px;
         width: 90%;
+        height: auto;
+        max-height: 90vh;
     }
     
     .wikaz-form-group.full-width {
         width: 100%;
+        grid-column: 1 / -1;
     }
 
     /* Fix full width container override */

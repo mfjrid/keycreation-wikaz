@@ -1991,11 +1991,45 @@
                         html = '<tr><td colspan="4">No posts found.</td></tr>';
                     }
                     $spList.html(html);
+
+                    // Render Pagination
+                    renderPagination(response.data.total_pages, page);
                 }
             },
             complete: function () {
                 $loader.hide();
             }
+        });
+    }
+
+    function renderPagination(totalPages, currentPage) {
+        const $pagination = $('#wikaz-sp-pagination');
+        let html = '';
+
+        if (totalPages > 1) {
+            if (currentPage > 1) {
+                html += `<button class="button">&laquo; Prev</button> `;
+            }
+
+            for (let i = 1; i <= totalPages; i++) {
+                const activeClass = i === currentPage ? 'button-primary' : 'button-secondary';
+                html += `<button class="button ${activeClass}">${i}</button> `;
+            }
+
+            if (currentPage < totalPages) {
+                html += `<button class="button">Next &raquo;</button>`;
+            }
+        }
+
+        $pagination.html(html);
+
+        // Re-bind pagination clicks to avoid using inline onclick which might fail with scope issues
+        $pagination.find('button').off('click').on('click', function (e) {
+            e.preventDefault();
+            const page = $(this).text().includes('Prev') ? currentPage - 1 :
+                $(this).text().includes('Next') ? currentPage + 1 :
+                    parseInt($(this).text());
+            loadSimplePosts(page);
         });
     }
 

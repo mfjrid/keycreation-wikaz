@@ -59,6 +59,22 @@ class Wikaz_Admin
         add_action('wp_ajax_wikaz_delete_simple_post', array($this, 'ajax_delete_simple_post'));
         add_action('wp_ajax_wikaz_get_simple_post', array($this, 'ajax_get_simple_post'));
         add_action('wp_ajax_wikaz_upload_summernote_image', array($this, 'ajax_upload_summernote_image'));
+
+        // Remove admin notices on Wikaz pages
+        add_action('admin_head', array($this, 'remove_admin_notices'));
+    }
+
+    /**
+     * Remove generic admin notices on Wikaz pages
+     */
+    public function remove_admin_notices()
+    {
+        $screen = get_current_screen();
+        // Check if we are on a wikaz page
+        if ($screen && strpos($screen->id, 'wikaz') !== false) {
+            remove_all_actions('admin_notices');
+            remove_all_actions('all_admin_notices');
+        }
     }
 
     /**
