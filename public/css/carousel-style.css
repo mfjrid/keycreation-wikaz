@@ -434,25 +434,59 @@ iframe.wikaz-video-embed,
 }
 
 /* Navigation & Pagination */
+
+/* 1. Default (Home Carousel - Vertical Bars on Right) */
 .wikaz-carousel-pagination {
+    position: absolute !important;
+    right: 20px !important;
+    left: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    z-index: 100 !important;
+    width: auto !important;
+}
+
+.wikaz-carousel-pagination .swiper-pagination-bullet {
+    width: 4px;
+    height: 30px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0 !important;
+    cursor: pointer;
+}
+
+.wikaz-carousel-pagination .swiper-pagination-bullet-active {
+    background: var(--wikaz-accent);
+    height: 50px;
+}
+
+/* 2. Header Slider (Centered Bullets at Bottom) */
+.header-slider-wrapper .wikaz-carousel-pagination {
     position: absolute !important;
     bottom: 30px !important;
     left: 0 !important;
     right: 0 !important;
+    top: auto !important;
+    transform: none !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     gap: 10px !important;
     z-index: 100 !important;
     width: 100% !important;
+    flex-direction: row !important;
     pointer-events: none !important;
-    /* Allow clicks through to slides if needed, but bullets will have pointer-events: auto */
 }
 
-.wikaz-carousel-pagination .swiper-pagination-bullet {
+.header-slider-wrapper .wikaz-carousel-pagination .swiper-pagination-bullet {
     pointer-events: auto !important;
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.4);
     opacity: 1;
@@ -462,13 +496,14 @@ iframe.wikaz-video-embed,
     border: 2px solid transparent;
 }
 
-.wikaz-carousel-pagination .swiper-pagination-bullet:hover {
+.header-slider-wrapper .wikaz-carousel-pagination .swiper-pagination-bullet:hover {
     background: rgba(255, 255, 255, 0.7);
 }
 
-.wikaz-carousel-pagination .swiper-pagination-bullet-active {
+.header-slider-wrapper .wikaz-carousel-pagination .swiper-pagination-bullet-active {
     background: var(--wikaz-accent);
-    width: 30px;
+    width: 24px;
+    height: 5px;
     border-radius: 10px;
 }
 
