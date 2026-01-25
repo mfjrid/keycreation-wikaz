@@ -527,12 +527,6 @@ class Wikaz_Frontend
                     </svg>
                 </button>
 
-                <!-- Slide Counter -->
-                <!-- <div class="wikaz-slide-counter wikaz-counter-<?php echo $uid; ?>">
-                    <span class="counter-current">1</span>
-                    <span class="counter-separator">/</span>
-                    <span class="counter-total"><?php echo count($slides); ?></span>
-                </div> -->
             </div>
         </div>
         <?php
