@@ -514,6 +514,18 @@ class Wikaz_Frontend
 
                 <!-- Pagination -->
                 <div class="wikaz-carousel-pagination wikaz-pagination-<?php echo $uid; ?>"></div>
+
+                <!-- Navigation Arrows -->
+                <button class="wikaz-slider-nav wikaz-slider-prev wikaz-button-prev-<?php echo $uid; ?>" aria-label="Previous slide">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button class="wikaz-slider-nav wikaz-slider-next wikaz-button-next-<?php echo $uid; ?>" aria-label="Next slide">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
             </div>
         </div>
         <?php

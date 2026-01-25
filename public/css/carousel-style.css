@@ -462,6 +462,72 @@ iframe.wikaz-video-embed,
     height: 50px;
 }
 
+/* Navigation Arrows */
+.wikaz-slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    width: 60px;
+    height: 60px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+    padding: 0;
+}
+
+.wikaz-carousel-wrapper:hover .wikaz-slider-nav {
+    opacity: 1;
+}
+
+.wikaz-slider-nav:hover {
+    transform: translateY(-50%) scale(1.2);
+}
+
+.wikaz-slider-nav:active {
+    transform: translateY(-50%) scale(0.9);
+}
+
+.wikaz-slider-nav svg {
+    width: 40px;
+    height: 40px;
+    stroke: #fff;
+    stroke-width: 2.5;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    transition: all 0.3s ease;
+}
+
+.wikaz-slider-nav:hover svg {
+    stroke: var(--wikaz-accent);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+}
+
+.wikaz-slider-prev {
+    left: 20px;
+}
+
+.wikaz-slider-next {
+    right: 70px;
+    /* Account for pagination on right side */
+}
+
+.wikaz-slider-nav.swiper-button-disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .wikaz-slider-nav {
+        display: none;
+    }
+}
+
 
 @keyframes slideUp {
     from {
