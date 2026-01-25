@@ -582,7 +582,9 @@ body.wikaz-header-transparent .wikaz-slide-content {
     }
 }
 
-.tf-topbar.bg-dark-5.topbar-bg {
+.tf-topbar.bg-dark-5.topbar-bg,
+body.elementor-page-6130 .tf-topbar.bg-dark-5.topbar-bg,
+body.elementor-page-6256 .tf-topbar.bg-dark-5.topbar-bg {
     position: absolute !important;
     z-index: 999;
     background-color: #0e0e0e !important;
