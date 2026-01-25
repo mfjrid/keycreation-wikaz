@@ -59,8 +59,15 @@
                 on: {
                     init: function () {
                         slider.classList.add('wikaz-carousel-loaded');
+                        // Update counter on init
+                        const counter = document.querySelector(`.wikaz-counter-${uid} .counter-current`);
+                        if (counter) counter.textContent = this.realIndex + 1;
                     },
                     slideChange: function () {
+                        // Update slide counter
+                        const counter = document.querySelector(`.wikaz-counter-${uid} .counter-current`);
+                        if (counter) counter.textContent = this.realIndex + 1;
+
                         // Reset animations
                         const activeSlide = this.slides[this.activeIndex];
                         if (activeSlide) {

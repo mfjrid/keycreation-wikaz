@@ -436,30 +436,37 @@ iframe.wikaz-video-embed,
 /* Navigation & Pagination */
 .wikaz-carousel-pagination {
     position: absolute !important;
-    right: 30px !important;
-    left: auto !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+    bottom: 30px !important;
+    left: 50% !important;
+    right: auto !important;
+    top: auto !important;
+    transform: translateX(-50%) !important;
     display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
+    flex-direction: row !important;
+    gap: 10px !important;
     z-index: 100 !important;
 }
 
 .wikaz-carousel-pagination .swiper-pagination-bullet {
-    width: 4px;
-    height: 30px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.3);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
     opacity: 1;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     margin: 0 !important;
-    /* Reset Swiper default margins */
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.wikaz-carousel-pagination .swiper-pagination-bullet:hover {
+    background: rgba(255, 255, 255, 0.7);
 }
 
 .wikaz-carousel-pagination .swiper-pagination-bullet-active {
     background: var(--wikaz-accent);
-    height: 50px;
+    width: 30px;
+    border-radius: 10px;
 }
 
 /* Navigation Arrows */
@@ -513,8 +520,7 @@ iframe.wikaz-video-embed,
 }
 
 .wikaz-slider-next {
-    right: 70px;
-    /* Account for pagination on right side */
+    right: 20px;
 }
 
 .wikaz-slider-nav.swiper-button-disabled {
@@ -525,6 +531,60 @@ iframe.wikaz-video-embed,
 @media (max-width: 768px) {
     .wikaz-slider-nav {
         display: none;
+    }
+}
+
+/* Slide Counter */
+.wikaz-slide-counter {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    z-index: 100;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: inherit;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wikaz-slide-counter .counter-current {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--wikaz-accent);
+    line-height: 1;
+}
+
+.wikaz-slide-counter .counter-separator {
+    font-size: 18px;
+    font-weight: 300;
+    opacity: 0.6;
+}
+
+.wikaz-slide-counter .counter-total {
+    font-size: 18px;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .wikaz-slide-counter {
+        bottom: 20px;
+        left: 20px;
+        padding: 8px 16px;
+    }
+
+    .wikaz-slide-counter .counter-current {
+        font-size: 22px;
+    }
+
+    .wikaz-slide-counter .counter-separator,
+    .wikaz-slide-counter .counter-total {
+        font-size: 14px;
     }
 }
 

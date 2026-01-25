@@ -526,6 +526,13 @@ class Wikaz_Frontend
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                 </button>
+
+                <!-- Slide Counter -->
+                <!-- <div class="wikaz-slide-counter wikaz-counter-<?php echo $uid; ?>">
+                    <span class="counter-current">1</span>
+                    <span class="counter-separator">/</span>
+                    <span class="counter-total"><?php echo count($slides); ?></span>
+                </div> -->
             </div>
         </div>
         <?php
