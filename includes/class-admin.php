@@ -1458,6 +1458,7 @@ class Wikaz_Admin
                     'title' => get_the_title(),
                     'date' => get_the_date('Y-m-d H:i'),
                     'image' => $image_url,
+                    'url' => get_permalink(),
                     'edit_url' => get_edit_post_link()
                 );
             }

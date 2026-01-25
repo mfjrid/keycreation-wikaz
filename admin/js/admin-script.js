@@ -1999,6 +1999,7 @@
                                         <strong>${p.title}</strong>
                                         <div class="row-actions">
                                             <span class="edit"><a href="#" class="wikaz-sp-edit" data-id="${p.id}">Edit</a> | </span>
+                                            <span class="view"><a href="${p.url}" target="_blank">View</a> | </span>
                                             <span class="trash"><a href="#" class="wikaz-sp-delete" data-id="${p.id}" style="color: #a00;">Delete</a></span>
                                         </div>
                                     </td>
