@@ -512,7 +512,7 @@ jQuery(document).ready(function($) {
 
     // WP Media Uploader (Image)
     let mediaUploader;
-    $('#hs-select-image').click(function(e) {
+    $('#hs-select-image, #hs-image-preview').click(function(e) {
         e.preventDefault();
         if(mediaUploader) { mediaUploader.open(); return; }
         
@@ -541,7 +541,7 @@ jQuery(document).ready(function($) {
 
     // WP Media Uploader (Video)
     let videoUploader;
-    $('#hs-select-video').click(function(e) {
+    $('#hs-select-video, #hs-video-preview .wikaz-video-placeholder').click(function(e) {
         e.preventDefault();
         if(videoUploader) { videoUploader.open(); return; }
         
