@@ -292,7 +292,7 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
                 <!-- 7a. Product Search -->
                 <div class="wikaz-form-group" id="wikaz-product-search-group">
                     <label
-                        for="wikaz-product-search"><?php _e('Link to Product (Optional)', 'keycreation-wikaz'); ?></label>
+                        for="wikaz-product-search"><?php _e('Search Product Title (Optional)', 'keycreation-wikaz'); ?></label>
                     <div class="wikaz-product-search-wrap">
                         <input type="text" id="wikaz-product-search"
                             placeholder="<?php _e('Search products...', 'keycreation-wikaz'); ?>" autocomplete="off">
@@ -309,7 +309,7 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
                 <!-- 7b. Post Search -->
                 <div class="wikaz-form-group" id="wikaz-post-search-group" style="display:none;">
                     <label
-                        for="wikaz-post-search"><?php _e('Link to Article (Optional)', 'keycreation-wikaz'); ?></label>
+                        for="wikaz-post-search"><?php _e('Search Article Title (Optional)', 'keycreation-wikaz'); ?></label>
                     <div class="wikaz-product-search-wrap">
                         <input type="text" id="wikaz-post-search"
                             placeholder="<?php _e('Search articles...', 'keycreation-wikaz'); ?>" autocomplete="off">
