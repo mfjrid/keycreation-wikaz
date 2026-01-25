@@ -366,7 +366,7 @@ body.wikaz-blog-redesign .post-meta {
 }
 
 .wikaz-blog-content-inner p {
-    text-align: justify !important;
+    text-align: justify;
 }
 
 .wikaz-blog-content-inner img {
