@@ -375,11 +375,11 @@ body.wikaz-blog-redesign .post-meta {
 }
 
 .wikaz-blog-content-inner img.note-float-left {
-    margin-right: 12px !important;
+    margin-right: 20px !important;
     border-radius: 5px !important;
 }
 
 .wikaz-blog-content-inner img.note-float-right {
-    margin-left: 12px !important;
+    margin-left: 20px !important;
     border-radius: 5px !important;
 }
