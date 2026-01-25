@@ -365,7 +365,7 @@ body.wikaz-blog-redesign .post-meta {
     text-align: unset !important;
 }
 
-.wikaz-blog-content-inner {
+.wikaz-blog-content-inner p {
     text-align: justify !important;
 }
 
