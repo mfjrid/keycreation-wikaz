@@ -115,11 +115,10 @@ if (!defined('ABSPATH')) {
     <div class="wikaz-dashboard-footer-section">
         <div class="wikaz-panel">
             <h3><?php _e('Need Help?', 'keycreation-wikaz'); ?></h3>
-            <p><?php _e('If you encounter any issues or need custom feature requests, feel free to contact our support team.', 'keycreation-wikaz'); ?>
+            <p><?php _e('If you encounter any issues or need custom feature requests, feel free to contact KeyCreation team.', 'keycreation-wikaz'); ?>
             </p>
             <div class="footer-links">
-                <a href="#" class="footer-link"><span class="dashicons dashicons-external"></span> Documentation</a>
-                <a href="#" class="footer-link"><span class="dashicons dashicons-sos"></span> Support</a>
+                <a href="https://keycreationofficial.com/" target="_blank" class="footer-link"><span class="dashicons dashicons-sos"></span> Support</a>
             </div>
         </div>
     </div>

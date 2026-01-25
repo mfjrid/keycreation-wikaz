@@ -359,3 +359,18 @@ body.wikaz-blog-redesign .post-meta {
 .heading.blog-post-item {
     display: none !important;
 }
+
+.blog-post .featured-post,
+.blog-post .main-post {
+    text-align: unset !important;
+}
+
+.wikaz-blog-content-inner {
+    text-align: unset !important;
+}
+
+.wikaz-blog-content-inner img {
+    padding: 12px !important;
+    border: 3px solid #ccc !important;
+    border-radius: 5px !important;
+}
