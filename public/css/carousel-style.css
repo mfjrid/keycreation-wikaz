@@ -206,31 +206,44 @@ iframe.wikaz-video-embed,
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    /* Force 16:9 aspect ratio to match YouTube video player */
-    aspect-ratio: 16 / 9 !important;
-    /* Allow resizing to satisfy aspect ratio */
-    width: auto !important;
-    height: auto !important;
-    /* Ensure it covers the container dimensions */
+    /* Force 16:9 aspect ratio cover behavior */
+    width: 177.77vh !important;
+    /* 100 * 16 / 9 */
+    height: 100vh !important;
     min-width: 100% !important;
     min-height: 100% !important;
-
+    max-width: none !important;
+    max-height: none !important;
     pointer-events: none;
     border: none !important;
     background: #000;
 }
 
-/* Fallback for ultra-wide containers to prevent top/bottom bars if screen > 16:9 */
+/* Fallback using modern aspect-ratio where supported */
+@supports (aspect-ratio: 16/9) {
+
+    iframe.wikaz-video-embed,
+    .wikaz-slide-video-container iframe {
+        width: auto !important;
+        height: auto !important;
+        aspect-ratio: 16 / 9 !important;
+    }
+}
+
+/* Ensure 'cover' behavior across all screen ratios */
 @media (min-aspect-ratio: 16/9) {
-    iframe.wikaz-video-embed {
+
+    iframe.wikaz-video-embed,
+    .wikaz-slide-video-container iframe {
         width: 100% !important;
         height: auto !important;
     }
 }
 
-/* Fallback for tall containers to prevent side bars if screen < 16:9 */
 @media (max-aspect-ratio: 16/9) {
-    iframe.wikaz-video-embed {
+
+    iframe.wikaz-video-embed,
+    .wikaz-slide-video-container iframe {
         width: auto !important;
         height: 100% !important;
     }
