@@ -36,6 +36,9 @@ class Wikaz_Frontend
         // Reorder variation attributes: Color first, then Size
         add_filter('woocommerce_product_get_attributes', array($this, 'reorder_variation_attributes'), 10, 2);
         add_filter('woocommerce_get_variation_prices_hash', array($this, 'variation_prices_hash'), 10, 3);
+
+        // Blog Redesign Hooks
+        add_filter('the_content', array($this, 'redesign_blog_content'));
     }
 
     /**
@@ -115,6 +118,11 @@ class Wikaz_Frontend
         if (get_option('wikaz_header_transparent', '0') === '1' && (is_front_page() || is_home())) {
             $classes[] = 'wikaz-header-transparent';
         }
+
+        if (is_singular('post')) {
+            $classes[] = 'wikaz-blog-redesign';
+        }
+
         return $classes;
     }
 
@@ -592,5 +600,75 @@ class Wikaz_Frontend
         }
 
         return '';
+    }
+
+    /**
+     * Redesign single blog post content
+     */
+    public function redesign_blog_content($content)
+    {
+        if (!is_singular('post') || !in_the_loop() || !is_main_query()) {
+            return $content;
+        }
+
+        global $post;
+
+        $thumbnail_url = get_the_post_thumbnail_url($post->ID, 'full');
+        $categories = get_the_category($post->ID);
+        $cat_html = '';
+        if ($categories) {
+            foreach ($categories as $cat) {
+                $cat_html .= '<span class="wikaz-blog-cat">' . esc_html($cat->name) . '</span>';
+            }
+        }
+
+        ob_start();
+        ?>
+        <div class="wikaz-blog-container">
+            <header class="wikaz-blog-hero">
+                <div class="wikaz-blog-hero-image">
+                    <?php if ($thumbnail_url): ?>
+                        <div class="wikaz-portrait-frame">
+                            <img src="<?php echo esc_url($thumbnail_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="wikaz-portrait-img">
+                        </div>
+                    <?php else: ?>
+                        <div class="wikaz-portrait-placeholder"></div>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="wikaz-blog-hero-details">
+                    <div class="wikaz-blog-meta-top">
+                        <?php echo $cat_html; ?>
+                        <span class="wikaz-blog-date"><?php echo get_the_date('M d, Y'); ?></span>
+                    </div>
+                    
+                    <h1 class="wikaz-blog-title"><?php echo get_the_title(); ?></h1>
+                    
+                    <div class="wikaz-blog-author">
+                        <span class="author-label">Written by</span>
+                        <span class="author-name"><?php echo get_the_author(); ?></span>
+                    </div>
+                    
+                    <div class="wikaz-blog-scroll-hint">
+                        <span class="scroll-text">Stories</span>
+                        <div class="scroll-line"></div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="wikaz-blog-body">
+                <div class="wikaz-blog-content-inner">
+                    <?php echo $content; ?>
+                </div>
+            </div>
+            
+            <footer class="wikaz-blog-footer">
+                <div class="wikaz-blog-tags">
+                    <?php the_tags('', ' ', ''); ?>
+                </div>
+            </footer>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 }

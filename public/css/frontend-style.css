@@ -46,3 +46,249 @@ body.elementor-page-6256 .tf-topbar.bg-dark-5.topbar-bg {
 .tf-topbar.bg-dark-5.topbar-bg .container {
     max-width: 100% !important;
 }
+
+/* ==========================================================================
+   BLOG REDESIGN - SINGLE POST
+   ========================================================================== */
+
+/* 1. Hide Theme Defaults on Single Post */
+body.wikaz-blog-redesign .tf-page-title,
+body.wikaz-blog-redesign .entry-title,
+body.wikaz-blog-redesign .post-details .featured-post,
+body.wikaz-blog-redesign .post-details .entry-meta,
+body.wikaz-blog-redesign .post-thumbnail,
+body.wikaz-blog-redesign .post-title,
+body.wikaz-blog-redesign .post-meta {
+    display: none !important;
+}
+
+/* 2. Container Structure */
+.wikaz-blog-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: #fff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* 3. Hero Section (Split Layout) */
+.wikaz-blog-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 85vh;
+    align-items: center;
+    background: #f9f9f9;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.wikaz-blog-hero-image {
+    padding: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    height: 100%;
+}
+
+.wikaz-portrait-frame {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+    background: #eee;
+    transform: rotate(-1deg);
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.wikaz-blog-container:hover .wikaz-portrait-frame {
+    transform: rotate(0deg);
+}
+
+.wikaz-portrait-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.05);
+    transition: transform 1.2s ease;
+}
+
+.wikaz-blog-container:hover .wikaz-portrait-img {
+    transform: scale(1);
+}
+
+/* 4. Hero Details (Text Side) */
+.wikaz-blog-hero-details {
+    padding: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.wikaz-blog-meta-top {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.wikaz-blog-cat {
+    color: #000;
+    font-weight: 700;
+    background: #eee;
+    padding: 4px 12px;
+    border-radius: 4px;
+}
+
+.wikaz-blog-date {
+    color: #999;
+}
+
+.wikaz-blog-title {
+    font-size: clamp(32px, 5vw, 64px) !important;
+    line-height: 1.1 !important;
+    font-weight: 300 !important;
+    color: #000 !important;
+    margin: 0 0 40px 0 !important;
+    font-family: "Playfair Display", serif !important;
+    /* Elegant serif fallback */
+}
+
+.wikaz-blog-author {
+    font-style: italic;
+    font-size: 16px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.author-name {
+    font-weight: 600;
+    color: #000;
+    font-style: normal;
+}
+
+.wikaz-blog-scroll-hint {
+    position: absolute;
+    bottom: 60px;
+    right: 80px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transform: rotate(90deg);
+    transform-origin: right center;
+}
+
+.scroll-text {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #ccc;
+}
+
+.scroll-line {
+    width: 40px;
+    height: 1px;
+    background: #ccc;
+}
+
+/* 5. Body Content */
+.wikaz-blog-body {
+    padding: 80px 0;
+    background: #fff;
+}
+
+.wikaz-blog-content-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 18px;
+    line-height: 1.8;
+    color: #333;
+    padding: 0 20px;
+}
+
+.wikaz-blog-content-inner p {
+    margin-bottom: 30px;
+}
+
+.wikaz-blog-content-inner h2,
+.wikaz-blog-content-inner h3 {
+    color: #000;
+    margin: 60px 0 30px 0;
+    font-family: inherit;
+    font-weight: 700;
+}
+
+/* 6. Footer & Tags */
+.wikaz-blog-footer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    border-top: 1px solid #eee;
+}
+
+.wikaz-blog-tags a {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #f5f5f5;
+    color: #666;
+    text-decoration: none;
+    border-radius: 50px;
+    font-size: 13px;
+    margin: 0 8px 8px 0;
+    transition: all 0.2s ease;
+}
+
+.wikaz-blog-tags a:hover {
+    background: #000;
+    color: #fff;
+}
+
+/* 7. Mobile Responsive */
+@media (max-width: 992px) {
+    .wikaz-blog-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .wikaz-blog-hero-image {
+        padding: 40px 20px;
+        order: 1;
+    }
+
+    .wikaz-blog-hero-details {
+        padding: 60px 20px;
+        order: 2;
+        text-align: center;
+        align-items: center;
+    }
+
+    .wikaz-blog-scroll-hint {
+        display: none;
+    }
+
+    .wikaz-blog-title {
+        font-size: 36px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .wikaz-blog-body {
+        padding: 40px 0;
+    }
+
+    .wikaz-blog-content-inner {
+        font-size: 16px;
+    }
+
+    .wikaz-portrait-frame {
+        max-width: 300px;
+    }
+}
+
+.heading.blog-post-item {
+    display: none !important;
+}
