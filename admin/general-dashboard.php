@@ -55,10 +55,10 @@ if (!defined('ABSPATH')) {
                 <span class="dashicons dashicons-images-alt2"></span>
             </div>
             <div class="card-content">
-                <h3><?php _e('Product Carousel', 'keycreation-wikaz'); ?></h3>
-                <p><?php _e('Create stunning, premium product carousels for your homepage to boost engagement.', 'keycreation-wikaz'); ?>
+                <h3><?php _e('Home Carousel', 'keycreation-wikaz'); ?></h3>
+                <p><?php _e('Create stunning, premium carousels for your homepage to boost engagement.', 'keycreation-wikaz'); ?>
                 </p>
-                <a href="<?php echo admin_url('admin.php?page=wikaz-design-carousel'); ?>"
+                <a href="<?php echo admin_url('admin.php?page=wikaz-carousel'); ?>"
                     class="button button-primary">
                     <?php _e('Go to Carousel', 'keycreation-wikaz'); ?>
                 </a>
@@ -68,7 +68,7 @@ if (!defined('ABSPATH')) {
         <!-- Marquee Card -->
         <div class="wikaz-dashboard-card">
             <div class="card-icon">
-                <span class="dashicons dashicons- megaphone"></span>
+                <span class="dashicons dashicons-megaphone"></span>
             </div>
             <div class="card-content">
                 <h3><?php _e('Running Text (Marquee)', 'keycreation-wikaz'); ?></h3>
@@ -76,6 +76,36 @@ if (!defined('ABSPATH')) {
                 </p>
                 <a href="<?php echo admin_url('admin.php?page=wikaz-marquee'); ?>" class="button button-primary">
                     <?php _e('Go to Marquee', 'keycreation-wikaz'); ?>
+                </a>
+            </div>
+        </div>
+
+        <!-- Slider Card -->
+        <div class="wikaz-dashboard-card">
+            <div class="card-icon">
+                <span class="dashicons dashicons-slides"></span>
+            </div>
+            <div class="card-content">
+                <h3><?php _e('Header Slider', 'keycreation-wikaz'); ?></h3>
+                <p><?php _e('Create eye-catching header sliders to highlight promotions, campaigns, or key messages.', 'keycreation-wikaz'); ?>
+                </p>
+                <a href="<?php echo admin_url('admin.php?page=wikaz-header-sliders'); ?>" class="button button-primary">
+                    <?php _e('Go to Header Slider', 'keycreation-wikaz'); ?>
+                </a>
+            </div>
+        </div>
+
+        <!-- Simple Post Card -->
+        <div class="wikaz-dashboard-card">
+            <div class="card-icon">
+                <span class="dashicons dashicons-welcome-write-blog"></span>
+            </div>
+            <div class="card-content">
+                <h3><?php _e('Simple Post', 'keycreation-wikaz'); ?></h3>
+                <p><?php _e('Add simple, structured posts for essential content and site updates.', 'keycreation-wikaz'); ?>
+                </p>
+                <a href="<?php echo admin_url('admin.php?page=wikaz-simple-post'); ?>" class="button button-primary">
+                    <?php _e('Go to Simple Post', 'keycreation-wikaz'); ?>
                 </a>
             </div>
         </div>
