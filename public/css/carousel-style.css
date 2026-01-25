@@ -649,34 +649,59 @@ iframe.wikaz-video-embed,
 @media (max-width: 768px) {
     .wikaz-slide {
         flex-direction: column !important;
-        /* Always vertical on mobile */
     }
 
-    .layout-split-left .wikaz-slide-image,
-    .layout-split-right .wikaz-slide-image {
+    /* Force all layouts to behave like full-bg on mobile with high specificity */
+    .wikaz-carousel .wikaz-slide.layout-split-left,
+    .wikaz-carousel .wikaz-slide.layout-split-right,
+    .wikaz-carousel .wikaz-slide.layout-full-bg {
+        display: block !important;
+        position: relative !important;
         width: 100% !important;
+        height: 100% !important;
+        background: #000 !important;
+        /* Unified dark background */
+    }
+
+    .wikaz-carousel .wikaz-slide.layout-split-left .wikaz-slide-image,
+    .wikaz-carousel .wikaz-slide.layout-split-right .wikaz-slide-image,
+    .wikaz-carousel .wikaz-slide.layout-full-bg .wikaz-slide-image {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
         min-width: 100% !important;
-        height: 50% !important;
-        padding: 20px !important;
-        /* Smaller padding on mobile */
+        height: 100% !important;
+        padding: 0 !important;
+        z-index: 1 !important;
+        background-color: transparent !important;
     }
 
-    /* .layout-split-left .wikaz-slide-bg,
-    .layout-split-right .wikaz-slide-bg {
-        inset: 20px !important;
-        border-radius: 20px !important;
-    } */
-
-    .layout-split-left .wikaz-slide-content,
-    .layout-split-right .wikaz-slide-content {
-        width: 100%;
-        height: 50%;
-        padding: 0px;
-    }
-
-    .wikaz-slide-content {
+    .wikaz-carousel .wikaz-slide.layout-split-left .wikaz-slide-content,
+    .wikaz-carousel .wikaz-slide.layout-split-right .wikaz-slide-content,
+    .wikaz-carousel .wikaz-slide.layout-full-bg .wikaz-slide-content {
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        height: 100% !important;
+        padding: 80px 20px 40px !important;
+        background: transparent !important;
+        z-index: 10 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
         align-items: center !important;
         text-align: center !important;
+    }
+
+    .wikaz-carousel .wikaz-slide.layout-split-left .wikaz-slide-overlay,
+    .wikaz-carousel .wikaz-slide.layout-split-right .wikaz-slide-overlay {
+        display: block !important;
+    }
+
+    .wikaz-content-inner {
+        max-width: 100% !important;
     }
 
     .wikaz-carousel-nav {
