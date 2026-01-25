@@ -371,6 +371,6 @@ body.wikaz-blog-redesign .post-meta {
 
 .wikaz-blog-content-inner img {
     margin: 12px !important;
-    border: 3px solid #ccc !important;
-    border-radius: 5px !important;
+    /* border: 3px solid #ccc !important; */
+    /* border-radius: 5px !important; */
 }
