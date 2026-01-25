@@ -190,7 +190,7 @@ if (!defined('ABSPATH')) {
 
                 <!-- Product Search -->
                 <div class="wikaz-form-group" id="hs-product-search-group">
-                    <label><?php _e('Link to Product', 'keycreation-wikaz'); ?></label>
+                    <label><?php _e('Search Product Title (Optional)', 'keycreation-wikaz'); ?></label>
                     <div class="wikaz-product-search-wrap">
                         <input type="text" id="hs-product-search" class="widefat" placeholder="<?php _e('Search products...', 'keycreation-wikaz'); ?>" autocomplete="off">
                         <input type="hidden" name="product_id" id="hs-product-id">
@@ -203,7 +203,7 @@ if (!defined('ABSPATH')) {
 
                 <!-- Post Search -->
                 <div class="wikaz-form-group" id="hs-post-search-group" style="display:none;">
-                    <label><?php _e('Link to Article', 'keycreation-wikaz'); ?></label>
+                    <label><?php _e('Search Article Title (Optional)', 'keycreation-wikaz'); ?></label>
                     <div class="wikaz-product-search-wrap">
                         <input type="text" id="hs-post-search" class="widefat" placeholder="<?php _e('Search articles...', 'keycreation-wikaz'); ?>" autocomplete="off">
                         <input type="hidden" name="post_id" id="hs-post-id">
