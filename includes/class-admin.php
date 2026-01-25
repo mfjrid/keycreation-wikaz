@@ -157,7 +157,9 @@ class Wikaz_Admin
             strpos($hook, 'wikaz-marquee') === false &&
             strpos($hook, 'wikaz-product-manager') === false &&
             strpos($hook, 'wikaz-master-data') === false &&
+            strpos($hook, 'wikaz-master-data') === false &&
             strpos($hook, 'wikaz-carousel') === false &&
+            strpos($hook, 'wikaz-header-sliders') === false &&
             strpos($hook, 'wikaz-simple-post') === false
         ) {
             return;

@@ -91,13 +91,13 @@
         // Media Type Toggle
         $('input[name="media_type"]').on('change', toggleMediaType);
 
-        // Product search
-        $('#wikaz-product-search').on('input', debounce(searchProducts, 300));
-        $('#wikaz-product-results').on('click', '.product-result-item', selectItem);
+        // Product search (Delegated)
+        $(document).on('input', '#wikaz-product-search, #hs-product-search', debounce(searchProducts, 300));
+        $('#wikaz-product-results, #hs-product-results').on('click', '.product-result-item', selectItem);
 
-        // Post search
-        $('#wikaz-post-search').on('input', debounce(searchPosts, 300));
-        $('#wikaz-post-results').on('click', '.product-result-item', selectItem);
+        // Post search (Delegated)
+        $(document).on('input', '#wikaz-post-search, #hs-post-search', debounce(searchPosts, 300));
+        $('#wikaz-post-results, #hs-post-results').on('click', '.product-result-item', selectItem);
         $(document).on('click', '.remove-product', removeItem);
 
         // Marquee events
@@ -108,7 +108,7 @@
         // Close product results on click outside
         $(document).on('click', function (e) {
             if (!$(e.target).closest('.wikaz-product-search-wrap').length) {
-                $('#wikaz-product-results').removeClass('active');
+                $('.wikaz-product-results').removeClass('active');
             }
         });
 
@@ -487,8 +487,10 @@
      * Search products
      */
     function searchProducts() {
-        const search = $('#wikaz-product-search').val();
-        const $results = $('#wikaz-product-results');
+        const $input = $(this);
+        const search = $input.val();
+        const isHeaderSlider = $input.attr('id') === 'hs-product-search';
+        const $results = isHeaderSlider ? $('#hs-product-results') : $('#wikaz-product-results');
 
         if (search.length < 2) {
             $results.removeClass('active').empty();
@@ -511,7 +513,7 @@
                     let html = '';
                     response.data.forEach(function (product) {
                         html += `
-                            <div class="product-result-item" data-id="${product.id}" data-title="${product.title}" data-image="${product.image}" data-url="${product.url}" data-type="product">
+                            <div class="product-result-item" data-id="${product.id}" data-title="${product.title}" data-image="${product.image}" data-url="${product.url}" data-type="product" data-origin="${isHeaderSlider ? 'hs' : 'wikaz'}">
                                 <img src="${product.image}" alt="">
                                 <div class="wikaz-product-item-info">
                                     <strong>${product.title}</strong>
@@ -531,6 +533,9 @@
     /**
      * Select product or post
      */
+    /**
+     * Select product or post
+     */
     function selectItem() {
         const $item = $(this);
         const id = $item.data('id');
@@ -538,27 +543,42 @@
         const image = $item.data('image');
         const url = $item.data('url');
         const type = $item.data('type'); // product or post
+        const origin = $item.data('origin') || 'wikaz'; // 'wikaz' or 'hs'
+
+        const prefix = origin === 'hs' ? '#hs' : '#wikaz';
 
         if (type === 'post') {
-            $('#wikaz-post-id').val(id);
-            $('#wikaz-post-search').hide();
-            $('#wikaz-post-results').removeClass('active');
-            $('#wikaz-selected-post').show().find('img').attr('src', image);
-            $('#wikaz-selected-post .product-name').text(title);
+            $(prefix + '-post-id').val(id);
+            $(prefix + '-post-search').hide();
+            $(prefix + '-post-results').removeClass('active');
+            $(prefix + '-selected-post').show().find('img').attr('src', image);
+            $(prefix + '-selected-post .product-name').text(title);
         } else {
-            $('#wikaz-product-id').val(id);
-            $('#wikaz-product-search').hide();
-            $('#wikaz-product-results').removeClass('active');
-            $('#wikaz-selected-product').show().find('img').attr('src', image);
-            $('#wikaz-selected-product .product-name').text(title);
+            $(prefix + '-product-id').val(id);
+            $(prefix + '-product-search').hide();
+            $(prefix + '-product-results').removeClass('active');
+            $(prefix + '-selected-product').show().find('img').attr('src', image);
+            $(prefix + '-selected-product .product-name').text(title);
         }
 
-        // Auto-fill title and URL if empty
-        if (!$('#wikaz-title').val()) {
-            $('#wikaz-title').val(title);
-        }
-        if (!$('#wikaz-button-url').val()) {
-            $('#wikaz-button-url').val(url);
+        // Auto-fill title and URL based on origin
+        if (origin === 'hs') {
+            // Header Slider uses name attributes within form
+            const $form = $('#wikaz-header-slide-form');
+            if (!$form.find('[name="title"]').val()) {
+                $form.find('[name="title"]').val(title);
+            }
+            if (!$form.find('[name="button_url"]').val()) {
+                $form.find('[name="button_url"]').val(url);
+            }
+        } else {
+            // Home Carousel uses specific IDs
+            if (!$('#wikaz-title').val()) {
+                $('#wikaz-title').val(title);
+            }
+            if (!$('#wikaz-button-url').val()) {
+                $('#wikaz-button-url').val(url);
+            }
         }
     }
 
@@ -567,16 +587,22 @@
      */
     function removeItem(e) {
         e.preventDefault();
-        const type = $(this).data('type');
+        const $btn = $(this);
+        const type = $btn.data('type') === 'post' ? 'post' : 'product';
+
+        // Determine origin by checking parent container ID
+        const parentId = $btn.closest('div[id$="-selected-product"], div[id$="-selected-post"]').attr('id');
+        const origin = parentId.indexOf('hs-') === 0 ? 'hs' : 'wikaz';
+        const prefix = origin === 'hs' ? '#hs' : '#wikaz';
 
         if (type === 'post') {
-            $('#wikaz-post-id').val('');
-            $('#wikaz-selected-post').hide();
-            $('#wikaz-post-search').val('').show();
+            $(prefix + '-post-id').val('');
+            $(prefix + '-selected-post').hide();
+            $(prefix + '-post-search').val('').show();
         } else {
-            $('#wikaz-product-id').val('');
-            $('#wikaz-selected-product').hide();
-            $('#wikaz-product-search').val('').show();
+            $(prefix + '-product-id').val('');
+            $(prefix + '-selected-product').hide();
+            $(prefix + '-product-search').val('').show();
         }
     }
 
@@ -584,8 +610,10 @@
      * Search Posts
      */
     function searchPosts() {
-        const search = $('#wikaz-post-search').val();
-        const $results = $('#wikaz-post-results');
+        const $input = $(this);
+        const search = $input.val();
+        const isHeaderSlider = $input.attr('id') === 'hs-post-search';
+        const $results = isHeaderSlider ? $('#hs-post-results') : $('#wikaz-post-results');
 
         if (search.length < 2) {
             $results.removeClass('active').empty();
@@ -608,7 +636,7 @@
                     let html = '';
                     response.data.forEach(post => {
                         html += `
-                            <div class="product-result-item" data-id="${post.id}" data-title="${post.title}" data-image="${post.image}" data-url="${post.url}" data-type="post">
+                            <div class="product-result-item" data-id="${post.id}" data-title="${post.title}" data-image="${post.image}" data-url="${post.url}" data-type="post" data-origin="${isHeaderSlider ? 'hs' : 'wikaz'}">
                                 <img src="${post.image}" alt="">
                                 <span>${post.title}</span>
                             </div>

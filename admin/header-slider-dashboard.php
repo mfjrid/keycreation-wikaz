@@ -605,6 +605,8 @@ jQuery(document).ready(function($) {
         }
     });
 
+
+
     function resetLinkSource() {
         $('#hs-product-id').val('');
         $('#hs-post-id').val('');
@@ -616,97 +618,7 @@ jQuery(document).ready(function($) {
         $('#hs-post-results').empty().hide();
     }
 
-    // Product Search
-    $('#hs-product-search').on('input', debounce(function() {
-        const term = $(this).val();
-        if(term.length < 3) {
-            $('#hs-product-results').hide();
-            return;
-        }
-        
-        $.get(ajaxUrl, { action: 'wikaz_search_products', term: term, nonce: nonce }, function(res) {
-            if(res.success) {
-                renderSearchResults(res.data, 'product');
-            }
-        });
-    }, 300));
-    
-    // Post Search
-    $('#hs-post-search').on('input', debounce(function() {
-        const term = $(this).val();
-        if(term.length < 3) {
-            $('#hs-post-results').hide();
-            return;
-        }
-        
-        $.get(ajaxUrl, { action: 'wikaz_search_posts', term: term, nonce: nonce }, function(res) {
-            if(res.success) {
-                renderSearchResults(res.data, 'post');
-            }
-        });
-    }, 300));
-
-    function renderSearchResults(items, type) {
-        const container = type === 'post' ? '#hs-post-results' : '#hs-product-results';
-        let html = '';
-        
-        if(!items.length) {
-            html = '<div class="wikaz-search-no-results">No results found.</div>';
-        } else {
-            items.forEach(item => {
-                const img = item.image || ''; // Post might not have image
-                html += `
-                    <div class="product-result-item" data-id="${item.id}" data-title="${item.name || item.title}" data-image="${img}" data-url="${item.url}" data-price="${item.price_html || ''}" data-type="${type}">
-                        ${img ? `<img src="${img}">` : '<span class="dashicons dashicons-format-image" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#eee;"></span>'}
-                        <div class="wikaz-product-item-info">
-                            <strong>${item.name || item.title}</strong>
-                            <span>ID: ${item.id}</span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-        
-        $(container).html(html).addClass('active').show();
-    }
-
-    // Select Item
-    $(document).on('click', '.product-result-item', function() {
-        const id = $(this).data('id');
-        const title = $(this).data('title');
-        const img = $(this).data('image');
-        const url = $(this).data('url');
-        const type = $(this).data('type');
-        
-        const prefix = type === 'post' ? '#hs-post' : '#hs-product';
-        const selectedPrefix = type === 'post' ? '#hs-selected-post' : '#hs-selected-product';
-        
-        $(prefix + '-id').val(id);
-        $(prefix + '-search').hide();
-        $(prefix + '-results').hide();
-        
-        $(selectedPrefix + ' img').attr('src', img || '');
-        if(!img) $(selectedPrefix + ' img').hide(); else $(selectedPrefix + ' img').show();
-        
-        $(selectedPrefix + ' .product-name').text(title);
-        $(selectedPrefix).show();
-        
-        // Auto-fill details if empty
-        if(!$('input[name="title"]').val()) $('input[name="title"]').val(title);
-        if(!$('input[name="button_url"]').val()) $('input[name="button_url"]').val(url);
-    });
-
-    // Remove Item
-    $('.remove-product').click(function() {
-        const type = $(this).data('type') === 'post' ? 'post' : 'product';
-        const searchInput = type === 'post' ? '#hs-post-search' : '#hs-product-search';
-        const hiddenInput = type === 'post' ? '#hs-post-id' : '#hs-product-id';
-        const selectedDiv = type === 'post' ? '#hs-selected-post' : '#hs-selected-product';
-        
-        $(hiddenInput).val('');
-        $(selectedDiv).hide();
-        $(searchInput).val('').show().focus();
-    });
+    // Search logic moved to admin-script.js
 
     // Init
     loadSliders();

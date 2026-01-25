@@ -573,12 +573,12 @@
     flex-direction: column;
     flex: 1;
     min-height: 0;
-    overflow: hidden;
 }
 
 .wikaz-modal-body {
     padding: 24px;
     overflow-y: auto;
+    overflow-x: visible;
     flex: 1;
     min-height: 0;
     scrollbar-width: thin;
@@ -732,12 +732,14 @@
     box-shadow: var(--wikaz-shadow-lg);
     max-height: 250px;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 999999;
     display: none;
 }
 
-.wikaz-product-results.active {
-    display: block;
+.wikaz-product-results.active,
+#hs-product-results.active,
+#hs-post-results.active {
+    display: block !important;
 }
 
 .wikaz-product-item {
