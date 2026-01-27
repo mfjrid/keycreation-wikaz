@@ -61,6 +61,7 @@ class Keycreation_Wikaz
     {
         require_once WIKAZ_PLUGIN_DIR . 'includes/class-admin.php';
         require_once WIKAZ_PLUGIN_DIR . 'public/class-frontend.php';
+        require_once WIKAZ_PLUGIN_DIR . 'public/class-post-list.php';
     }
 
     /**
@@ -78,6 +79,7 @@ class Keycreation_Wikaz
 
         // Init frontend
         new Wikaz_Frontend();
+        new Wikaz_Post_List();
 
         // Register CPT
         // add_action('init', array($this, 'register_cpt'));
