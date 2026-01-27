@@ -12,12 +12,14 @@
 /* Search Bar Styling */
 .wikaz-post-search-wrap {
     margin-bottom: 40px;
+    position: relative;
+    z-index: 10;
 }
 
 .wikaz-post-search-form {
     display: flex;
     gap: 10px;
-    max-width: 500px;
+    width: 100%;
 }
 
 .wikaz-post-search-form input[type="text"] {

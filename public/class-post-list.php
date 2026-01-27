@@ -26,7 +26,14 @@ class Wikaz_Post_List
         wp_enqueue_style('wikaz-post-list', WIKAZ_PLUGIN_URL . 'public/css/post-list.css', array(), WIKAZ_VERSION);
 
         // Get current page and search term
-        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+        if (get_query_var('paged')) {
+            $paged = get_query_var('paged');
+        } elseif (get_query_var('page')) {
+            $paged = get_query_var('page');
+        } else {
+            $paged = 1;
+        }
+
         $search_query = isset($_GET['wikaz_s']) ? sanitize_text_field($_GET['wikaz_s']) : '';
 
         // Query arguments
@@ -35,28 +42,59 @@ class Wikaz_Post_List
             'posts_per_page' => 3,
             'paged'          => $paged,
             'post_status'    => 'publish',
-            's'              => $search_query,
         );
+
+        if (!empty($search_query)) {
+            $args['s'] = $search_query;
+        }
 
         $query = new WP_Query($args);
 
         ob_start();
         ?>
+        <?php
+        // Get the base URL without query strings for redirection
+        $base_url = get_permalink();
+        ?>
         <div class="wikaz-post-list-container">
-            <!-- Search Form -->
+            <!-- Search Bar (Using div instead of form to avoid hijacking) -->
             <div class="wikaz-post-search-wrap">
-                <form role="search" method="get" class="wikaz-post-search-form" action="">
-                    <input type="text" value="<?php echo esc_attr($search_query); ?>" name="wikaz_s" placeholder="Search stories...">
-                    <!-- Preserve existing page if needed, but for simple list usually blank action is fine -->
-                    <button type="submit">Search</button>
-                    <?php 
-                    // If on a static page, we might need to pass the page ID to keep the user there
-                    if (is_page()) {
-                        echo '<input type="hidden" name="page_id" value="' . get_the_ID() . '">';
-                    }
-                    ?>
-                </form>
+                <div class="wikaz-post-search-form">
+                    <input type="text" id="wikazSearchInput" value="<?php echo esc_attr($search_query); ?>" placeholder="Search stories..." onkeydown="if(event.key === 'Enter') document.getElementById('wikazSearchBtn').click()">
+                    <button type="button" id="wikazSearchBtn">Search</button>
+                </div>
             </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchBtn = document.getElementById('wikazSearchBtn');
+                const searchInput = document.getElementById('wikazSearchInput');
+                
+                if (searchBtn && searchInput) {
+                    searchBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const keyword = searchInput.value.trim();
+                        let targetUrl = '<?php echo esc_url($base_url); ?>';
+                        
+                        // Add or update the search parameter
+                        if (targetUrl.includes('?')) {
+                            // If URL has existing params (like page_id), we need to handle them
+                            const urlObj = new URL(targetUrl);
+                            urlObj.searchParams.set('wikaz_s', keyword);
+                            // Always reset page to 1 on new search
+                            urlObj.searchParams.delete('paged');
+                            urlObj.searchParams.delete('page');
+                            targetUrl = urlObj.toString();
+                        } else {
+                            targetUrl += '?wikaz_s=' + encodeURIComponent(keyword);
+                        }
+                        
+                        console.log('Wikaz Search: Redirecting to...', targetUrl);
+                        window.location.href = targetUrl;
+                    });
+                }
+            });
+            </script>
 
             <?php if ($query->have_posts()) : ?>
                 <div class="wikaz-post-list">
