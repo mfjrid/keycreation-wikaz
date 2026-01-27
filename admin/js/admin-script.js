@@ -115,6 +115,11 @@
         // Product Manager Events
         $('#wikaz-add-pm-product').on('click', () => openPMProductModal());
         $('#wikaz-pm-search').on('input', debounce(() => loadPMProducts(1), 500));
+        $(document).on('click', '.pm-cat-tab', function () {
+            $('.pm-cat-tab').removeClass('active');
+            $(this).addClass('active');
+            loadPMProducts(1);
+        });
         $(document).on('click', '.wikaz-pm-edit', function () { openPMProductModal($(this).data('id')); });
         $(document).on('click', '.wikaz-pm-delete', function () { deletePMProduct($(this).data('id'), $(this)); });
         $(document).on('change', '.pm-term-item input', generateVariationMatrix);
@@ -815,6 +820,8 @@
         const $loader = $('#wikaz-pm-loader');
         $loader.show();
 
+        const category = $('.pm-cat-tab.active').data('category') || 'all';
+
         $.ajax({
             url: wikazAdmin.ajaxUrl,
             type: 'POST',
@@ -822,6 +829,7 @@
                 action: 'wikaz_get_pm_products',
                 nonce: wikazAdmin.nonce,
                 search: $('#wikaz-pm-search').val(),
+                category: category,
                 page: page
             },
             success: function (response) {

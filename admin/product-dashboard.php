@@ -24,7 +24,25 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
     </div>
     <hr class="wp-header-end">
 
-    <div class="wikaz-admin-container full-width">
+        <!-- Category Tabs -->
+        <div class="wikaz-pm-categories-tabs">
+            <ul class="pm-cat-tabs">
+                <?php 
+                $total_products = wp_count_posts('product')->publish;
+                ?>
+                <li class="pm-cat-tab active" data-category="all">
+                    <?php _e('All', 'keycreation-wikaz'); ?>
+                    <span class="pm-cat-count"><?php echo esc_html($total_products); ?></span>
+                </li>
+                <?php foreach ($categories as $cat) : ?>
+                    <li class="pm-cat-tab" data-category="<?php echo esc_attr($cat->slug); ?>">
+                        <?php echo esc_html($cat->name); ?>
+                        <span class="pm-cat-count"><?php echo esc_html($cat->count); ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+
         <!-- Tools Bar -->
         <div class="wikaz-pm-tools">
             <div class="wikaz-search-box">

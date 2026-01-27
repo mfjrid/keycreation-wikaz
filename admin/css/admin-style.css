@@ -1565,3 +1565,65 @@
     color: #1e293b;
     font-weight: 500;
 }
+
+/* Category Tabs for Product Manager */
+.wikaz-pm-categories-tabs {
+    margin-bottom: 20px;
+    background: var(--wikaz-white);
+    padding: 10px;
+    border-radius: var(--wikaz-radius);
+    box-shadow: var(--wikaz-shadow);
+}
+
+.pm-cat-tabs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pm-cat-tab {
+    padding: 8px 16px;
+    background: var(--wikaz-light);
+    color: var(--wikaz-gray);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.pm-cat-tab:hover {
+    background: var(--wikaz-border);
+    color: var(--wikaz-dark);
+}
+
+.pm-cat-tab.active {
+    background: var(--wikaz-primary);
+    color: var(--wikaz-white);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.pm-cat-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.1);
+    color: inherit;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+    font-weight: 600;
+}
+
+.pm-cat-tab.active .pm-cat-count {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#wpfooter {
+    display: none !important;
+}

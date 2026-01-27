@@ -628,6 +628,7 @@ class Wikaz_Admin
             wp_send_json_error('Unauthorized');
 
         $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : 'all';
         $page = isset($_POST['page']) ? intval($_POST['page']) : 1;
         $per_page = 10;
 
@@ -640,6 +641,10 @@ class Wikaz_Admin
 
         if (!empty($search)) {
             $args['s'] = $search;
+        }
+
+        if ($category !== 'all') {
+            $args['category'] = array($category);
         }
 
         $products = wc_get_products($args);

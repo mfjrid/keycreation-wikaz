@@ -58,12 +58,13 @@ class Wikaz_Post_List
         ?>
         <div class="wikaz-post-list-container">
             <!-- Search Bar (Using div instead of form to avoid hijacking) -->
-            <div class="wikaz-post-search-wrap">
+            <!-- Uncommment ini kalau mau ada search -->
+            <!-- <div class="wikaz-post-search-wrap">
                 <div class="wikaz-post-search-form">
                     <input type="text" id="wikazSearchInput" value="<?php echo esc_attr($search_query); ?>" placeholder="Search stories..." onkeydown="if(event.key === 'Enter') document.getElementById('wikazSearchBtn').click()">
                     <button type="button" id="wikazSearchBtn">Search</button>
                 </div>
-            </div>
+            </div> -->
 
             <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -101,7 +102,7 @@ class Wikaz_Post_List
                     <?php while ($query->have_posts()) : $query->the_post(); 
                         $thumb_url = get_the_post_thumbnail_url(get_the_ID(), 'medium');
                         if (!$thumb_url) {
-                            $thumb_url = 'https://via.placeholder.com/150'; // Fallback
+                            $thumb_url = 'https://placehold.jp/150x150.png'; // Fallback
                         }
                     ?>
                         <article class="wikaz-post-item">
