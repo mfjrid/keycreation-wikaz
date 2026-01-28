@@ -4,9 +4,10 @@
 }
 
 .tf-page-title {
-    /* background: linear-gradient(180deg, #8d8d8d 30%, #303030 60%) !important; */
-    background: #757575 !important;
-    background: linear-gradient(7deg, rgba(43, 43, 43, 1) 0%, rgba(64, 64, 64, 1) 50%, rgba(77, 77, 77, 1) 100%) !important;
+    /* background: #757575 !important;
+    background: linear-gradient(7deg, rgba(43, 43, 43, 1) 0%, rgba(64, 64, 64, 1) 50%, rgba(77, 77, 77, 1) 100%) !important; */
+    background: url('../assets/images/bg-header.jpg') repeat-x center !important;
+    background-size: auto 100% !important;
 }
 
 .tf-page-title .page-title-heading .title,
