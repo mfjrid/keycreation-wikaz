@@ -1007,6 +1007,15 @@
             });
         } else {
             $('#wikaz-pm-modal-title').text('Add New Product');
+
+            // Auto-select active category if not "All"
+            const $activeTab = $('.pm-cat-tab.active');
+            if ($activeTab.length && $activeTab.data('category') !== 'all') {
+                const activeCatId = $activeTab.data('id');
+                if (activeCatId) {
+                    $('#pm-product-category').val([activeCatId.toString()]).trigger('change');
+                }
+            }
         }
         $pmModal.addClass('active');
     }
@@ -1025,6 +1034,7 @@
         $('#pm-variation-matrix-wrap').hide();
         $('#pm-variation-matrix-body').empty();
         $('.pm-term-item input').prop('checked', false);
+        $('#pm-product-price').val('0');
     }
 
     function selectPMImage() {

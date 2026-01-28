@@ -35,7 +35,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                     <span class="pm-cat-count"><?php echo esc_html($total_products); ?></span>
                 </li>
                 <?php foreach ($categories as $cat) : ?>
-                    <li class="pm-cat-tab" data-category="<?php echo esc_attr($cat->slug); ?>">
+                    <li class="pm-cat-tab" data-category="<?php echo esc_attr($cat->slug); ?>" data-id="<?php echo esc_attr($cat->term_id); ?>">
                         <?php echo esc_html($cat->name); ?>
                         <span class="pm-cat-count"><?php echo esc_html($cat->count); ?></span>
                     </li>
