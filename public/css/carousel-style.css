@@ -819,7 +819,9 @@ body.wikaz-header-transparent .tf-page-title,
 body.wikaz-header-transparent #goTop,
 body.wikaz-header-transparent .elementor-element-02d9bda,
 body.wikaz-header-transparent .elementor-element-9ac43ae,
-body.wikaz-header-transparent .elementor-element-daa771f {
+body.wikaz-header-transparent .elementor-element-daa771f,
+body.class-name-page-kategori-wanita #footer,
+body.class-name-page-kategori-pria #footer {
     display: none !important;
 }
 
@@ -847,8 +849,17 @@ a.nav-icon-item {
     color: #f1f1f1 !important;
 }
 
-#mainnav ul.elementor-icon-list-items a {
+#mainnav ul.elementor-icon-list-items a,
+.card-product-info a {
     color: #000000 !important;
+}
+
+.toolbar-label {
+    color: #000000 !important;
+}
+
+.offcanvas {
+    z-index: 9999 !important;
 }
 
 /* li.menu-item.menu-item-type-post_type.menu-item-object-page {
