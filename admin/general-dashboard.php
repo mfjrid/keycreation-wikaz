@@ -109,6 +109,21 @@ if (!defined('ABSPATH')) {
                 </a>
             </div>
         </div>
+        
+        <!-- Mega Menu Card -->
+        <div class="wikaz-dashboard-card">
+            <div class="card-icon">
+                <span class="dashicons dashicons-menu-alt"></span>
+            </div>
+            <div class="card-content">
+                <h3><?php _e('Mega Menu', 'keycreation-wikaz'); ?></h3>
+                <p><?php _e('Shortcut to Mega Menu Editor.', 'keycreation-wikaz'); ?>
+                </p>
+                <a href="<?php echo admin_url('admin.php?page=wikaz-mega-menu-editor'); ?>" class="button button-primary">
+                    <?php _e('Go to Mega Menu', 'keycreation-wikaz'); ?>
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Quick Links / Documentation Section -->

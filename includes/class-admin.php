@@ -145,6 +145,14 @@ class Wikaz_Admin
             'wikaz-simple-post',
             array($this, 'render_simple_post_page')
         );
+        add_submenu_page(
+            'wikaz-design',
+            __('Mega Menu Editor', 'keycreation-wikaz'),
+            __('Mega Menu Editor', 'keycreation-wikaz'),
+            'manage_options',
+            'wikaz-mega-menu-editor',
+            array($this, 'render_mega_menu_editor_page')
+        );
     }
 
     /**
@@ -206,6 +214,14 @@ class Wikaz_Admin
                 'error' => __('An error occurred', 'keycreation-wikaz'),
             )
         ));
+    }
+
+    /**
+     * Render mega menu editor admin page
+     */
+    public function render_mega_menu_editor_page()
+    {
+        require_once WIKAZ_PLUGIN_DIR . 'admin/mega-menu-editor.php';
     }
 
     /**
