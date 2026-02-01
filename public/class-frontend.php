@@ -39,6 +39,20 @@ class Wikaz_Frontend
 
         // Blog Redesign Hooks
         add_filter('the_content', array($this, 'redesign_blog_content'));
+
+        // Archive Styling Hooks
+        add_filter('post_class', array($this, 'add_archive_post_class'), 10, 3);
+    }
+
+    /**
+     * Add wikaz-post-item class to posts on archive pages
+     */
+    public function add_archive_post_class($classes, $class, $post_id)
+    {
+        if (is_archive() || is_home() || is_search()) {
+            $classes[] = 'wikaz-post-item';
+        }
+        return $classes;
     }
 
     /**
@@ -138,6 +152,11 @@ class Wikaz_Frontend
             array(),
             WIKAZ_VERSION
         );
+
+        // Enqueue post list styles on archives and search pages
+        if (is_archive() || is_home() || is_search()) {
+            wp_enqueue_style('wikaz-post-list', WIKAZ_PLUGIN_URL . 'public/css/post-list.css', array(), WIKAZ_VERSION);
+        }
 
         // Swiper CSS (Only for carousel pages)
         if (is_front_page() || $this->has_shortcode()) {
