@@ -115,6 +115,17 @@ class Wikaz_Post_List
                                 <h3 class="wikaz-post-title">
                                     <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
                                 </h3>
+                                <div class="wikaz-post-meta">
+                                    <span class="wikaz-post-author">
+                                        <span class="meta-icon">👤</span> <?php echo get_the_author(); ?>
+                                    </span>
+                                    <span class="wikaz-post-date">
+                                        <span class="meta-icon">📅</span> <?php echo get_the_date(); ?>
+                                    </span>
+                                    <span class="wikaz-post-comments">
+                                        <span class="meta-icon">💬</span> <?php echo get_comments_number(); ?> <?php _e('Comments', 'keycreation-wikaz'); ?>
+                                    </span>
+                                </div>
                                 <div class="wikaz-post-excerpt">
                                     <?php echo wp_trim_words(get_the_excerpt(), 25); ?>
                                 </div>

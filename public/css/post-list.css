@@ -122,6 +122,26 @@
     color: #555;
 }
 
+.wikaz-post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #888;
+}
+
+.wikaz-post-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.meta-icon {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
 .wikaz-post-excerpt {
     color: #666;
     font-size: 15px;
