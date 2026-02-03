@@ -52,6 +52,15 @@ class Wikaz_Frontend
      */
     public function add_archive_post_class($classes, $class, $post_id)
     {
+        // Don't add blog classes on WooCommerce pages or for product post type
+        if (get_post_type($post_id) === 'product') {
+            return $classes;
+        }
+
+        if (function_exists('is_woocommerce') && (is_woocommerce() || is_cart() || is_checkout())) {
+            return $classes;
+        }
+
         if (is_archive() || is_home() || is_search()) {
             $classes[] = 'wikaz-post-item';
         }
@@ -156,8 +165,9 @@ class Wikaz_Frontend
             WIKAZ_VERSION
         );
 
-        // Enqueue post list styles on archives and search pages
-        if (is_archive() || is_home() || is_search()) {
+        // Enqueue post list styles on archives and search pages (exclude WooCommerce)
+        $is_woo = function_exists('is_woocommerce') && (is_woocommerce() || is_cart() || is_checkout());
+        if (($is_woo === false) && (is_archive() || is_home() || is_search())) {
             wp_enqueue_style('wikaz-post-list', WIKAZ_PLUGIN_URL . 'public/css/post-list.css', array(), WIKAZ_VERSION);
         }
 
