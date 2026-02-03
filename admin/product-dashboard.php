@@ -62,7 +62,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                     <tr>
                         <th class="column-thumb"><?php _e('Image', 'keycreation-wikaz'); ?></th>
                         <th class="column-name"><?php _e('Name', 'keycreation-wikaz'); ?></th>
-                        <th class="column-sku" style="display:none;"><?php _e('SKU', 'keycreation-wikaz'); ?></th>
+                        <th class="column-sku"><?php _e('SKU', 'keycreation-wikaz'); ?></th>
                         <th class="column-type"><?php _e('Type', 'keycreation-wikaz'); ?></th>
                         <th class="column-price"><?php _e('Price', 'keycreation-wikaz'); ?></th>
                         <th class="column-stock"><?php _e('Stock', 'keycreation-wikaz'); ?></th>
@@ -97,10 +97,10 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                         <label><?php _e('Product Name', 'keycreation-wikaz'); ?> <span class="required">*</span></label>
                         <input type="text" id="pm-product-name" required placeholder="KHIMAR KHADIJAH...">
                     </div>
-                    <div class="wikaz-form-group" style="display:none;">
+                    <div class="wikaz-form-group">
                         <label><?php _e('Base SKU', 'keycreation-wikaz'); ?></label>
-                        <input type="text" id="pm-product-sku" placeholder="WIZ-KMR">
-                        <p class="description"><?php _e('Used as prefix for variations', 'keycreation-wikaz'); ?></p>
+                        <input type="text" id="pm-product-sku" readonly placeholder="WIZ-KMR" style="background: #f0f0f1; cursor: not-allowed;">
+                        <p class="description"><?php _e('Auto-generated based on name', 'keycreation-wikaz'); ?></p>
                     </div>
                 </div>
 
@@ -196,7 +196,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                             <thead>
                                 <tr>
                                     <th><?php _e('Variation', 'keycreation-wikaz'); ?></th>
-                                    <th style="display:none;"><?php _e('SKU', 'keycreation-wikaz'); ?></th>
+                                    <th><?php _e('SKU', 'keycreation-wikaz'); ?></th>
                                     <th><?php _e('Price', 'keycreation-wikaz'); ?></th>
                                     <th><?php _e('Stock', 'keycreation-wikaz'); ?></th>
                                 </tr>

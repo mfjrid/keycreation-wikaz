@@ -845,14 +845,14 @@
     function renderPMProductList(products) {
         let html = '';
         if (!products.length) {
-            html = `<tr><td colspan="6" style="text-align:center;">No products found.</td></tr>`;
+            html = `<tr><td colspan="7" style="text-align:center;">No products found.</td></tr>`;
         } else {
             products.forEach(p => {
                 html += `
                         <tr>
                         <td class="column-thumb"><img src="${p.image}" alt=""></td>
                         <td><strong>${p.name}</strong></td>
-                        <td style="display:none;"><code>${p.sku || '-'}</code></td>
+                        <td><code>${p.sku || '-'}</code></td>
                         <td><small>${p.type.toUpperCase()}</small></td>
                         <td>Rp ${p.price || 0}</td>
                         <td>${p.stock !== null ? p.stock : '∞'}</td>
@@ -1142,7 +1142,7 @@
             const html = `
                 <tr data-combo='${comboKey}'>
                     <td><strong>${labels}</strong></td>
-                    <td style="display:none;"><input type="text" class="pm-var-sku" data-idx="${idx}" value="${sku}"></td>
+                    <td><input type="text" class="pm-var-sku" data-idx="${idx}" value="${sku}" readonly style="background: #f0f0f1; cursor: not-allowed;"></td>
                     <td><input type="number" class="pm-var-price" data-idx="${idx}" value="${price}"></td>
                     <td><input type="number" class="pm-var-stock" data-idx="${idx}" value="${stock}"></td>
                 </tr>
