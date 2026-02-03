@@ -42,6 +42,9 @@ class Wikaz_Frontend
 
         // Archive Styling Hooks
         add_filter('post_class', array($this, 'add_archive_post_class'), 10, 3);
+
+        // Inject short description below view count (priority 12 in theme)
+        add_action('woocommerce_single_product_summary', array($this, 'render_short_description'), 15);
     }
 
     /**
@@ -689,5 +692,26 @@ class Wikaz_Frontend
         </div>
         <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Render product short description for single product pages
+     */
+    public function render_short_description()
+    {
+        if (!is_product()) {
+            return;
+        }
+
+        global $product;
+        $short_description = $product->get_short_description();
+
+        if (empty($short_description)) {
+            return;
+        }
+
+        echo '<div class="wikaz-product-short-description">';
+        echo apply_filters('woocommerce_short_description', $short_description);
+        echo '</div>';
     }
 }
