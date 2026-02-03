@@ -712,7 +712,7 @@ class Wikaz_Admin
             'name' => $product->get_name(),
             'description' => $product->get_description('edit'),
             'short_description' => $product->get_short_description('edit'),
-            'price' => $product->get_regular_price(),
+            'price' => $product->get_regular_price() ?: ($product->is_type('variable') ? $product->get_variation_regular_price('min') : ''),
             'sale_price' => $product->get_sale_price(),
             'sku' => $product->get_sku(),
             'type' => $product->get_type(),

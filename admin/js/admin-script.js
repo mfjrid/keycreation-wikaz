@@ -1251,6 +1251,13 @@
         }
     });
 
+    $('#pm-product-price').on('input', function () {
+        // If variations exist, update their prices based on this base price
+        if ($('#pm-variation-matrix-wrap').is(':visible')) {
+            generateVariationMatrix();
+        }
+    });
+
     function deletePMProduct(id, $btn) {
         if (!confirm('Delete this product permanently from WooCommerce?')) return;
 
