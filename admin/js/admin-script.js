@@ -1123,7 +1123,7 @@
         $tableBody.empty();
 
         const baseSku = $('#pm-product-sku').val() || 'SKU';
-        const basePrice = $('#pm-product-price').val() || '';
+        const basePrice = $('#pm-product-price').val() || '0';
 
         combinations.forEach((combo, idx) => {
             const labels = Object.values(combo).map(v => v.name).join(' / ');
@@ -1136,7 +1136,7 @@
 
             const preserved = savedData[comboKey] || null;
             const sku = `${baseSku}-${skuSuffix}`;
-            const price = preserved ? preserved.price : basePrice;
+            const price = (preserved && preserved.price && preserved.price !== '0') ? preserved.price : basePrice;
             const stock = preserved ? preserved.stock : '0';
 
             const html = `
@@ -1252,10 +1252,9 @@
     });
 
     $('#pm-product-price').on('input', function () {
-        // If variations exist, update their prices based on this base price
-        if ($('#pm-variation-matrix-wrap').is(':visible')) {
-            generateVariationMatrix();
-        }
+        const newVal = $(this).val();
+        // Update all variation prices to match the master price
+        $('.pm-var-price').val(newVal);
     });
 
     function deletePMProduct(id, $btn) {
