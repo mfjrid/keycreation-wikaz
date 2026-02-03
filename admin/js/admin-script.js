@@ -845,14 +845,14 @@
     function renderPMProductList(products) {
         let html = '';
         if (!products.length) {
-            html = `<tr><td colspan="7" style="text-align:center;">No products found.</td></tr>`;
+            html = `<tr><td colspan="6" style="text-align:center;">No products found.</td></tr>`;
         } else {
             products.forEach(p => {
                 html += `
                         <tr>
                         <td class="column-thumb"><img src="${p.image}" alt=""></td>
                         <td><strong>${p.name}</strong></td>
-                        <td><code>${p.sku || '-'}</code></td>
+                        <td style="display:none;"><code>${p.sku || '-'}</code></td>
                         <td><small>${p.type.toUpperCase()}</small></td>
                         <td>Rp ${p.price || 0}</td>
                         <td>${p.stock !== null ? p.stock : '∞'}</td>
@@ -1135,14 +1135,14 @@
             const comboKey = JSON.stringify(cleanCombo);
 
             const preserved = savedData[comboKey] || null;
-            const sku = preserved ? preserved.sku : `${baseSku}-${skuSuffix}`;
+            const sku = `${baseSku}-${skuSuffix}`;
             const price = preserved ? preserved.price : basePrice;
             const stock = preserved ? preserved.stock : '0';
 
             const html = `
                 <tr data-combo='${comboKey}'>
                     <td><strong>${labels}</strong></td>
-                    <td><input type="text" class="pm-var-sku" data-idx="${idx}" value="${sku}"></td>
+                    <td style="display:none;"><input type="text" class="pm-var-sku" data-idx="${idx}" value="${sku}"></td>
                     <td><input type="number" class="pm-var-price" data-idx="${idx}" value="${price}"></td>
                     <td><input type="number" class="pm-var-stock" data-idx="${idx}" value="${stock}"></td>
                 </tr>
@@ -1231,6 +1231,25 @@
             }
         });
     }
+
+    function generateSkuFromName(name) {
+        if (!name) return '';
+        return name.trim().toUpperCase()
+            .replace(/&/g, 'AND')
+            .replace(/[^A-Z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .substring(0, 30);
+    }
+
+    $('#pm-product-name').on('input', function () {
+        const autoSku = generateSkuFromName($(this).val());
+        $('#pm-product-sku').val(autoSku);
+
+        // If variations exist, we should update them too
+        if ($('#pm-variation-matrix-wrap').is(':visible')) {
+            generateVariationMatrix();
+        }
+    });
 
     function deletePMProduct(id, $btn) {
         if (!confirm('Delete this product permanently from WooCommerce?')) return;
