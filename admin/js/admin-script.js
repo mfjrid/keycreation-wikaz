@@ -1983,6 +1983,8 @@
             placeholder: 'Write your content here...',
             tabsize: 2,
             height: 300,
+            styleTags: ['p'],
+            enterHtml: '<br>',
             toolbar: [
                 ['style', ['style']],
                 ['font', ['bold', 'underline', 'clear']],

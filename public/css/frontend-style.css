@@ -232,6 +232,10 @@ body.wikaz-blog-redesign .post-meta {
     margin-bottom: 30px;
 }
 
+.wikaz-blog-content-inner p:empty {
+    min-height: 1em !important;
+}
+
 .wikaz-blog-content-inner h2,
 .wikaz-blog-content-inner h3 {
     color: #000;
@@ -383,6 +387,10 @@ body.wikaz-blog-redesign .post-meta {
 .wikaz-blog-content-inner img.note-float-right {
     margin-left: 20px !important;
     border-radius: 5px !important;
+}
+
+.featured-post.entry_image {
+    display: none !important;
 }
 
 /* Product Short Description */
