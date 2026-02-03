@@ -649,7 +649,7 @@ class Wikaz_Admin
         $per_page = 10;
 
         $args = array(
-            'status' => 'publish',
+            'status' => array('publish', 'draft'),
             'limit' => $per_page,
             'page' => $page,
             'paginate' => true,
@@ -682,6 +682,7 @@ class Wikaz_Admin
                 'image' => wp_get_attachment_image_url($product->get_image_id(), 'thumbnail') ?: wc_placeholder_img_src('thumbnail'),
                 'type' => $product->get_type(),
                 'stock' => $product->get_stock_quantity(),
+                'status' => $product->get_status(),
                 'variations_count' => $product->is_type('variable') ? count($product->get_children()) : 0
             );
         }
@@ -723,6 +724,7 @@ class Wikaz_Admin
             }, $product->get_gallery_image_ids()),
             'categories' => $product->get_category_ids(),
             'tags' => $product->get_tag_ids(),
+            'status' => $product->get_status(),
             'video_url' => get_post_meta($product->get_id(), '_video_url', true),
             'attributes' => array(),
             'variations' => array()
@@ -863,7 +865,11 @@ class Wikaz_Admin
 
             // 2. Set Basic Data
             $product->set_name(sanitize_text_field($_POST['name']));
-            $product->set_status('publish');
+            
+            // Set status (default to publish if not set)
+            $status = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : 'publish';
+            $product->set_status($status);
+            
             $product->set_sku(sanitize_text_field($_POST['sku']));
             $product->set_description(wp_kses_post($_POST['description']));
             $product->set_short_description(wp_kses_post($_POST['short_description']));

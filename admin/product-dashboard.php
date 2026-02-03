@@ -28,7 +28,8 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
         <div class="wikaz-pm-categories-tabs">
             <ul class="pm-cat-tabs">
                 <?php 
-                $total_products = wp_count_posts('product')->publish;
+                $counts = wp_count_posts('product');
+                $total_products = intval($counts->publish) + intval($counts->draft);
                 ?>
                 <li class="pm-cat-tab active" data-category="all">
                     <?php _e('All', 'keycreation-wikaz'); ?>
@@ -63,6 +64,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                         <th class="column-thumb"><?php _e('Image', 'keycreation-wikaz'); ?></th>
                         <th class="column-name"><?php _e('Name', 'keycreation-wikaz'); ?></th>
                         <th class="column-sku"><?php _e('SKU', 'keycreation-wikaz'); ?></th>
+                        <th class="column-status"><?php _e('Status', 'keycreation-wikaz'); ?></th>
                         <th class="column-type"><?php _e('Type', 'keycreation-wikaz'); ?></th>
                         <th class="column-price"><?php _e('Price', 'keycreation-wikaz'); ?></th>
                         <th class="column-stock"><?php _e('Stock', 'keycreation-wikaz'); ?></th>
@@ -147,6 +149,17 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                         <p class="description">
                             <?php _e('YouTube or Vimeo link for video thumbnail', 'keycreation-wikaz'); ?>
                         </p>
+                    </div>
+                </div>
+
+                <div class="wikaz-form-row">
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Product Status', 'keycreation-wikaz'); ?></label>
+                        <select id="pm-product-status" style="width: 100%; max-width: 200px;">
+                            <option value="publish"><?php _e('Publish', 'keycreation-wikaz'); ?></option>
+                            <option value="draft"><?php _e('Draft', 'keycreation-wikaz'); ?></option>
+                        </select>
+                        <p class="description"><?php _e('Draft products will not be visible to customers', 'keycreation-wikaz'); ?></p>
                     </div>
                 </div>
 
@@ -396,5 +409,22 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
 
     .pm-save-spinner.is-active {
         visibility: visible;
+    }
+    .pm-status-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .pm-status-badge.status-publish {
+        background: #e1f5fe;
+        color: #039be5;
+    }
+
+    .pm-status-badge.status-draft {
+        background: #f5f5f5;
+        color: #757575;
     }
 </style>

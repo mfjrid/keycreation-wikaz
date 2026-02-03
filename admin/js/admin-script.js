@@ -845,7 +845,7 @@
     function renderPMProductList(products) {
         let html = '';
         if (!products.length) {
-            html = `<tr><td colspan="7" style="text-align:center;">No products found.</td></tr>`;
+            html = `<tr><td colspan="8" style="text-align:center;">No products found.</td></tr>`;
         } else {
             products.forEach(p => {
                 html += `
@@ -853,6 +853,7 @@
                         <td class="column-thumb"><img src="${p.image}" alt=""></td>
                         <td><strong>${p.name}</strong></td>
                         <td><code>${p.sku || '-'}</code></td>
+                        <td><span class="pm-status-badge status-${p.status}">${p.status.toUpperCase()}</span></td>
                         <td><small>${p.type.toUpperCase()}</small></td>
                         <td>Rp ${p.price || 0}</td>
                         <td>${p.stock !== null ? p.stock : '∞'}</td>
@@ -949,6 +950,7 @@
                             $('#pm-product-description').val(p.description || '');
                             $('#pm-product-category').val(p.categories ? p.categories.map(String) : []).trigger('change');
                             $('#pm-product-tags').val(p.tags ? p.tags.map(String) : []).trigger('change');
+                            $('#pm-product-status').val(p.status || 'publish');
                             $('#pm-product-video-url').val(p.video_url || '');
 
                             if (p.image_url) {
@@ -1028,6 +1030,7 @@
         $('#pm-product-image-id').val('');
         $('#pm-product-gallery-ids').val('');
         $('#pm-product-category, #pm-product-tags').val([]).trigger('change');
+        $('#pm-product-status').val('publish');
         $('#pm-image-preview img').hide().attr('src', '');
         $('#pm-image-preview .placeholder').show();
         $('.pm-gallery-item').remove();
@@ -1208,6 +1211,7 @@
             video_url: $('#pm-product-video-url').val(),
             image_id: $('#pm-product-image-id').val(),
             gallery_ids: $('#pm-product-gallery-ids').val(),
+            status: $('#pm-product-status').val(),
             attributes: attributes,
             variations: variations
         };
