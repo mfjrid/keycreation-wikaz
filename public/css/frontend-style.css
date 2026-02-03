@@ -384,3 +384,11 @@ body.wikaz-blog-redesign .post-meta {
     margin-left: 20px !important;
     border-radius: 5px !important;
 }
+/* Product Stock Short Description */
+.wikaz-stock-short-desc {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 20px;
+}
