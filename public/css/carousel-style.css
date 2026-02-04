@@ -850,7 +850,8 @@ a.nav-icon-item {
 }
 
 #mainnav ul.elementor-icon-list-items a,
-.card-product-info a {
+.card-product-info a,
+#mainnav a.name-product.link.text-md {
     color: #000000 !important;
 }
 
@@ -859,7 +860,7 @@ a.nav-icon-item {
 }
 
 .offcanvas {
-    z-index: 9999 !important;
+    z-index: 99999 !important;
 }
 
 /* li.menu-item.menu-item-type-post_type.menu-item-object-page {
