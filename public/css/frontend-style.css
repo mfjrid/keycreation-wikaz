@@ -393,10 +393,10 @@ body.wikaz-blog-redesign .post-meta {
     display: none !important;
 }
 
-.woocommerce-product-gallery__image video,
+/* .woocommerce-product-gallery__image video,
 .woocommerce-product-gallery__item video {
     aspect-ratio: unset !important;
-}
+} */
 
 /* Product Short Description */
 .wikaz-product-short-description {
@@ -416,4 +416,8 @@ p[align="center"] {
     text-align: center !important;
     display: flex !important;
     justify-content: center !important;
+}
+
+video.rsfv-video {
+    aspect-ratio: 9/16 !important;
 }
