@@ -725,7 +725,7 @@ class Wikaz_Admin
             'categories' => $product->get_category_ids(),
             'tags' => $product->get_tag_ids(),
             'status' => $product->get_status(),
-            'video_url' => get_post_meta($product->get_id(), '_video_url', true),
+            'video_url' => get_post_meta($product->get_id(), '_tf_video_url', true),
             'attributes' => array(),
             'variations' => array()
         );
@@ -877,7 +877,7 @@ class Wikaz_Admin
             $product->set_tag_ids(isset($_POST['tags']) ? array_map('intval', $_POST['tags']) : array());
 
             if (isset($_POST['video_url'])) {
-                $product->update_meta_data('_video_url', esc_url_raw($_POST['video_url']));
+                $product->update_meta_data('_tf_video_url', esc_url_raw($_POST['video_url']));
             }
 
             if (!empty($_POST['image_id'])) {
