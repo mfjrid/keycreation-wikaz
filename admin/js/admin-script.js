@@ -952,7 +952,7 @@
                             $('#pm-product-description').val(p.description || '');
                             $('#pm-product-category').val(p.categories ? p.categories.map(String) : []).trigger('change');
                             $('#pm-product-tags').val(p.tags ? p.tags.map(String) : []).trigger('change');
-                            $('#pm-product-status').val(p.status || 'publish');
+                            $('#pm-product-status').val(p.status || 'draft');
                             $('#pm-product-video-url').val(p.video_url || '');
 
                             if (p.image_url) {
@@ -1033,7 +1033,7 @@
         $('#pm-product-image-id').val('');
         $('#pm-product-gallery-ids').val('');
         $('#pm-product-category, #pm-product-tags').val([]).trigger('change');
-        $('#pm-product-status').val('publish');
+        $('#pm-product-status').val('draft');
         $('#pm-image-preview img').hide().attr('src', '');
         $('#pm-image-preview .placeholder').show();
         $('.pm-gallery-item').remove();

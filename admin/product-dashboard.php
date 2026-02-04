@@ -152,17 +152,6 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                     </div>
                 </div>
 
-                <div class="wikaz-form-row">
-                    <div class="wikaz-form-group">
-                        <label><?php _e('Product Status', 'keycreation-wikaz'); ?></label>
-                        <select id="pm-product-status" style="width: 100%; max-width: 200px;">
-                            <option value="draft" selected><?php _e('Draft', 'keycreation-wikaz'); ?></option>
-                            <option value="publish"><?php _e('Publish', 'keycreation-wikaz'); ?></option>
-                        </select>
-                        <p class="description"><?php _e('Draft products will not be visible to customers', 'keycreation-wikaz'); ?></p>
-                    </div>
-                </div>
-
                 <!-- Image & Gallery Section -->
                 <div class="wikaz-form-row">
                     <div class="wikaz-form-group">
@@ -218,15 +207,26 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                         </table>
                     </div>
                 </div>
+
+                <div class="wikaz-form-row" style="margin-top:20px;">
+                    <div class="wikaz-form-group">
+                        <label><?php _e('Product Status', 'keycreation-wikaz'); ?></label>
+                        <select id="pm-product-status" style="width: 100%; max-width: 200px;">
+                            <option value="draft" selected><?php _e('Draft', 'keycreation-wikaz'); ?></option>
+                            <option value="publish"><?php _e('Publish', 'keycreation-wikaz'); ?></option>
+                        </select>
+                        <p class="description"><?php _e('Draft products will not be visible to customers', 'keycreation-wikaz'); ?></p>
+                    </div>
+                </div>
             </form>
         </div>
         <div class="wikaz-modal-footer">
+            <span class="spinner pm-save-spinner"></span>
             <button type="button" class="button wikaz-modal-cancel"><?php _e('Cancel', 'keycreation-wikaz'); ?></button>
             <button type="submit" form="wikaz-pm-form" class="button button-primary" id="pm-save-btn">
                 <span class="dashicons dashicons-yes"></span>
                 <?php _e('Save Product', 'keycreation-wikaz'); ?>
             </button>
-            <span class="spinner pm-save-spinner"></span>
         </div>
     </div>
 </div>
