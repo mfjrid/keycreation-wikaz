@@ -891,6 +891,15 @@ class Wikaz_Admin
 
             if ($type === 'simple') {
                 $product->set_regular_price(sanitize_text_field($_POST['price']));
+                
+                // Cleanup all variations if it was previously variable
+                $existing_variation_ids = $product->get_children();
+                if (!empty($existing_variation_ids)) {
+                    foreach ($existing_variation_ids as $evid) {
+                        $v_old = wc_get_product($evid);
+                        if ($v_old) $v_old->delete(true);
+                    }
+                }
             }
 
             // 3. Handle Variable Product Attributes
@@ -989,7 +998,6 @@ class Wikaz_Admin
 
                     if ($variation_id) {
                         $variation = new WC_Product_Variation($variation_id);
-                        $processed_variation_ids[] = $variation_id;
                     } else {
                         $variation = new WC_Product_Variation();
                         $variation->set_parent_id($product_id);
@@ -1002,7 +1010,20 @@ class Wikaz_Admin
                     $variation->set_manage_stock(true);
                     $variation->set_stock_quantity(intval($v_data['stock']));
                     $variation->set_status('publish');
-                    $variation->save();
+                    
+                    $v_id = $variation->save();
+                    if ($v_id) {
+                        $processed_variation_ids[] = (int)$v_id;
+                    }
+                }
+
+                // Delete variations that are no longer present in the submission
+                $orphaned_ids = array_diff($existing_variation_ids, $processed_variation_ids);
+                foreach ($orphaned_ids as $orphaned_id) {
+                    $v_orphaned = wc_get_product($orphaned_id);
+                    if ($v_orphaned) {
+                        $v_orphaned->delete(true);
+                    }
                 }
             }
 

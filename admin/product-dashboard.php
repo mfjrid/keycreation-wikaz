@@ -194,6 +194,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
 
                     <div class="pm-variation-matrix-wrap" id="pm-variation-matrix-wrap" style="display:none;">
                         <h4><?php _e('Stock per Variation', 'keycreation-wikaz'); ?></h4>
+                        <p class="description"><?php _e('Empty the price and stock fields if this variation is not available', 'keycreation-wikaz'); ?></p>
                         <table class="pm-variation-table">
                             <thead>
                                 <tr>
