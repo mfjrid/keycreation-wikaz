@@ -18,6 +18,7 @@
     // Media uploader instance
     let mediaUploader;
     let pmAttrPromise;
+    let pmSessionSuffix = '';
 
     /**
      * Initialize
@@ -923,6 +924,7 @@
         resetPMForm();
         initSelect2($pmModal);
         if (productId > 0) {
+            pmSessionSuffix = productId.toString();
             $('#wikaz-pm-modal-title').text('Edit Product');
             $('#pm-product-id').val(productId);
 
@@ -1008,6 +1010,7 @@
                 });
             });
         } else {
+            pmSessionSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
             $('#wikaz-pm-modal-title').text('Add New Product');
 
             // Auto-select active category if not "All"
@@ -1238,11 +1241,13 @@
 
     function generateSkuFromName(name) {
         if (!name) return '';
-        return name.trim().toUpperCase()
+        const base = name.trim().toUpperCase()
             .replace(/&/g, 'AND')
             .replace(/[^A-Z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
-            .substring(0, 30);
+            .substring(0, 25);
+
+        return pmSessionSuffix ? `${base}-${pmSessionSuffix}` : base;
     }
 
     $('#pm-product-name').on('input', function () {

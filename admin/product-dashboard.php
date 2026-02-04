@@ -156,8 +156,8 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                     <div class="wikaz-form-group">
                         <label><?php _e('Product Status', 'keycreation-wikaz'); ?></label>
                         <select id="pm-product-status" style="width: 100%; max-width: 200px;">
+                            <option value="draft" selected><?php _e('Draft', 'keycreation-wikaz'); ?></option>
                             <option value="publish"><?php _e('Publish', 'keycreation-wikaz'); ?></option>
-                            <option value="draft"><?php _e('Draft', 'keycreation-wikaz'); ?></option>
                         </select>
                         <p class="description"><?php _e('Draft products will not be visible to customers', 'keycreation-wikaz'); ?></p>
                     </div>
