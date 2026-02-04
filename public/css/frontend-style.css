@@ -410,3 +410,10 @@ body.wikaz-blog-redesign .post-meta {
 .wikaz-product-short-description p {
     margin-bottom: 0;
 }
+
+p[style*="text-align: center"] img,
+p[align="center"] {
+    text-align: center !important;
+    display: flex !important;
+    justify-content: center !important;
+}
