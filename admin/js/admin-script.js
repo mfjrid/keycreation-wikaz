@@ -230,9 +230,11 @@
         if (source === 'post') {
             $('#wikaz-post-search-group').show();
             $('#wikaz-product-search-group').hide();
+            $('#wikaz-button-text').val('Read More');
         } else {
             $('#wikaz-post-search-group').hide();
             $('#wikaz-product-search-group').show();
+            $('#wikaz-button-text').val('Shop Now');
         }
     }
 
@@ -618,16 +620,26 @@
             if (!$form.find('[name="title"]').val()) {
                 $form.find('[name="title"]').val(title);
             }
-            if (!$form.find('[name="button_url"]').val()) {
-                $form.find('[name="button_url"]').val(url);
+            // Always replace URL
+            $form.find('[name="button_url"]').val(url);
+
+            // Also update button text if empty or system default
+            const currentBtnText = $form.find('[name="button_text"]').val();
+            if (!currentBtnText || currentBtnText === 'Shop Now' || currentBtnText === 'Read More') {
+                $form.find('[name="button_text"]').val(type === 'post' ? 'Read More' : 'Shop Now');
             }
         } else {
             // Home Carousel uses specific IDs
             if (!$('#wikaz-title').val()) {
                 $('#wikaz-title').val(title);
             }
-            if (!$('#wikaz-button-url').val()) {
-                $('#wikaz-button-url').val(url);
+            // Always replace URL
+            $('#wikaz-button-url').val(url);
+
+            // Also update button text if empty or system default
+            const currentBtnText = $('#wikaz-button-text').val();
+            if (!currentBtnText || currentBtnText === 'Shop Now' || currentBtnText === 'Read More') {
+                $('#wikaz-button-text').val(type === 'post' ? 'Read More' : 'Shop Now');
             }
         }
     }

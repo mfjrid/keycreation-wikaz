@@ -638,12 +638,17 @@ jQuery(document).ready(function($) {
     
     // Toggle Link Source
     $(document).on('change', '#wikaz-header-slide-form input[name="link_source"]', function() {
-        if($(this).val() === 'post') {
+        const source = $(this).val();
+        const $form = $('#wikaz-header-slide-form');
+
+        if(source === 'post') {
             $('#hs-post-search-group').show();
             $('#hs-product-search-group').hide();
+            $form.find('[name="button_text"]').val('Read More');
         } else {
             $('#hs-post-search-group').hide();
             $('#hs-product-search-group').show();
+            $form.find('[name="button_text"]').val('Shop Now');
         }
     });
 
