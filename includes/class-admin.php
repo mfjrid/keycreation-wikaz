@@ -340,13 +340,16 @@ class Wikaz_Admin
         $table_name = $wpdb->prefix . 'wikaz_carousel_slides';
 
         $slide_id = isset($_POST['slide_id']) ? intval($_POST['slide_id']) : 0;
+        $media_type = sanitize_text_field($_POST['media_type']);
+        $link_source = sanitize_text_field($_POST['link_source']);
+
         $data = array(
-            'product_id' => !empty($_POST['product_id']) ? intval($_POST['product_id']) : null,
-            'post_id' => !empty($_POST['post_id']) ? intval($_POST['post_id']) : null,
+            'product_id' => ($link_source === 'product' && !empty($_POST['product_id'])) ? intval($_POST['product_id']) : null,
+            'post_id' => ($link_source === 'post' && !empty($_POST['post_id'])) ? intval($_POST['post_id']) : null,
             'title' => sanitize_text_field($_POST['title']),
             'subtitle' => sanitize_text_field($_POST['subtitle']),
-            'background_image' => esc_url_raw($_POST['background_image']),
-            'background_video' => esc_url_raw($_POST['background_video']),
+            'background_image' => ($media_type === 'image') ? esc_url_raw($_POST['background_image']) : null,
+            'background_video' => ($media_type === 'video') ? esc_url_raw($_POST['background_video']) : null,
             'layout' => sanitize_text_field($_POST['layout']),
             'description' => wp_kses_post($_POST['description']),
             'button_text' => sanitize_text_field($_POST['button_text']),
@@ -1405,32 +1408,21 @@ class Wikaz_Admin
         }
 
         $media_type = sanitize_text_field($_POST['media_type']);
-        $background_image = esc_url_raw($_POST['background_image']);
-        $background_video = esc_url_raw($_POST['background_video']);
-
-        // Validation based on media type
-        if ($media_type === 'image' && empty($background_image)) {
-            wp_send_json_error('Background image is required');
-        }
-        
-        // Use video only if media type is video
-        if ($media_type === 'image') {
-            $background_video = null;
-        }
+        $link_source = sanitize_text_field($_POST['link_source']);
 
         $data = array(
             'slider_id' => $slider_id,
             'title' => sanitize_text_field($_POST['title']),
             'subtitle' => sanitize_text_field($_POST['subtitle']),
-            'background_image' => $background_image,
-            'background_video' => $background_video,
+            'background_image' => ($media_type === 'image') ? esc_url_raw($_POST['background_image']) : null,
+            'background_video' => ($media_type === 'video') ? esc_url_raw($_POST['background_video']) : null,
             'layout' => sanitize_text_field($_POST['layout']),
             'description' => wp_kses_post($_POST['description']),
             'button_text' => sanitize_text_field($_POST['button_text']),
             'button_url' => esc_url_raw($_POST['button_url']),
             'is_active' => 1, // Default to active since we don't have a toggle yet
-            'product_id' => !empty($_POST['product_id']) ? intval($_POST['product_id']) : null,
-            'post_id' => !empty($_POST['post_id']) ? intval($_POST['post_id']) : null,
+            'product_id' => ($link_source === 'product' && !empty($_POST['product_id'])) ? intval($_POST['product_id']) : null,
+            'post_id' => ($link_source === 'post' && !empty($_POST['post_id'])) ? intval($_POST['post_id']) : null,
         );
 
         if ($id > 0) {

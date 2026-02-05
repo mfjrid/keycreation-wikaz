@@ -90,7 +90,7 @@
         $('#wikaz-background-video').on('change input', debounce(updateVideoPreview, 500));
 
         // Media Type Toggle
-        $('input[name="media_type"]').on('change', toggleMediaType);
+        $('#wikaz-slide-form input[name="media_type"]').on('change', toggleMediaType);
 
         // Product search (Delegated)
         $(document).on('input', '#wikaz-product-search, #hs-product-search', debounce(searchProducts, 300));
@@ -208,9 +208,10 @@
      * Toggle Media Type
      */
     function toggleMediaType() {
-        const type = $('input[name="media_type"]:checked').val();
-        $('.wikaz-media-section').hide();
-        $('#section-media-' + type).show();
+        const $form = $('#wikaz-slide-form');
+        const type = $form.find('input[name="media_type"]:checked').val();
+        $form.find('.wikaz-media-section').hide();
+        $form.find('#section-media-' + type).show();
     }
 
     /**
@@ -250,6 +251,16 @@
             $('#wikaz-selected-product').show()
                 .find('img').attr('src', data.product.image);
             $('#wikaz-selected-product .product-name').text(data.product.title);
+            $('input[name="link_source"][value="product"]').prop('checked', true).trigger('change');
+        } else if (data.post_id && data.post) {
+            $('#wikaz-post-id').val(data.post_id);
+            $('#wikaz-post-search').hide();
+            $('#wikaz-selected-post').show()
+                .find('img').attr('src', data.post.image);
+            $('#wikaz-selected-post .product-name').text(data.post.title);
+            $('input[name="link_source"][value="post"]').prop('checked', true).trigger('change');
+        } else {
+            $('input[name="link_source"][value="product"]').prop('checked', true).trigger('change');
         }
     }
 
@@ -656,13 +667,12 @@
         });
     }
 
-    // Toggle Link Source
-    $('input[name="link_source"]').on('change', function () {
+    // Toggle Link Source (Carousel)
+    $('#wikaz-slide-form input[name="link_source"]').on('change', function () {
         const source = $(this).val();
         if (source === 'post') {
             $('#wikaz-product-search-group').hide();
             $('#wikaz-post-search-group').show();
-            // Clear product if switching? Maybe optional
         } else {
             $('#wikaz-product-search-group').show();
             $('#wikaz-post-search-group').hide();
