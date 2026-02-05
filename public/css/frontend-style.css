@@ -421,3 +421,7 @@ p[align="center"] {
 video.rsfv-video {
     aspect-ratio: 9/16 !important;
 }
+
+.offcanvas {
+    z-index: 99999 !important;
+}
