@@ -52,6 +52,7 @@ class Wikaz_Admin
         add_action('wp_ajax_wikaz_get_header_slides', array($this, 'ajax_get_header_slides'));
         add_action('wp_ajax_wikaz_save_header_slide', array($this, 'ajax_save_header_slide'));
         add_action('wp_ajax_wikaz_delete_header_slide', array($this, 'ajax_delete_header_slide'));
+        add_action('wp_ajax_wikaz_get_header_slide', array($this, 'ajax_get_header_slide'));
 
         // Simple Post AJAX
         add_action('wp_ajax_wikaz_get_simple_posts', array($this, 'ajax_get_simple_posts'));
@@ -350,6 +351,8 @@ class Wikaz_Admin
             'subtitle' => sanitize_text_field($_POST['subtitle']),
             'background_image' => ($media_type === 'image') ? esc_url_raw($_POST['background_image']) : null,
             'background_video' => ($media_type === 'video') ? esc_url_raw($_POST['background_video']) : null,
+            'media_type' => $media_type,
+            'link_source' => $link_source,
             'layout' => sanitize_text_field($_POST['layout']),
             'description' => wp_kses_post($_POST['description']),
             'button_text' => sanitize_text_field($_POST['button_text']),
@@ -1384,7 +1387,82 @@ class Wikaz_Admin
         
         $slides = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE slider_id = %d ORDER BY sort_order ASC", $slider_id));
 
+        // Enrich slides with product/post data
+        foreach ($slides as &$slide) {
+            if ($slide->product_id) {
+                $product = wc_get_product($slide->product_id);
+                if ($product) {
+                    $slide->product = array(
+                        'id' => $slide->product_id,
+                        'title' => $product->get_name(),
+                        'image' => wp_get_attachment_image_url($product->get_image_id(), 'thumbnail') ?: wc_placeholder_img_src('thumbnail'),
+                        'url' => get_permalink($slide->product_id)
+                    );
+                }
+            }
+            if ($slide->post_id) {
+                $post = get_post($slide->post_id);
+                if ($post) {
+                    $image_id = get_post_thumbnail_id($slide->post_id);
+                    $slide->post = array(
+                        'id' => $slide->post_id,
+                        'title' => $post->post_title,
+                        'image' => $image_id ? wp_get_attachment_image_url($image_id, 'thumbnail') : WIKAZ_PLUGIN_URL . 'admin/images/placeholder.png',
+                        'url' => get_permalink($slide->post_id)
+                    );
+                }
+            }
+        }
+
         wp_send_json_success($slides);
+    }
+
+    /**
+     * AJAX: Get single header slide data
+     */
+    public function ajax_get_header_slide()
+    {
+        check_ajax_referer('wikaz_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wikaz_header_slider_slides';
+
+        $id = intval($_POST['id']);
+        $slide = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $id));
+
+        if (!$slide) {
+            wp_send_json_error('Slide not found');
+        }
+
+        // Enrich slide with product/post data
+        if ($slide->product_id) {
+            $product = wc_get_product($slide->product_id);
+            if ($product) {
+                $slide->product = array(
+                    'id' => $slide->product_id,
+                    'title' => $product->get_name(),
+                    'image' => wp_get_attachment_image_url($product->get_image_id(), 'thumbnail') ?: wc_placeholder_img_src('thumbnail'),
+                    'url' => get_permalink($slide->product_id)
+                );
+            }
+        }
+        if ($slide->post_id) {
+            $post = get_post($slide->post_id);
+            if ($post) {
+                $image_id = get_post_thumbnail_id($slide->post_id);
+                $slide->post = array(
+                    'id' => $slide->post_id,
+                    'title' => $post->post_title,
+                    'image' => $image_id ? wp_get_attachment_image_url($image_id, 'thumbnail') : WIKAZ_PLUGIN_URL . 'admin/images/placeholder.png',
+                    'url' => get_permalink($slide->post_id)
+                );
+            }
+        }
+
+        wp_send_json_success($slide);
     }
 
     /**
@@ -1417,10 +1495,12 @@ class Wikaz_Admin
             'background_image' => ($media_type === 'image') ? esc_url_raw($_POST['background_image']) : null,
             'background_video' => ($media_type === 'video') ? esc_url_raw($_POST['background_video']) : null,
             'layout' => sanitize_text_field($_POST['layout']),
+            'media_type' => $media_type,
+            'link_source' => $link_source,
             'description' => wp_kses_post($_POST['description']),
             'button_text' => sanitize_text_field($_POST['button_text']),
             'button_url' => esc_url_raw($_POST['button_url']),
-            'is_active' => 1, // Default to active since we don't have a toggle yet
+            'is_active' => 1,
             'product_id' => ($link_source === 'product' && !empty($_POST['product_id'])) ? intval($_POST['product_id']) : null,
             'post_id' => ($link_source === 'post' && !empty($_POST['post_id'])) ? intval($_POST['post_id']) : null,
         );

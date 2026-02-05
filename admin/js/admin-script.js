@@ -82,15 +82,18 @@
         // Save settings
         $settingsForm.on('submit', saveSettings);
 
-        // Media upload
-        $('#wikaz-select-image, #wikaz-image-preview').on('click', selectImage);
-        $('#wikaz-remove-image').on('click', removeImage);
-        $('#wikaz-select-video, #wikaz-video-preview .wikaz-video-placeholder').on('click', selectVideo);
-        $('#wikaz-remove-video').on('click', removeVideo);
-        $('#wikaz-background-video').on('change input', debounce(updateVideoPreview, 500));
+        // Media upload (Delegated & Broadened)
+        $(document).on('click', '#wikaz-select-image, #wikaz-image-preview', selectImage);
+        $(document).on('click', '#wikaz-remove-image', removeImage);
+        $(document).on('click', '#wikaz-select-video, #wikaz-video-preview', selectVideo);
+        $(document).on('click', '#wikaz-remove-video', removeVideo);
+        $(document).on('change input', '#wikaz-background-video', debounce(updateVideoPreview, 500));
 
         // Media Type Toggle
         $('#wikaz-slide-form input[name="media_type"]').on('change', toggleMediaType);
+
+        // Link Source Toggle
+        $('#wikaz-slide-form input[name="link_source"]').on('change', toggleLinkSource);
 
         // Product search (Delegated)
         $(document).on('input', '#wikaz-product-search, #hs-product-search', debounce(searchProducts, 300));
@@ -192,6 +195,7 @@
         $('#wikaz-image-preview .wikaz-image-placeholder').show();
         $('#wikaz-remove-image').hide();
         $('#wikaz-video-preview video').hide().attr('src', '');
+        $('#wikaz-video-preview .wikaz-video-placeholder').show();
         $('#wikaz-remove-video').hide();
 
         // Reset Media Type to Image
@@ -215,6 +219,20 @@
     }
 
     /**
+     * Toggle Link Source
+     */
+    function toggleLinkSource() {
+        const source = $(this).val();
+        if (source === 'post') {
+            $('#wikaz-post-search-group').show();
+            $('#wikaz-product-search-group').hide();
+        } else {
+            $('#wikaz-post-search-group').hide();
+            $('#wikaz-product-search-group').show();
+        }
+    }
+
+    /**
      * Populate form with slide data
      */
     function populateForm(data) {
@@ -229,6 +247,10 @@
             $(`input[name="layout"][value="${data.layout}"]`).prop('checked', true);
         }
 
+        // Media Type Detection
+        let mediaType = data.media_type || (data.background_video ? 'video' : 'image');
+        $('input[name="media_type"][value="' + mediaType + '"]').prop('checked', true).trigger('change');
+
         if (data.background_image) {
             $('#wikaz-background-image').val(data.background_image);
             $('#wikaz-image-preview img').attr('src', data.background_image).show();
@@ -238,29 +260,31 @@
 
         if (data.background_video) {
             $('#wikaz-background-video').val(data.background_video).trigger('change');
-            // Switch to video tab
-            $('input[name="media_type"][value="video"]').prop('checked', true).trigger('change');
+            $('#wikaz-video-preview video').attr('src', data.background_video).show();
+            $('#wikaz-video-preview .wikaz-video-placeholder').hide();
+            $('#wikaz-remove-video').show();
         } else {
-            // Default to image tab
-            $('input[name="media_type"][value="image"]').prop('checked', true).trigger('change');
+            $('#wikaz-video-preview video').hide().attr('src', '');
+            $('#wikaz-video-preview .wikaz-video-placeholder').show();
+            $('#wikaz-remove-video').hide();
         }
 
-        if (data.product_id && data.product) {
+        // Link Source Detection
+        let linkSource = data.link_source || (data.post_id ? 'post' : 'product');
+        $(`input[name="link_source"][value="${linkSource}"]`).prop('checked', true).trigger('change');
+
+        if (linkSource === 'product' && data.product_id && data.product) {
             $('#wikaz-product-id').val(data.product_id);
             $('#wikaz-product-search').hide();
             $('#wikaz-selected-product').show()
                 .find('img').attr('src', data.product.image);
             $('#wikaz-selected-product .product-name').text(data.product.title);
-            $('input[name="link_source"][value="product"]').prop('checked', true).trigger('change');
-        } else if (data.post_id && data.post) {
+        } else if (linkSource === 'post' && data.post_id && data.post) {
             $('#wikaz-post-id').val(data.post_id);
             $('#wikaz-post-search').hide();
             $('#wikaz-selected-post').show()
                 .find('img').attr('src', data.post.image);
             $('#wikaz-selected-post .product-name').text(data.post.title);
-            $('input[name="link_source"][value="post"]').prop('checked', true).trigger('change');
-        } else {
-            $('input[name="link_source"][value="product"]').prop('checked', true).trigger('change');
         }
     }
 
@@ -287,6 +311,8 @@
                 description: $('#wikaz-description').val(),
                 background_image: $('#wikaz-background-image').val(),
                 background_video: $('#wikaz-background-video').val(),
+                media_type: $('input[name="media_type"]:checked').val(),
+                link_source: $('input[name="link_source"]:checked').val(),
                 layout: $('input[name="layout"]:checked').val(),
                 button_text: $('#wikaz-button-text').val(),
                 button_url: $('#wikaz-button-url').val(),

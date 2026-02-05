@@ -52,6 +52,7 @@ class Keycreation_Wikaz
     {
         $this->load_dependencies();
         $this->init_hooks();
+        $this->maybe_update_database();
     }
 
     /**
@@ -83,6 +84,18 @@ class Keycreation_Wikaz
 
         // Register CPT
         // add_action('init', array($this, 'register_cpt'));
+    }
+
+    /**
+     * Maybe update database schema
+     */
+    public function maybe_update_database()
+    {
+        $db_version = get_option('wikaz_db_version', '0.0.0');
+        if (version_compare($db_version, WIKAZ_VERSION, '<')) {
+            $this->activate();
+            update_option('wikaz_db_version', WIKAZ_VERSION);
+        }
     }
 
     /**
@@ -130,6 +143,8 @@ class Keycreation_Wikaz
             background_image VARCHAR(500) DEFAULT NULL,
             background_video VARCHAR(500) DEFAULT NULL,
             layout VARCHAR(20) DEFAULT 'full-bg',
+            media_type VARCHAR(20) DEFAULT 'image',
+            link_source VARCHAR(20) DEFAULT 'product',
             description TEXT DEFAULT NULL,
             button_text VARCHAR(100) DEFAULT 'Shop Now',
             button_url VARCHAR(500) DEFAULT NULL,
@@ -167,6 +182,18 @@ class Keycreation_Wikaz
             $wpdb->query("ALTER TABLE $table_name ADD post_id BIGINT DEFAULT NULL AFTER product_id");
         }
 
+        // Manually ensure media_type column exists
+        $mt_row = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table_name' AND COLUMN_NAME = 'media_type' AND TABLE_SCHEMA = '" . DB_NAME . "'");
+        if (empty($mt_row)) {
+            $wpdb->query("ALTER TABLE $table_name ADD media_type VARCHAR(20) DEFAULT 'image' AFTER layout");
+        }
+
+        // Manually ensure link_source column exists
+        $ls_row = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table_name' AND COLUMN_NAME = 'link_source' AND TABLE_SCHEMA = '" . DB_NAME . "'");
+        if (empty($ls_row)) {
+            $wpdb->query("ALTER TABLE $table_name ADD link_source VARCHAR(20) DEFAULT 'product' AFTER media_type");
+        }
+
         // Set default options
         add_option('wikaz_carousel_autoplay', '1');
         add_option('wikaz_carousel_speed', '5000');
@@ -198,6 +225,8 @@ class Keycreation_Wikaz
             background_image VARCHAR(500) DEFAULT NULL,
             background_video VARCHAR(500) DEFAULT NULL,
             layout VARCHAR(20) DEFAULT 'full-bg',
+            media_type VARCHAR(20) DEFAULT 'image',
+            link_source VARCHAR(20) DEFAULT 'product',
             description TEXT DEFAULT NULL,
             button_text VARCHAR(100) DEFAULT 'Shop Now',
             button_url VARCHAR(500) DEFAULT NULL,
@@ -209,6 +238,16 @@ class Keycreation_Wikaz
             KEY slider_id (slider_id)
         ) $charset_collate;";
         dbDelta($sql_slider_slides);
+
+        // Ensure media_type and link_source for header slides too
+        $mt_row_hs = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$slider_slides_table' AND COLUMN_NAME = 'media_type' AND TABLE_SCHEMA = '" . DB_NAME . "'");
+        if (empty($mt_row_hs)) {
+            $wpdb->query("ALTER TABLE $slider_slides_table ADD media_type VARCHAR(20) DEFAULT 'image' AFTER layout");
+        }
+        $ls_row_hs = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$slider_slides_table' AND COLUMN_NAME = 'link_source' AND TABLE_SCHEMA = '" . DB_NAME . "'");
+        if (empty($ls_row_hs)) {
+            $wpdb->query("ALTER TABLE $slider_slides_table ADD link_source VARCHAR(20) DEFAULT 'product' AFTER media_type");
+        }
     }
 }
 

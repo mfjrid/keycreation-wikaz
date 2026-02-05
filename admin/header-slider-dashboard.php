@@ -372,7 +372,7 @@ jQuery(document).ready(function($) {
             const title = slide.title || 'Untitled';
             
             html += `
-                <div class="wikaz-slide-item" data-id="${slide.id}" data-object='${JSON.stringify(slide)}'>
+                <div class="wikaz-slide-item" data-id="${slide.id}">
                      <div class="wikaz-slide-preview">
                         ${img ? `<img src="${img}">` : '<span class="dashicons dashicons-format-image"></span>'}
                      </div>
@@ -407,62 +407,87 @@ jQuery(document).ready(function($) {
 
     // Edit Slide
     $(document).on('click', '.wikaz-edit-header-slide', function() {
-        const item = $(this).closest('.wikaz-slide-item');
-        const data = item.data('object');
-        
-        $('#wikaz-header-slide-id').val(data.id);
-        $('#wikaz-header-slide-slider-id').val(data.slider_id);
-        
-        // Populate fields
-        $('[name="title"]').val(data.title);
-        $('[name="subtitle"]').val(data.subtitle);
-        $('[name="description"]').val(data.description);
-        $('[name="button_text"]').val(data.button_text);
-        $('[name="button_url"]').val(data.button_url);
-        $('[name="layout"][value="' + (data.layout || 'full-bg') + '"]').prop('checked', true);
-        
-        // Media Type
-        const mediaType = data.background_video ? 'video' : 'image';
-        $('#wikaz-header-slide-form input[name="media_type"][value="' + mediaType + '"]').prop('checked', true).trigger('change');
-        
-        if(data.background_image) {
-            $('#hs-background-image').val(data.background_image);
-            $('#hs-image-preview img').attr('src', data.background_image).show();
-            $('#hs-image-preview .wikaz-image-placeholder').hide();
-            $('#hs-remove-image').show();
-        }
-        
-        if(data.background_video) {
-            $('#hs-background-video').val(data.background_video);
-            // Trigger video preview update
-            $('#hs-background-video').trigger('input');
-        }
+        const id = $(this).closest('.wikaz-slide-item').data('id');
+        const $btn = $(this);
+        $btn.prop('disabled', true).find('.dashicons').addClass('spin');
 
-        // Link Source
-        resetLinkSource();
-        const linkSource = data.post_id ? 'post' : 'product';
-        $('#wikaz-header-slide-form input[name="link_source"][value="' + linkSource + '"]').prop('checked', true).trigger('change');
-        
-        if(data.product_id) {
-            // We don't have product name readily available in item data object usually, 
-            // but we can try to fetch or just show ID. 
-            // Ideally backend sends product name. For now let's assume we might need to fetch it or just show "Product ID: X"
-            // Or simpler: Just set the ID and let user search again if they want to change.
-            $('#hs-product-id').val(data.product_id);
-            // Simulate selected state if we could (requires name)
-            $('#hs-selected-product .product-name').text('Product ID: ' + data.product_id + ' (Save to refresh name)');
-            $('#hs-selected-product').show();
-            $('#hs-product-search').hide();
-        } 
-        
-        if(data.post_id) {
-            $('#hs-post-id').val(data.post_id);
-            $('#hs-selected-post .product-name').text('Post ID: ' + data.post_id + ' (Save to refresh name)');
-            $('#hs-selected-post').show();
-            $('#hs-post-search').hide();
-        }
+        $.post(ajaxUrl, { action: 'wikaz_get_header_slide', id: id, nonce: nonce }, function(res) {
+            $btn.prop('disabled', false).find('.dashicons').removeClass('spin');
+            if(!res.success) {
+                alert('Error loading slide data');
+                return;
+            }
+            
+            const data = res.data;
+            $('#wikaz-header-slide-id').val(data.id);
+            $('#wikaz-header-slide-slider-id').val(data.slider_id);
+            
+            // Populate fields
+            $('[name="title"]').val(data.title);
+            $('[name="subtitle"]').val(data.subtitle);
+            $('[name="description"]').val(data.description);
+            $('[name="button_text"]').val(data.button_text);
+            $('[name="button_url"]').val(data.button_url);
+            $('[name="layout"][value="' + (data.layout || 'full-bg') + '"]').prop('checked', true);
+            $('[name="is_active"]').prop('checked', data.is_active == 1);
+            
+            // Media Type Detection (Safe)
+            const mediaType = data.media_type || ((data.background_video && data.background_video !== '') ? 'video' : 'image');
+            $('#wikaz-header-slide-form input[name="media_type"][value="' + mediaType + '"]').prop('checked', true).trigger('change');
+            
+            if(data.background_image) {
+                $('#hs-background-image').val(data.background_image);
+                $('#hs-image-preview img').attr('src', data.background_image).show();
+                $('#hs-image-preview .wikaz-image-placeholder').hide();
+                $('#hs-remove-image').show();
+            } else {
+                $('#hs-background-image').val('');
+                $('#hs-image-preview img').hide().attr('src', '');
+                $('#hs-image-preview .wikaz-image-placeholder').show();
+                $('#hs-remove-image').hide();
+            }
+            
+            if(data.background_video) {
+                $('#hs-background-video').val(data.background_video);
+                // Trigger video preview update
+                $('#hs-background-video').trigger('input');
+            } else {
+                $('#hs-background-video').val('');
+                $('#hs-video-preview video').hide().attr('src', '');
+                $('#hs-video-preview .wikaz-video-placeholder').show();
+                $('#hs-remove-video').hide();
+            }
 
-        $('#wikaz-header-slide-modal').addClass('active');
+            // Link Source Detection
+            resetLinkSource();
+            let linkSource = data.link_source || (data.post_id ? 'post' : 'product');
+
+            $('#wikaz-header-slide-form input[name="link_source"][value="' + linkSource + '"]').prop('checked', true).trigger('change');
+            
+            if(data.product_id) {
+                $('#hs-product-id').val(data.product_id);
+                const productName = (data.product && data.product.title) ? data.product.title : 'Product ID: ' + data.product_id;
+                const productImage = (data.product && data.product.image) ? data.product.image : '';
+                
+                $('#hs-selected-product .product-name').text(productName);
+                if(productImage) $('#hs-selected-product img').attr('src', productImage);
+                $('#hs-selected-product').show();
+                $('#hs-product-search').hide();
+            } 
+            
+            if(data.post_id) {
+                $('#hs-post-id').val(data.post_id);
+                const postName = (data.post && data.post.title) ? data.post.title : 'Post ID: ' + data.post_id;
+                const postImage = (data.post && data.post.image) ? data.post.image : '';
+
+                $('#hs-selected-post .product-name').text(postName);
+                if(postImage) $('#hs-selected-post img').attr('src', postImage);
+                $('#hs-selected-post').show();
+                $('#hs-post-search').hide();
+            }
+
+            $('#wikaz-header-slide-modal').addClass('active');
+        });
     });
 
     // Save Slide
@@ -512,7 +537,7 @@ jQuery(document).ready(function($) {
 
     // WP Media Uploader (Image)
     let mediaUploader;
-    $('#hs-select-image, #hs-image-preview').click(function(e) {
+    $(document).on('click', '#hs-select-image, #hs-image-preview', function(e) {
         e.preventDefault();
         if(mediaUploader) { mediaUploader.open(); return; }
         
@@ -541,7 +566,7 @@ jQuery(document).ready(function($) {
 
     // WP Media Uploader (Video)
     let videoUploader;
-    $('#hs-select-video, #hs-video-preview .wikaz-video-placeholder').click(function(e) {
+    $(document).on('click', '#hs-select-video, #hs-video-preview', function(e) {
         e.preventDefault();
         if(videoUploader) { videoUploader.open(); return; }
         
