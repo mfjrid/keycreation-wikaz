@@ -56,12 +56,19 @@ $header_transparent = get_option('wikaz_header_transparent', '0');
                                 <h4><?php echo esc_html($slide->title ?: ($product ? $product->get_name() : __('Untitled', 'keycreation-wikaz'))); ?>
                                 </h4>
                                 <p><?php echo esc_html($slide->subtitle ?: '—'); ?></p>
-                                <?php if ($product): ?>
-                                    <span class="wikaz-slide-product">
-                                        <span class="dashicons dashicons-products"></span>
-                                        <?php echo esc_html($product->get_name()); ?>
-                                    </span>
-                                <?php endif; ?>
+                                <div class="wikaz-slide-source">
+                                    <?php if ($slide->link_source === 'post' || $slide->post_id): ?>
+                                        <span class="wikaz-source-badge article">
+                                            <span class="dashicons dashicons-admin-post"></span>
+                                            <?php _e('Article', 'keycreation-wikaz'); ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="wikaz-source-badge product">
+                                            <span class="dashicons dashicons-cart"></span>
+                                            <?php _e('Product', 'keycreation-wikaz'); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                             <div class="wikaz-slide-actions">
                                 <label class="wikaz-toggle">

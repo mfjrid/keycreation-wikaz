@@ -379,6 +379,19 @@ jQuery(document).ready(function($) {
                      <div class="wikaz-slide-info">
                         <h4>${title}</h4>
                         <p>${slide.subtitle || '-'}</p>
+                        <div class="wikaz-slide-source">
+                            ${(slide.link_source === 'post' || slide.post_id) ? `
+                                <span class="wikaz-source-badge article">
+                                    <span class="dashicons dashicons-admin-post"></span>
+                                    Article
+                                </span>
+                            ` : `
+                                <span class="wikaz-source-badge product">
+                                    <span class="dashicons dashicons-cart"></span>
+                                    Product
+                                </span>
+                            `}
+                        </div>
                      </div>
                      <div class="wikaz-slide-actions">
                         <button type="button" class="button wikaz-edit-header-slide"><span class="dashicons dashicons-edit"></span></button>

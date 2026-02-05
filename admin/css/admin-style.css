@@ -230,21 +230,30 @@
     text-overflow: ellipsis;
 }
 
-.wikaz-slide-product {
+.wikaz-source-badge {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     font-size: 11px;
-    color: var(--wikaz-primary);
-    background: rgba(99, 102, 241, 0.1);
     padding: 3px 8px;
     border-radius: 4px;
+    font-weight: 500;
 }
 
-.wikaz-slide-product .dashicons {
+.wikaz-source-badge .dashicons {
     font-size: 12px;
     width: 12px;
     height: 12px;
+}
+
+.wikaz-source-badge.article {
+    color: #0ea5e9;
+    background: rgba(14, 165, 233, 0.1);
+}
+
+.wikaz-source-badge.product {
+    color: var(--wikaz-primary);
+    background: rgba(99, 102, 241, 0.1);
 }
 
 /* Slide Actions */
