@@ -464,26 +464,30 @@ jQuery(document).ready(function($) {
 
             $('#wikaz-header-slide-form input[name="link_source"][value="' + linkSource + '"]').prop('checked', true).trigger('change');
             
-            if(data.product_id) {
-                $('#hs-product-id').val(data.product_id);
-                const productName = (data.product && data.product.title) ? data.product.title : 'Product ID: ' + data.product_id;
-                const productImage = (data.product && data.product.image) ? data.product.image : '';
+            if(data.product_id || (data.product && data.product.id)) {
+                const product = data.product || {};
+                const productId = data.product_id || product.id;
+                $('#hs-product-id').val(productId);
+                const productName = product.title ? product.title : 'Product ID: ' + productId;
+                const productImage = product.image ? product.image : '';
                 
                 $('#hs-selected-product .product-name').text(productName);
                 if(productImage) $('#hs-selected-product img').attr('src', productImage);
                 $('#hs-selected-product').show();
-                $('#hs-product-search').hide();
+                $('#hs-product-search').hide().parent().find('label').hide();
             } 
             
-            if(data.post_id) {
-                $('#hs-post-id').val(data.post_id);
-                const postName = (data.post && data.post.title) ? data.post.title : 'Post ID: ' + data.post_id;
-                const postImage = (data.post && data.post.image) ? data.post.image : '';
+            if(data.post_id || (data.post && data.post.id)) {
+                const post = data.post || {};
+                const postId = data.post_id || post.id;
+                $('#hs-post-id').val(postId);
+                const postName = post.title ? post.title : 'Post ID: ' + postId;
+                const postImage = post.image ? post.image : '';
 
                 $('#hs-selected-post .product-name').text(postName);
                 if(postImage) $('#hs-selected-post img').attr('src', postImage);
                 $('#hs-selected-post').show();
-                $('#hs-post-search').hide();
+                $('#hs-post-search').hide().parent().find('label').hide();
             }
 
             $('#wikaz-header-slide-modal').addClass('active');

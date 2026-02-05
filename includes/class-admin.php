@@ -607,8 +607,17 @@ class Wikaz_Admin
             wp_send_json_error('Slide not found');
         }
 
+        // Standardize media_type and link_source for old data
+        if (empty($slide->media_type)) {
+            $slide->media_type = $slide->background_video ? 'video' : 'image';
+        }
+        if (empty($slide->link_source)) {
+            $slide->link_source = $slide->post_id ? 'post' : 'product';
+        }
+
         $data = (array) $slide;
 
+        // Enrich product data
         if ($slide->product_id) {
             $product = wc_get_product($slide->product_id);
             if ($product) {
@@ -622,7 +631,7 @@ class Wikaz_Admin
             }
         }
 
-        // Add post data if linked
+        // Enrich post data
         if ($slide->post_id) {
             $post = get_post($slide->post_id);
             if ($post) {

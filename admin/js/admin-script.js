@@ -191,6 +191,10 @@
         $('#wikaz-background-image').val('');
         $('#wikaz-background-video').val('');
         $('#wikaz-product-id').val('');
+        $('#wikaz-post-id').val('');
+        $('#wikaz-selected-product, #wikaz-selected-post').hide();
+        $('#wikaz-product-search, #wikaz-post-search').val('').show();
+        $('.wikaz-product-results').removeClass('active').empty();
         $('#wikaz-image-preview img').hide().attr('src', '');
         $('#wikaz-image-preview .wikaz-image-placeholder').show();
         $('#wikaz-remove-image').hide();
@@ -273,18 +277,20 @@
         let linkSource = data.link_source || (data.post_id ? 'post' : 'product');
         $(`input[name="link_source"][value="${linkSource}"]`).prop('checked', true).trigger('change');
 
-        if (linkSource === 'product' && data.product_id && data.product) {
-            $('#wikaz-product-id').val(data.product_id);
-            $('#wikaz-product-search').hide();
+        if (linkSource === 'product' && (data.product_id || data.product)) {
+            const product = data.product || {};
+            $('#wikaz-product-id').val(data.product_id || product.id);
+            $('#wikaz-product-search').hide().parent().find('label').hide();
             $('#wikaz-selected-product').show()
-                .find('img').attr('src', data.product.image);
-            $('#wikaz-selected-product .product-name').text(data.product.title);
-        } else if (linkSource === 'post' && data.post_id && data.post) {
-            $('#wikaz-post-id').val(data.post_id);
-            $('#wikaz-post-search').hide();
+                .find('img').attr('src', product.image || '');
+            $('#wikaz-selected-product .product-name').text(product.title || 'Product ID: ' + (data.product_id || product.id));
+        } else if (linkSource === 'post' && (data.post_id || data.post)) {
+            const post = data.post || {};
+            $('#wikaz-post-id').val(data.post_id || post.id);
+            $('#wikaz-post-search').hide().parent().find('label').hide();
             $('#wikaz-selected-post').show()
-                .find('img').attr('src', data.post.image);
-            $('#wikaz-selected-post .product-name').text(data.post.title);
+                .find('img').attr('src', post.image || '');
+            $('#wikaz-selected-post .product-name').text(post.title || 'Post ID: ' + (data.post_id || post.id));
         }
     }
 
@@ -306,6 +312,7 @@
                 nonce: wikazAdmin.nonce,
                 slide_id: $('#wikaz-slide-id').val(),
                 product_id: $('#wikaz-product-id').val(),
+                post_id: $('#wikaz-post-id').val(),
                 title: $('#wikaz-title').val(),
                 subtitle: $('#wikaz-subtitle').val(),
                 description: $('#wikaz-description').val(),
@@ -693,17 +700,6 @@
         });
     }
 
-    // Toggle Link Source (Carousel)
-    $('#wikaz-slide-form input[name="link_source"]').on('change', function () {
-        const source = $(this).val();
-        if (source === 'post') {
-            $('#wikaz-product-search-group').hide();
-            $('#wikaz-post-search-group').show();
-        } else {
-            $('#wikaz-product-search-group').show();
-            $('#wikaz-post-search-group').hide();
-        }
-    });
 
     /**
      * Save settings
