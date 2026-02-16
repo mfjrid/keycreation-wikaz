@@ -134,6 +134,7 @@
         $(document).on('click', '#pm-rsfv-poster-preview', selectRsfvPoster);
         $('#pm-add-gallery-item').on('click', selectPMGalleryImages);
         $(document).on('click', '.pm-gallery-remove', function () { $(this).parent().remove(); updateGalleryIDs(); });
+        $(document).on('click', '.pm-remove-media', removePMMedia);
 
         // Initial Load
         if ($pmProductList.length) {
@@ -1235,6 +1236,23 @@
     function updateGalleryIDs() {
         const ids = $('.pm-gallery-item').map(function () { return $(this).data('id'); }).get();
         $('#pm-product-gallery-ids').val(ids.join(','));
+    }
+
+    function removePMMedia(e) {
+        e.preventDefault();
+        e.stopPropagation(); // Prevent triggering the selection frame
+
+        const $btn = $(this);
+        const $preview = $btn.closest('.pm-image-preview');
+        const $uploader = $preview.closest('.pm-image-uploader');
+        const $hiddenInput = $uploader.find('input[type="hidden"]');
+
+        // Reset the value
+        $hiddenInput.val('');
+
+        // Reset the preview elements
+        $preview.find('img, video').hide().attr('src', '');
+        $preview.find('.placeholder').show();
     }
 
     /**

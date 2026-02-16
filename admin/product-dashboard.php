@@ -137,15 +137,17 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                     </div>
                 </div>
 
+                <!-- <div class="wikaz-form-row">
+                    
+                </div> -->
+
                 <div class="wikaz-form-row">
                     <div class="wikaz-form-group">
                         <label><?php _e('Full Description', 'keycreation-wikaz'); ?></label>
                         <textarea class="textarea-form-control" id="pm-product-description" rows="4"
                             placeholder="<?php _e('Write a detailed description...', 'keycreation-wikaz'); ?>"></textarea>
                     </div>
-                </div>
 
-                <div class="wikaz-form-row">
                     <div class="wikaz-form-group featured-video-group" style="flex: 1;">
                         <label><?php _e('Featured Video', 'keycreation-wikaz'); ?></label>
                         <div class="rsfv-source-selector">
@@ -166,6 +168,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                                                 <p><?php _e('Select Video', 'keycreation-wikaz'); ?></p>
                                             </div>
                                             <video src="" style="display:none; width:100%; height:100%; object-fit:cover;" muted loop></video>
+                                            <button type="button" class="pm-remove-media" title="<?php _e('Remove Video', 'keycreation-wikaz'); ?>">&times;</button>
                                         </div>
                                     </div>
                                 </div>
@@ -179,6 +182,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                                                 <p><?php _e('Set Poster', 'keycreation-wikaz'); ?></p>
                                             </div>
                                             <img src="" style="display:none; width:100%; height:100%; object-fit:cover;">
+                                            <button type="button" class="pm-remove-media" title="<?php _e('Remove Poster', 'keycreation-wikaz'); ?>">&times;</button>
                                         </div>
                                     </div>
                                 </div>
@@ -206,6 +210,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                                     <p><?php _e('Set Main Image', 'keycreation-wikaz'); ?></p>
                                 </div>
                                 <img src="" style="display:none;">
+                                <button type="button" class="pm-remove-media" title="<?php _e('Remove Image', 'keycreation-wikaz'); ?>">&times;</button>
                             </div>
                         </div>
                     </div>
