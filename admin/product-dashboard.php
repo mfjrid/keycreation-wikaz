@@ -172,7 +172,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                                         </div>
                                     </div>
                                 </div>
-                                <div class="wikaz-form-group" style="flex: 1;">
+                                <!-- <div class="wikaz-form-group" style="flex: 1;">
                                     <label style="font-size: 11px; margin-bottom: 5px;"><?php _e('Poster Image', 'keycreation-wikaz'); ?></label>
                                     <div class="pm-image-uploader thumb-uploader rsfv-uploader" id="pm-rsfv-poster-uploader" style="height: 120px;">
                                         <input type="hidden" id="pm-rsfv-poster-id">
@@ -185,7 +185,7 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                                             <button type="button" class="pm-remove-media" title="<?php _e('Remove Poster', 'keycreation-wikaz'); ?>">&times;</button>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
 
