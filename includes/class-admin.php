@@ -191,14 +191,14 @@ class Wikaz_Admin
             'wikaz-admin-style',
             WIKAZ_PLUGIN_URL . 'admin/css/admin-style2.css',
             array(),
-            WIKAZ_VERSION
+            time()
         );
 
         wp_enqueue_script(
             'wikaz-admin-script',
             WIKAZ_PLUGIN_URL . 'admin/js/admin-script2.js',
             array('jquery', 'jquery-ui-sortable', 'wp-color-picker'),
-            WIKAZ_VERSION,
+            time(),
             true
         );
 
