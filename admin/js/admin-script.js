@@ -129,7 +129,9 @@
         $(document).on('change', '.pm-term-item input', generateVariationMatrix);
         $pmModal.find('.wikaz-modal-close, .wikaz-modal-cancel').on('click', closePMModal);
         $pmForm.on('submit', savePMProduct);
-        $('#pm-image-preview').on('click', selectPMImage);
+        $(document).on('click', '#pm-image-preview', selectPMImage);
+        $(document).on('click', '#pm-rsfv-video-preview', selectRsfvVideo);
+        $(document).on('click', '#pm-rsfv-poster-preview', selectRsfvPoster);
         $('#pm-add-gallery-item').on('click', selectPMGalleryImages);
         $(document).on('click', '.pm-gallery-remove', function () { $(this).parent().remove(); updateGalleryIDs(); });
 
@@ -893,9 +895,28 @@
             html = `<tr><td colspan="8" style="text-align:center;">No products found.</td></tr>`;
         } else {
             products.forEach(p => {
+                const isVideo = (url) => {
+                    if (!url) return false;
+                    const ext = url.split('.').pop().toLowerCase().split(/[?#]/)[0];
+                    return ['mp4', 'webm', 'ogg', 'mov'].includes(ext);
+                };
+
+                let thumbHtml = `<img src="${p.image}" alt="">`;
+                if (p.video_url) {
+                    if (isVideo(p.video_url)) {
+                        thumbHtml = `<video src="${p.video_url}" muted loop autoplay style="width:45px;height:45px;object-fit:cover;border-radius:8px;"></video>`;
+                    } else if (p.rsfv_source === 'embed') {
+                        // For embed, just show a video icon or the main image. RSFV doesn't easily give us the thumbnail URL here without more PHP work.
+                        thumbHtml = `<div style="width:45px;height:45px;background:#f0f0f1;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;">
+                            <img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;opacity:0.6;">
+                            <span class="dashicons dashicons-video-alt3" style="position:absolute;color:#fff;text-shadow:0 0 3px rgba(0,0,0,0.5);"></span>
+                        </div>`;
+                    }
+                }
+
                 html += `
                         <tr>
-                        <td class="column-thumb"><img src="${p.image}" alt=""></td>
+                        <td class="column-thumb">${thumbHtml}</td>
                         <td><strong>${p.name}</strong></td>
                         <td><code>${p.sku || '-'}</code></td>
                         <td><span class="pm-status-badge status-${p.status}">${p.status.toUpperCase()}</span></td>
@@ -997,7 +1018,36 @@
                             $('#pm-product-category').val(p.categories ? p.categories.map(String) : []).trigger('change');
                             $('#pm-product-tags').val(p.tags ? p.tags.map(String) : []).trigger('change');
                             $('#pm-product-status').val(p.status || 'draft');
-                            $('#pm-product-video-url').val(p.video_url || '');
+
+                            // Featured Video (RSFV) Population
+                            const rsfvSource = p.rsfv_source || 'self';
+                            $(`input[name="pm_rsfv_source"][value="${rsfvSource}"]`).prop('checked', true).trigger('change');
+
+                            if (p.rsfv_video_id) {
+                                $('#pm-rsfv-video-id').val(p.rsfv_video_id);
+                                $('#pm-rsfv-video-preview video').attr('src', p.rsfv_video_url).show();
+                                $('#pm-rsfv-video-preview .placeholder').hide();
+                            } else {
+                                $('#pm-rsfv-video-id').val('');
+                                $('#pm-rsfv-video-preview video').hide().attr('src', '');
+                                $('#pm-rsfv-video-preview .placeholder').show();
+                            }
+
+                            if (p.rsfv_poster_id) {
+                                $('#pm-rsfv-poster-id').val(p.rsfv_poster_id);
+                                $('#pm-rsfv-poster-preview img').attr('src', p.rsfv_poster_url).show();
+                                $('#pm-rsfv-poster-preview .placeholder').hide();
+                            } else {
+                                $('#pm-rsfv-poster-id').val('');
+                                $('#pm-rsfv-poster-preview img').hide().attr('src', '');
+                                $('#pm-rsfv-poster-preview .placeholder').show();
+                            }
+
+                            if (p.rsfv_embed_url) {
+                                $('#pm-rsfv-embed-url').val(p.rsfv_embed_url);
+                            } else {
+                                $('#pm-rsfv-embed-url').val('');
+                            }
 
                             if (p.image_url) {
                                 $('#pm-product-image-id').val(p.image_id);
@@ -1080,6 +1130,10 @@
         $('#pm-product-status').val('draft');
         $('#pm-image-preview img').hide().attr('src', '');
         $('#pm-image-preview .placeholder').show();
+        $('.pm-rsfv-section video, .pm-rsfv-section img').hide().attr('src', '');
+        $('.pm-rsfv-section .placeholder').show();
+        $('#pm-rsfv-video-id, #pm-rsfv-poster-id, #pm-rsfv-embed-url').val('');
+        $('input[name="pm_rsfv_source"][value="self"]').prop('checked', true).trigger('change');
         $('.pm-gallery-item').remove();
         $('#pm-variation-matrix-wrap').hide();
         $('#pm-variation-matrix-body').empty();
@@ -1098,6 +1152,57 @@
         });
         wp.media.frames.pm_frame.open();
     }
+
+    function selectRsfvVideo(e) {
+        e.preventDefault();
+        if (wp.media.frames.pm_rsfv_video_frame) { wp.media.frames.pm_rsfv_video_frame.open(); return; }
+        wp.media.frames.pm_rsfv_video_frame = wp.media({
+            title: 'Select Featured Video',
+            button: { text: 'Use Video' },
+            library: { type: 'video' },
+            multiple: false
+        });
+        wp.media.frames.pm_rsfv_video_frame.on('select', function () {
+            const attachment = wp.media.frames.pm_rsfv_video_frame.state().get('selection').first().toJSON();
+            $('#pm-rsfv-video-id').val(attachment.id);
+            $('#pm-rsfv-video-preview video').attr('src', attachment.url).show();
+            $('#pm-rsfv-video-preview .placeholder').hide();
+        });
+        wp.media.frames.pm_rsfv_video_frame.open();
+    }
+
+    function selectRsfvPoster(e) {
+        e.preventDefault();
+        if (wp.media.frames.pm_rsfv_poster_frame) { wp.media.frames.pm_rsfv_poster_frame.open(); return; }
+        wp.media.frames.pm_rsfv_poster_frame = wp.media({
+            title: 'Select Poster Image',
+            button: { text: 'Use Image' },
+            library: { type: 'image' },
+            multiple: false
+        });
+        wp.media.frames.pm_rsfv_poster_frame.on('select', function () {
+            const attachment = wp.media.frames.pm_rsfv_poster_frame.state().get('selection').first().toJSON();
+            $('#pm-rsfv-poster-id').val(attachment.id);
+
+            $('#pm-rsfv-poster-preview img').attr('src', attachment.url).show();
+            $('#pm-rsfv-poster-preview .placeholder').hide();
+        });
+        wp.media.frames.pm_rsfv_poster_frame.open();
+    }
+
+    $(document).on('change', 'input[name="pm_rsfv_source"]', function () {
+        const val = $(this).val();
+        if (val === 'self') {
+            $('.pm-rsfv-self').show();
+            $('.pm-rsfv-embed').hide();
+        } else {
+            $('.pm-rsfv-self').hide();
+            $('.pm-rsfv-embed').show();
+        }
+    });
+
+    $(document).on('click', '#pm-rsfv-video-uploader', selectRsfvVideo);
+    $(document).on('click', '#pm-rsfv-poster-uploader', selectRsfvPoster);
 
     function selectPMGalleryImages() {
         const frame = wp.media({
@@ -1255,7 +1360,10 @@
             description: $('#pm-product-description').val(),
             categories: $('#pm-product-category').val(),
             tags: $('#pm-product-tags').val(),
-            video_url: $('#pm-product-video-url').val(),
+            rsfv_source: $('input[name="pm_rsfv_source"]:checked').val(),
+            rsfv_video_id: $('#pm-rsfv-video-id').val(),
+            rsfv_poster_id: $('#pm-rsfv-poster-id').val(),
+            rsfv_embed_url: $('#pm-rsfv-embed-url').val(),
             image_id: $('#pm-product-image-id').val(),
             gallery_ids: $('#pm-product-gallery-ids').val(),
             status: $('#pm-product-status').val(),

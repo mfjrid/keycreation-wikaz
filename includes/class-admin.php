@@ -695,6 +695,8 @@ class Wikaz_Admin
                 'sku' => $product->get_sku(),
                 'price' => $price,
                 'image' => wp_get_attachment_image_url($product->get_image_id(), 'thumbnail') ?: wc_placeholder_img_src('thumbnail'),
+                'video_url' => $product->get_meta('rsfv_featured_video') ? wp_get_attachment_url($product->get_meta('rsfv_featured_video')) : $product->get_meta('rsfv_featured_embed_video'),
+                'rsfv_source' => $product->get_meta('rsfv_source') ?: 'self',
                 'type' => $product->get_type(),
                 'stock' => $product->get_stock_quantity(),
                 'status' => $product->get_status(),
@@ -740,7 +742,12 @@ class Wikaz_Admin
             'categories' => $product->get_category_ids(),
             'tags' => $product->get_tag_ids(),
             'status' => $product->get_status(),
-            'video_url' => get_post_meta($product->get_id(), '_tf_video_url', true),
+            'rsfv_source' => get_post_meta($product->get_id(), 'rsfv_source', true) ?: 'self',
+            'rsfv_video_id' => get_post_meta($product->get_id(), 'rsfv_featured_video', true),
+            'rsfv_video_url' => wp_get_attachment_url(get_post_meta($product->get_id(), 'rsfv_featured_video', true)),
+            'rsfv_poster_id' => get_post_meta($product->get_id(), 'rsfv_featured_poster', true),
+            'rsfv_poster_url' => wp_get_attachment_url(get_post_meta($product->get_id(), 'rsfv_featured_poster', true)),
+            'rsfv_embed_url' => get_post_meta($product->get_id(), 'rsfv_featured_embed_video', true),
             'attributes' => array(),
             'variations' => array()
         );
@@ -891,8 +898,27 @@ class Wikaz_Admin
             $product->set_category_ids(isset($_POST['categories']) ? array_map('intval', $_POST['categories']) : array());
             $product->set_tag_ids(isset($_POST['tags']) ? array_map('intval', $_POST['tags']) : array());
 
-            if (isset($_POST['video_url'])) {
-                $product->update_meta_data('_tf_video_url', esc_url_raw($_POST['video_url']));
+            if (isset($_POST['rsfv_source'])) {
+                $product->update_meta_data('rsfv_source', sanitize_text_field($_POST['rsfv_source']));
+            }
+            if (isset($_POST['rsfv_video_id'])) {
+                $product->update_meta_data('rsfv_featured_video', sanitize_text_field($_POST['rsfv_video_id']));
+                // Also update legacy theme key for single product page compatibility
+                $vurl = wp_get_attachment_url($_POST['rsfv_video_id']);
+                if ($vurl) $product->update_meta_data('_tf_video_url', $vurl);
+            }
+            if (isset($_POST['rsfv_poster_id'])) {
+                $product->update_meta_data('rsfv_featured_poster', sanitize_text_field($_POST['rsfv_poster_id']));
+                // Also update legacy theme key for single product page compatibility
+                $purl = wp_get_attachment_url($_POST['rsfv_poster_id']);
+                if ($purl) $product->update_meta_data('_tf_video_thumb', $purl);
+            }
+            if (isset($_POST['rsfv_embed_url'])) {
+                $product->update_meta_data('rsfv_featured_embed_video', esc_url_raw($_POST['rsfv_embed_url']));
+                // If embed is used, also set it to legacy key
+                if ($_POST['rsfv_source'] === 'embed') {
+                    $product->update_meta_data('_tf_video_url', esc_url_raw($_POST['rsfv_embed_url']));
+                }
             }
 
             if (!empty($_POST['image_id'])) {

@@ -143,14 +143,56 @@ $tags = get_terms('product_tag', array('hide_empty' => false));
                         <textarea class="textarea-form-control" id="pm-product-description" rows="4"
                             placeholder="<?php _e('Write a detailed description...', 'keycreation-wikaz'); ?>"></textarea>
                     </div>
-                    <div class="wikaz-form-group">
-                        <label><?php _e('Video URL', 'keycreation-wikaz'); ?></label>
-                        <input type="url" id="pm-product-video-url" placeholder="https://youtube.com/watch?v=...">
-                        <p class="description">
-                            <?php _e('YouTube or Vimeo link for video thumbnail', 'keycreation-wikaz'); ?>
-                        </p>
+                </div>
+
+                <div class="wikaz-form-row">
+                    <div class="wikaz-form-group featured-video-group" style="flex: 1;">
+                        <label><?php _e('Featured Video', 'keycreation-wikaz'); ?></label>
+                        <div class="rsfv-source-selector">
+                            <label><input type="radio" name="pm_rsfv_source" value="self" checked> <?php _e('Self (Upload)', 'rsfv'); ?></label>
+                            <label><input type="radio" name="pm_rsfv_source" value="embed"> <?php _e('Embed (URL)', 'rsfv'); ?></label>
+                        </div>
+
+                        <!-- Self-Hosted Section -->
+                        <div class="pm-rsfv-section pm-rsfv-self">
+                            <div class="wikaz-form-row" style="margin-top: 10px;">
+                                <div class="wikaz-form-group" style="flex: 1;">
+                                    <label style="font-size: 11px; margin-bottom: 5px;"><?php _e('Video File', 'keycreation-wikaz'); ?></label>
+                                    <div class="pm-image-uploader thumb-uploader rsfv-uploader" id="pm-rsfv-video-uploader" style="height: 120px;">
+                                        <input type="hidden" id="pm-rsfv-video-id">
+                                        <div class="pm-image-preview" id="pm-rsfv-video-preview">
+                                            <div class="placeholder">
+                                                <span class="dashicons dashicons-video-alt3"></span>
+                                                <p><?php _e('Select Video', 'keycreation-wikaz'); ?></p>
+                                            </div>
+                                            <video src="" style="display:none; width:100%; height:100%; object-fit:cover;" muted loop></video>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="wikaz-form-group" style="flex: 1;">
+                                    <label style="font-size: 11px; margin-bottom: 5px;"><?php _e('Poster Image', 'keycreation-wikaz'); ?></label>
+                                    <div class="pm-image-uploader thumb-uploader rsfv-uploader" id="pm-rsfv-poster-uploader" style="height: 120px;">
+                                        <input type="hidden" id="pm-rsfv-poster-id">
+                                        <div class="pm-image-preview" id="pm-rsfv-poster-preview">
+                                            <div class="placeholder">
+                                                <span class="dashicons dashicons-format-image"></span>
+                                                <p><?php _e('Set Poster', 'keycreation-wikaz'); ?></p>
+                                            </div>
+                                            <img src="" style="display:none; width:100%; height:100%; object-fit:cover;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Embed Section -->
+                        <div class="pm-rsfv-section pm-rsfv-embed" style="display:none; margin-top: 10px;">
+                            <input type="url" id="pm-rsfv-embed-url" placeholder="https://www.youtube.com/watch?v=..." class="wikaz-input">
+                            <p class="description"><?php _e('YouTube, Vimeo, or Dailymotion URL', 'keycreation-wikaz'); ?></p>
+                        </div>
                     </div>
                 </div>
+
 
                 <!-- Image & Gallery Section -->
                 <div class="wikaz-form-row">
