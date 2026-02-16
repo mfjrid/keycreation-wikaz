@@ -996,6 +996,17 @@ class Wikaz_Admin
             // 5. Handle Variations
             if ($type === 'variable' && $product_id && is_array($variations_data)) {
                 $existing_variation_ids = $product->get_children();
+                
+                // CRITICAL: Temporarily clear existing variation SKUs to prevent "self-collision"
+                // when updated variations try to use a SKU currently held by an old version of themselves.
+                foreach ($existing_variation_ids as $evid) {
+                    $ev = wc_get_product($evid);
+                    if ($ev) {
+                        $ev->set_sku(''); // Clear it temporarily
+                        $ev->save();
+                    }
+                }
+
                 $processed_variation_ids = array();
 
                 foreach ($variations_data as $v_data) {
@@ -1069,7 +1080,11 @@ class Wikaz_Admin
             }
 
         } catch (Throwable $e) {
-            wp_send_json_error('System Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
+            $error_msg = 'System Error: ' . $e->getMessage();
+            if (strpos($e->getMessage(), 'SKU') !== false) {
+                 $error_msg .= ' (Likely collision with another product)';
+            }
+            wp_send_json_error($error_msg . ' in ' . basename($e->getFile()) . ' on line ' . $e->getLine());
         }
 
         wp_send_json_success(array('id' => $product_id));

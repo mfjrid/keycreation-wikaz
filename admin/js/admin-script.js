@@ -1415,7 +1415,7 @@
             .replace(/&/g, 'AND')
             .replace(/[^A-Z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
-            .substring(0, 25);
+            .substring(0, 40);
 
         return pmSessionSuffix ? `${base}-${pmSessionSuffix}` : base;
     }
